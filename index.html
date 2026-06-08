@@ -1,359 +1,396 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-TW">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>eShop Microservices — 學習導覽</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>eShop Microservices — 學習導覽</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
 
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #f0f4f8;
-      color: #1a202c;
-      line-height: 1.7;
-    }
+            body {
+                font-family: 'Segoe UI', system-ui, sans-serif;
+                background: #f0f4f8;
+                color: #1a202c;
+                line-height: 1.7;
+            }
 
-    /* ── Header ── */
-    header {
-      background: linear-gradient(135deg, #1a202c, #2d3748);
-      border-bottom: 3px solid #4a5568;
-      padding: 2.8rem 2rem;
-      text-align: center;
-    }
+            /* ── Header ── */
+            header {
+                background: linear-gradient(135deg, #1a202c, #2d3748);
+                border-bottom: 3px solid #4a5568;
+                padding: 2.8rem 2rem;
+                text-align: center;
+            }
 
-    header h1 {
-      font-size: 2.1rem;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 0.5rem;
-      letter-spacing: -0.02em;
-    }
+            header h1 {
+                font-size: 2.1rem;
+                font-weight: 800;
+                color: #fff;
+                margin-bottom: 0.5rem;
+                letter-spacing: -0.02em;
+            }
 
-    header p {
-      color: #a0aec0;
-      font-size: 1rem;
-      max-width: 600px;
-      margin: 0 auto;
-    }
+            header p {
+                color: #a0aec0;
+                font-size: 1rem;
+                max-width: 600px;
+                margin: 0 auto;
+            }
 
-    header .badge-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.5rem;
-      margin-top: 1.2rem;
-    }
+            header .badge-row {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
+                margin-top: 1.2rem;
+            }
 
-    header .badge {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      background: rgba(255,255,255,0.1);
-      color: #e2e8f0;
-      border: 1px solid rgba(255,255,255,0.15);
-    }
+            header .badge {
+                display: inline-block;
+                padding: 0.25rem 0.75rem;
+                border-radius: 999px;
+                font-size: 0.78rem;
+                font-weight: 600;
+                background: rgba(255, 255, 255, 0.1);
+                color: #e2e8f0;
+                border: 1px solid rgba(255, 255, 255, 0.15);
+            }
 
-    /* ── Main layout ── */
-    main {
-      max-width: 1060px;
-      margin: 0 auto;
-      padding: 0 1.5rem 5rem;
-    }
+            /* ── Main layout ── */
+            main {
+                max-width: 1060px;
+                margin: 0 auto;
+                padding: 0 1.5rem 5rem;
+            }
 
-    /* ── Section heading ── */
-    .section-heading {
-      margin: 2.5rem 0 1.2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
+            /* ── Section heading ── */
+            .section-heading {
+                margin: 2.5rem 0 1.2rem;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
 
-    .section-heading h2 {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: #718096;
-      font-weight: 700;
-    }
+            .section-heading h2 {
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 0.12em;
+                color: #718096;
+                font-weight: 700;
+            }
 
-    .section-heading::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: #e2e8f0;
-    }
+            .section-heading::after {
+                content: '';
+                flex: 1;
+                height: 1px;
+                background: #e2e8f0;
+            }
 
-    /* ── Architecture diagram ── */
-    .arch-card {
-      background: #1a202c;
-      border: 1.5px solid #2d3748;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-    }
+            /* ── Architecture diagram ── */
+            .arch-card {
+                background: #1a202c;
+                border: 1.5px solid #2d3748;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+            }
 
-    .arch-card-title {
-      padding: 0.65rem 1.2rem;
-      background: #2d3748;
-      border-bottom: 1px solid #4a5568;
-      font-size: 0.8rem;
-      color: #a0aec0;
-      font-family: 'Cascadia Code', 'Fira Code', monospace;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+            .arch-card-title {
+                padding: 0.65rem 1.2rem;
+                background: #2d3748;
+                border-bottom: 1px solid #4a5568;
+                font-size: 0.8rem;
+                color: #a0aec0;
+                font-family: 'Cascadia Code', 'Fira Code', monospace;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
 
-    .arch-card-title .lang-tag {
-      font-size: 0.7rem;
-      padding: 0.15rem 0.5rem;
-      border-radius: 4px;
-      background: #4a5568;
-      color: #a0aec0;
-    }
+            .arch-card-title .lang-tag {
+                font-size: 0.7rem;
+                padding: 0.15rem 0.5rem;
+                border-radius: 4px;
+                background: #4a5568;
+                color: #a0aec0;
+            }
 
-    .arch-card pre {
-      padding: 1.4rem 1.6rem;
-      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
-      font-size: 0.84rem;
-      line-height: 1.65;
-      color: #e2e8f0;
-      overflow-x: auto;
-    }
+            .arch-card pre {
+                padding: 1.4rem 1.6rem;
+                font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+                font-size: 0.84rem;
+                line-height: 1.65;
+                color: #e2e8f0;
+                overflow-x: auto;
+            }
 
-    /* ASCII 顏色 tokens */
-    .arch-card .svc-web    { color: #5eead4; font-weight: 700; }  /* 青綠 */
-    .arch-card .svc-gw     { color: #94a3b8; font-weight: 700; }  /* 石板 */
-    .arch-card .svc-cat    { color: #fbbf24; font-weight: 700; }  /* 鵝黃 */
-    .arch-card .svc-bsk    { color: #60a5fa; font-weight: 700; }  /* 藍 */
-    .arch-card .svc-dis    { color: #c084fc; font-weight: 700; }  /* 紫 */
-    .arch-card .svc-ord    { color: #818cf8; font-weight: 700; }  /* 靛藍 */
-    .arch-card .svc-db     { color: #86efac; }                     /* 綠（資料庫） */
-    .arch-card .svc-mq     { color: #fca5a5; }                     /* 紅（MQ） */
-    .arch-card .arrow      { color: #4a5568; }
-    .arch-card .dim        { color: #4a5568; }
-    .arch-card .proto      { color: #fde68a; font-style: italic; }
+            /* ASCII 顏色 tokens */
+            .arch-card .svc-web {
+                color: #5eead4;
+                font-weight: 700;
+            } /* 青綠 */
+            .arch-card .svc-gw {
+                color: #94a3b8;
+                font-weight: 700;
+            } /* 石板 */
+            .arch-card .svc-cat {
+                color: #fbbf24;
+                font-weight: 700;
+            } /* 鵝黃 */
+            .arch-card .svc-bsk {
+                color: #60a5fa;
+                font-weight: 700;
+            } /* 藍 */
+            .arch-card .svc-dis {
+                color: #c084fc;
+                font-weight: 700;
+            } /* 紫 */
+            .arch-card .svc-ord {
+                color: #818cf8;
+                font-weight: 700;
+            } /* 靛藍 */
+            .arch-card .svc-db {
+                color: #86efac;
+            } /* 綠（資料庫） */
+            .arch-card .svc-mq {
+                color: #fca5a5;
+            } /* 紅（MQ） */
+            .arch-card .arrow {
+                color: #4a5568;
+            }
+            .arch-card .dim {
+                color: #ffffff;
+            }
+            .arch-card .proto {
+                color: #fde68a;
+                font-style: italic;
+            }
 
-    /* ── Service cards grid ── */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.25rem;
-    }
+            /* ── Service cards grid ── */
+            .cards-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 1.25rem;
+            }
 
-    .svc-card {
-      background: #fff;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
+            .svc-card {
+                background: #fff;
+                border: 1.5px solid #e2e8f0;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+                display: flex;
+                flex-direction: column;
+                transition:
+                    transform 0.15s,
+                    box-shadow 0.15s;
+            }
 
-    .svc-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    }
+            .svc-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            }
 
-    .svc-card-header {
-      padding: 1.1rem 1.3rem 0.9rem;
-      border-bottom: 1.5px solid #e2e8f0;
-    }
+            .svc-card-header {
+                padding: 1.1rem 1.3rem 0.9rem;
+                border-bottom: 1.5px solid #e2e8f0;
+            }
 
-    .svc-card-header .svc-label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      font-weight: 700;
-      margin-bottom: 0.3rem;
-      opacity: 0.85;
-    }
+            .svc-card-header .svc-label {
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                font-weight: 700;
+                margin-bottom: 0.3rem;
+                opacity: 0.85;
+            }
 
-    .svc-card-header h3 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #1a202c;
-    }
+            .svc-card-header h3 {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: #1a202c;
+            }
 
-    .svc-card-header .svc-sub {
-      font-size: 0.82rem;
-      color: #718096;
-      margin-top: 0.15rem;
-    }
+            .svc-card-header .svc-sub {
+                font-size: 0.82rem;
+                color: #718096;
+                margin-top: 0.15rem;
+            }
 
-    .svc-card-body {
-      padding: 1rem 1.3rem;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.85rem;
-    }
+            .svc-card-body {
+                padding: 1rem 1.3rem;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 0.85rem;
+            }
 
-    .tech-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-    }
+            .tech-tags {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.35rem;
+            }
 
-    .tech-tag {
-      display: inline-block;
-      padding: 0.2rem 0.6rem;
-      border-radius: 999px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      background: #f7fafc;
-      border: 1px solid #e2e8f0;
-      color: #4a5568;
-    }
+            .tech-tag {
+                display: inline-block;
+                padding: 0.2rem 0.6rem;
+                border-radius: 999px;
+                font-size: 0.72rem;
+                font-weight: 600;
+                background: #f7fafc;
+                border: 1px solid #e2e8f0;
+                color: #4a5568;
+            }
 
-    .phases-info {
-      font-size: 0.82rem;
-      color: #718096;
-    }
+            .phases-info {
+                font-size: 0.82rem;
+                color: #718096;
+            }
 
-    .phases-info strong {
-      color: #2d3748;
-    }
+            .phases-info strong {
+                color: #2d3748;
+            }
 
-    .svc-card-footer {
-      padding: 0.85rem 1.3rem;
-      border-top: 1.5px solid #e2e8f0;
-    }
+            .svc-card-footer {
+                padding: 0.85rem 1.3rem;
+                border-top: 1.5px solid #e2e8f0;
+            }
 
-    .svc-card-footer a {
-      display: block;
-      text-align: center;
-      padding: 0.55rem 1rem;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      text-decoration: none;
-      color: #fff;
-      transition: opacity 0.15s, transform 0.1s;
-    }
+            .svc-card-footer a {
+                display: block;
+                text-align: center;
+                padding: 0.55rem 1rem;
+                border-radius: 8px;
+                font-size: 0.88rem;
+                font-weight: 600;
+                text-decoration: none;
+                color: #fff;
+                transition:
+                    opacity 0.15s,
+                    transform 0.1s;
+            }
 
-    .svc-card-footer a:hover {
-      opacity: 0.88;
-      transform: scale(0.98);
-    }
+            .svc-card-footer a:hover {
+                opacity: 0.88;
+                transform: scale(0.98);
+            }
 
-    /* ── Learning path ── */
-    .path-card {
-      background: #fff;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
+            /* ── Learning path ── */
+            .path-card {
+                background: #fff;
+                border: 1.5px solid #e2e8f0;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            }
 
-    .path-steps {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0;
-    }
+            .path-steps {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0;
+            }
 
-    .path-step {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 1rem 1.4rem;
-      flex: 1;
-      min-width: 180px;
-      position: relative;
-    }
+            .path-step {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 1rem 1.4rem;
+                flex: 1;
+                min-width: 180px;
+                position: relative;
+            }
 
-    .path-step::after {
-      content: '→';
-      position: absolute;
-      right: -0.3rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #cbd5e0;
-      font-size: 1.1rem;
-      z-index: 1;
-    }
+            .path-step::after {
+                content: '→';
+                position: absolute;
+                right: -0.3rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #cbd5e0;
+                font-size: 1.1rem;
+                z-index: 1;
+            }
 
-    .path-step:last-child::after { display: none; }
+            .path-step:last-child::after {
+                display: none;
+            }
 
-    .path-num {
-      width: 2rem;
-      height: 2rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 0.85rem;
-      flex-shrink: 0;
-      color: #fff;
-    }
+            .path-num {
+                width: 2rem;
+                height: 2rem;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 700;
+                font-size: 0.85rem;
+                flex-shrink: 0;
+                color: #fff;
+            }
 
-    .path-step-info .name {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: #1a202c;
-    }
+            .path-step-info .name {
+                font-size: 0.88rem;
+                font-weight: 700;
+                color: #1a202c;
+            }
 
-    .path-step-info .reason {
-      font-size: 0.75rem;
-      color: #718096;
-    }
+            .path-step-info .reason {
+                font-size: 0.75rem;
+                color: #718096;
+            }
 
-    /* ── Footer ── */
-    footer {
-      text-align: center;
-      padding: 2rem;
-      color: #a0aec0;
-      font-size: 0.82rem;
-      border-top: 1px solid #e2e8f0;
-      margin-top: 2rem;
-    }
-  </style>
-</head>
-<body>
+            /* ── Footer ── */
+            footer {
+                text-align: center;
+                padding: 2rem;
+                color: #a0aec0;
+                font-size: 0.82rem;
+                border-top: 1px solid #e2e8f0;
+                margin-top: 2rem;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>🛒 eShop Microservices 學習導覽</h1>
+            <p>六個微服務的分階段學習教材，從 Catalog 到 Shopping Web，完整覆蓋現代 .NET 微服務架構</p>
+            <div class="badge-row">
+                <span class="badge">.NET 8</span>
+                <span class="badge">Docker Compose</span>
+                <span class="badge">Vertical Slice</span>
+                <span class="badge">CQRS / MediatR</span>
+                <span class="badge">gRPC</span>
+                <span class="badge">MassTransit + RabbitMQ</span>
+                <span class="badge">YARP Gateway</span>
+                <span class="badge">Clean Architecture</span>
+                <span class="badge">Razor Pages</span>
+            </div>
+        </header>
 
-<header>
-  <h1>🛒 eShop Microservices 學習導覽</h1>
-  <p>六個微服務的分階段學習教材，從 Catalog 到 Shopping Web，完整覆蓋現代 .NET 微服務架構</p>
-  <div class="badge-row">
-    <span class="badge">.NET 8</span>
-    <span class="badge">Docker Compose</span>
-    <span class="badge">Vertical Slice</span>
-    <span class="badge">CQRS / MediatR</span>
-    <span class="badge">gRPC</span>
-    <span class="badge">MassTransit + RabbitMQ</span>
-    <span class="badge">YARP Gateway</span>
-    <span class="badge">Clean Architecture</span>
-    <span class="badge">Razor Pages</span>
-  </div>
-</header>
+        <main>
+            <!-- ── 整體架構圖 ── -->
+            <div class="section-heading"><h2>整體架構圖</h2></div>
 
-<main>
-
-  <!-- ── 整體架構圖 ── -->
-  <div class="section-heading"><h2>整體架構圖</h2></div>
-
-  <div class="arch-card">
-    <div class="arch-card-title">
-      <span>eshop-microservices — 服務關係圖</span>
-      <span class="lang-tag">ASCII</span>
-    </div>
-    <pre>
+            <div class="arch-card">
+                <div class="arch-card-title">
+                    <span>eshop-microservices — 服務關係圖</span>
+                    <span class="lang-tag">ASCII</span>
+                </div>
+                <pre>
 <span class="dim">  瀏覽器 / Postman</span>
        │  HTTPS
        ▼
 ┌──────────────────────┐
-│  <span class="svc-web">Shopping.Web</span>         │  Razor Pages + Refit HTTP Client
-│  <span class="dim">:6065</span>                │
+│  <span class="svc-web">Shopping.Web</span>        │  Razor Pages + Refit HTTP Client
+│  <span class="dim">:6065</span>               │
 └──────────┬───────────┘
            │  HTTP/HTTPS
            ▼
-┌──────────────────────┐
+┌───────────────────────┐
 │  <span class="svc-gw">YARP API Gateway</span>     │  反向代理 · Rate Limiting · Path Rewrite
 │  <span class="dim">:6004 / :6064</span>        │
 └──────┬───────┬────────┘
@@ -361,272 +398,292 @@
        │       │  HTTP
        │       ▼
        │  ┌─────────────────────────────────────────────┐
-       │  │  <span class="svc-cat">Catalog.API</span>  <span class="dim">:6000/6060</span>                  │
-       │  │  Vertical Slice · Carter · Marten            │
-       │  │         <span class="arrow">↓</span>                                    │
-       │  │  <span class="svc-db">PostgreSQL</span> <span class="dim">:5432</span>                          │
+       │  │  <span class="svc-cat">Catalog.API</span>  <span class="dim">:6000/6060</span>                    │
+       │  │  Vertical Slice · Carter · Marten           │
+       │  │         <span class="arrow">↓</span>                                   │
+       │  │  <span class="svc-db">PostgreSQL</span> <span class="dim">:5432</span>                           │
        │  └─────────────────────────────────────────────┘
        │
        │  HTTP
        ▼
 ┌────────────────────────────────────────────────────┐
-│  <span class="svc-bsk">Basket.API</span>  <span class="dim">:6001/6061</span>                           │
+│  <span class="svc-bsk">Basket.API</span>  <span class="dim">:6001/6061</span>                            │
 │  Scrutor Decorator · Cache-Aside                   │
-│    <span class="arrow">↓</span> Redis <span class="dim">:6379</span>          <span class="arrow">↓</span> <span class="proto">gRPC</span>              │
-│  <span class="svc-db">Redis</span> Cache              <span class="svc-dis">Discount.Grpc</span> <span class="dim">:6002/6062</span>│
-│                              EF Core + SQLite       │
-│    <span class="arrow">↓</span> Publish                                      │
-│  <span class="svc-mq">RabbitMQ</span> <span class="dim">:5672</span>                                   │
+│    <span class="arrow">↓</span> Redis <span class="dim">:6379</span>          <span class="arrow">↓</span> <span class="proto">gRPC</span>                   │
+│  <span class="svc-db">Redis</span> Cache              <span class="svc-dis">Discount.Grpc</span> <span class="dim">:6002/6062</span> │
+│                              EF Core + SQLite      │
+│    <span class="arrow">↓</span> Publish                                       │
+│  <span class="svc-mq">RabbitMQ</span> <span class="dim">:5672</span>                                    │
 └────────────────────────────────────────────────────┘
                       │
                       │  Subscribe / Consume
                       ▼
 ┌────────────────────────────────────────────────────┐
-│  <span class="svc-ord">Ordering.API</span>  <span class="dim">:6003/6063</span>                         │
+│  <span class="svc-ord">Ordering.API</span>  <span class="dim">:6003/6063</span>                          │
 │  Clean Architecture · DDD · EF Core                │
 │    <span class="arrow">↓</span>                                               │
-│  <span class="svc-db">SQL Server (MSSQL)</span> <span class="dim">:1433</span>                         │
+│  <span class="svc-db">SQL Server (MSSQL)</span> <span class="dim">:1433</span>                          │
 └────────────────────────────────────────────────────┘
 
-<span class="dim">  ┌──────────────────────────────────────────────────────────┐
-  │  基礎設施（docker-compose）                               │
+<span class="dim">  
+  ┌──────────────────────────────────────────────────────────┐
+  │  基礎設施（docker-compose）                                │
   │  PostgreSQL · Redis · RabbitMQ · SQL Server              │
   └──────────────────────────────────────────────────────────┘</span>
 </pre>
-  </div>
+            </div>
 
-  <!-- ── 建議學習路徑 ── -->
-  <div class="section-heading"><h2>建議學習路徑</h2></div>
+            <!-- ── 建議學習路徑 ── -->
+            <div class="section-heading"><h2>建議學習路徑</h2></div>
 
-  <div class="path-card">
-    <div class="path-steps">
-      <div class="path-step">
-        <div class="path-num" style="background:#a88c00;">1</div>
-        <div class="path-step-info">
-          <div class="name" style="color:#92800a;">Catalog API</div>
-          <div class="reason">MediatR · Carter · Marten<br>奠定 Vertical Slice 基礎</div>
-        </div>
-      </div>
-      <div class="path-step">
-        <div class="path-num" style="background:#2b6cb0;">2</div>
-        <div class="path-step-info">
-          <div class="name" style="color:#2b6cb0;">Basket API</div>
-          <div class="reason">Decorator · Redis<br>gRPC Client · MassTransit</div>
-        </div>
-      </div>
-      <div class="path-step">
-        <div class="path-num" style="background:#6b46c1;">3</div>
-        <div class="path-step-info">
-          <div class="name" style="color:#6b46c1;">Discount gRPC</div>
-          <div class="reason">Protocol Buffers · gRPC<br>EF Core + SQLite</div>
-        </div>
-      </div>
-      <div class="path-step">
-        <div class="path-num" style="background:#4a4aab;">4</div>
-        <div class="path-step-info">
-          <div class="name" style="color:#4a4aab;">Ordering API</div>
-          <div class="reason">Clean Architecture · DDD<br>MassTransit Consumer</div>
-        </div>
-      </div>
-      <div class="path-step">
-        <div class="path-num" style="background:#5a6a7a;">5</div>
-        <div class="path-step-info">
-          <div class="name" style="color:#5a6a7a;">YARP Gateway</div>
-          <div class="reason">反向代理 · Route Config<br>Rate Limiting</div>
-        </div>
-      </div>
-      <div class="path-step">
-        <div class="path-num" style="background:#0d9488;">6</div>
-        <div class="path-step-info">
-          <div class="name" style="color:#0d9488;">Shopping Web</div>
-          <div class="reason">Razor Pages · Refit<br>完整前後端串接</div>
-        </div>
-      </div>
-    </div>
-  </div>
+            <div class="path-card">
+                <div class="path-steps">
+                    <div class="path-step">
+                        <div class="path-num" style="background: #a88c00">1</div>
+                        <div class="path-step-info">
+                            <div class="name" style="color: #92800a">Catalog API</div>
+                            <div class="reason">MediatR · Carter · Marten<br />奠定 Vertical Slice 基礎</div>
+                        </div>
+                    </div>
+                    <div class="path-step">
+                        <div class="path-num" style="background: #2b6cb0">2</div>
+                        <div class="path-step-info">
+                            <div class="name" style="color: #2b6cb0">Basket API</div>
+                            <div class="reason">Decorator · Redis<br />gRPC Client · MassTransit</div>
+                        </div>
+                    </div>
+                    <div class="path-step">
+                        <div class="path-num" style="background: #6b46c1">3</div>
+                        <div class="path-step-info">
+                            <div class="name" style="color: #6b46c1">Discount gRPC</div>
+                            <div class="reason">Protocol Buffers · gRPC<br />EF Core + SQLite</div>
+                        </div>
+                    </div>
+                    <div class="path-step">
+                        <div class="path-num" style="background: #4a4aab">4</div>
+                        <div class="path-step-info">
+                            <div class="name" style="color: #4a4aab">Ordering API</div>
+                            <div class="reason">Clean Architecture · DDD<br />MassTransit Consumer</div>
+                        </div>
+                    </div>
+                    <div class="path-step">
+                        <div class="path-num" style="background: #5a6a7a">5</div>
+                        <div class="path-step-info">
+                            <div class="name" style="color: #5a6a7a">YARP Gateway</div>
+                            <div class="reason">反向代理 · Route Config<br />Rate Limiting</div>
+                        </div>
+                    </div>
+                    <div class="path-step">
+                        <div class="path-num" style="background: #0d9488">6</div>
+                        <div class="path-step-info">
+                            <div class="name" style="color: #0d9488">Shopping Web</div>
+                            <div class="reason">Razor Pages · Refit<br />完整前後端串接</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-  <!-- ── 服務教材卡片 ── -->
-  <div class="section-heading"><h2>服務教材</h2></div>
+            <!-- ── 服務教材卡片 ── -->
+            <div class="section-heading"><h2>服務教材</h2></div>
 
-  <div class="cards-grid">
+            <div class="cards-grid">
+                <!-- Catalog API -->
+                <div class="svc-card">
+                    <div class="svc-card-header" style="border-left: 4px solid #a88c00">
+                        <div class="svc-label" style="color: #a88c00">Service 1 · Port 6000 / 6060</div>
+                        <h3>Catalog API</h3>
+                        <div class="svc-sub">商品目錄 — 查詢 / 新增 / 更新 / 刪除</div>
+                    </div>
+                    <div class="svc-card-body">
+                        <div class="tech-tags">
+                            <span class="tech-tag">Vertical Slice</span>
+                            <span class="tech-tag">MediatR</span>
+                            <span class="tech-tag">FluentValidation</span>
+                            <span class="tech-tag">Carter</span>
+                            <span class="tech-tag">Marten</span>
+                            <span class="tech-tag">PostgreSQL</span>
+                        </div>
+                        <div class="phases-info">
+                            <strong>5 個階段</strong>：MediatR Pipeline → FluentValidation → Marten Document Store →
+                            Carter 路由 → 對照原專案
+                        </div>
+                    </div>
+                    <div class="svc-card-footer">
+                        <a href="learn-catalog-api.html" style="background: linear-gradient(135deg, #a88c00, #7a6500)"
+                            >開始學習 →</a
+                        >
+                    </div>
+                </div>
 
-    <!-- Catalog API -->
-    <div class="svc-card">
-      <div class="svc-card-header" style="border-left: 4px solid #a88c00;">
-        <div class="svc-label" style="color:#a88c00;">Service 1 · Port 6000 / 6060</div>
-        <h3>Catalog API</h3>
-        <div class="svc-sub">商品目錄 — 查詢 / 新增 / 更新 / 刪除</div>
-      </div>
-      <div class="svc-card-body">
-        <div class="tech-tags">
-          <span class="tech-tag">Vertical Slice</span>
-          <span class="tech-tag">MediatR</span>
-          <span class="tech-tag">FluentValidation</span>
-          <span class="tech-tag">Carter</span>
-          <span class="tech-tag">Marten</span>
-          <span class="tech-tag">PostgreSQL</span>
-        </div>
-        <div class="phases-info">
-          <strong>5 個階段</strong>：MediatR Pipeline → FluentValidation → Marten Document Store → Carter 路由 → 對照原專案
-        </div>
-      </div>
-      <div class="svc-card-footer">
-        <a href="learn-catalog-api.html" style="background: linear-gradient(135deg,#a88c00,#7a6500);">開始學習 →</a>
-      </div>
-    </div>
+                <!-- Basket API -->
+                <div class="svc-card">
+                    <div class="svc-card-header" style="border-left: 4px solid #2b6cb0">
+                        <div class="svc-label" style="color: #2b6cb0">Service 2 · Port 6001 / 6061</div>
+                        <h3>Basket API</h3>
+                        <div class="svc-sub">購物車 — Cache-Aside · gRPC · 事件發布</div>
+                    </div>
+                    <div class="svc-card-body">
+                        <div class="tech-tags">
+                            <span class="tech-tag">Scrutor Decorator</span>
+                            <span class="tech-tag">Redis</span>
+                            <span class="tech-tag">gRPC Client</span>
+                            <span class="tech-tag">MassTransit</span>
+                            <span class="tech-tag">RabbitMQ</span>
+                        </div>
+                        <div class="phases-info">
+                            <strong>6 個階段</strong>：Scrutor Decorator → Redis Cache-Aside → gRPC Client → MassTransit
+                            Publisher → 整合串接 → 對照原專案
+                        </div>
+                    </div>
+                    <div class="svc-card-footer">
+                        <a href="learn-basket-api.html" style="background: linear-gradient(135deg, #2b6cb0, #1a4a80)"
+                            >開始學習 →</a
+                        >
+                    </div>
+                </div>
 
-    <!-- Basket API -->
-    <div class="svc-card">
-      <div class="svc-card-header" style="border-left: 4px solid #2b6cb0;">
-        <div class="svc-label" style="color:#2b6cb0;">Service 2 · Port 6001 / 6061</div>
-        <h3>Basket API</h3>
-        <div class="svc-sub">購物車 — Cache-Aside · gRPC · 事件發布</div>
-      </div>
-      <div class="svc-card-body">
-        <div class="tech-tags">
-          <span class="tech-tag">Scrutor Decorator</span>
-          <span class="tech-tag">Redis</span>
-          <span class="tech-tag">gRPC Client</span>
-          <span class="tech-tag">MassTransit</span>
-          <span class="tech-tag">RabbitMQ</span>
-        </div>
-        <div class="phases-info">
-          <strong>6 個階段</strong>：Scrutor Decorator → Redis Cache-Aside → gRPC Client → MassTransit Publisher → 整合串接 → 對照原專案
-        </div>
-      </div>
-      <div class="svc-card-footer">
-        <a href="learn-basket-api.html" style="background: linear-gradient(135deg,#2b6cb0,#1a4a80);">開始學習 →</a>
-      </div>
-    </div>
+                <!-- Discount gRPC -->
+                <div class="svc-card">
+                    <div class="svc-card-header" style="border-left: 4px solid #6b46c1">
+                        <div class="svc-label" style="color: #6b46c1">Service 3 · Port 6002 / 6062</div>
+                        <h3>Discount gRPC</h3>
+                        <div class="svc-sub">折扣服務 — Protocol Buffers · gRPC Server</div>
+                    </div>
+                    <div class="svc-card-body">
+                        <div class="tech-tags">
+                            <span class="tech-tag">gRPC</span>
+                            <span class="tech-tag">Protocol Buffers</span>
+                            <span class="tech-tag">EF Core</span>
+                            <span class="tech-tag">SQLite</span>
+                            <span class="tech-tag">Mapster</span>
+                        </div>
+                        <div class="phases-info">
+                            <strong>5 個階段</strong>：gRPC 概念 → .proto 定義 → EF Core SQLite → Service 實作 → Basket
+                            呼叫對照
+                        </div>
+                    </div>
+                    <div class="svc-card-footer">
+                        <a href="learn-discount-grpc.html" style="background: linear-gradient(135deg, #6b46c1, #4c3494)"
+                            >開始學習 →</a
+                        >
+                    </div>
+                </div>
 
-    <!-- Discount gRPC -->
-    <div class="svc-card">
-      <div class="svc-card-header" style="border-left: 4px solid #6b46c1;">
-        <div class="svc-label" style="color:#6b46c1;">Service 3 · Port 6002 / 6062</div>
-        <h3>Discount gRPC</h3>
-        <div class="svc-sub">折扣服務 — Protocol Buffers · gRPC Server</div>
-      </div>
-      <div class="svc-card-body">
-        <div class="tech-tags">
-          <span class="tech-tag">gRPC</span>
-          <span class="tech-tag">Protocol Buffers</span>
-          <span class="tech-tag">EF Core</span>
-          <span class="tech-tag">SQLite</span>
-          <span class="tech-tag">Mapster</span>
-        </div>
-        <div class="phases-info">
-          <strong>5 個階段</strong>：gRPC 概念 → .proto 定義 → EF Core SQLite → Service 實作 → Basket 呼叫對照
-        </div>
-      </div>
-      <div class="svc-card-footer">
-        <a href="learn-discount-grpc.html" style="background: linear-gradient(135deg,#6b46c1,#4c3494);">開始學習 →</a>
-      </div>
-    </div>
+                <!-- Ordering API -->
+                <div class="svc-card">
+                    <div class="svc-card-header" style="border-left: 4px solid #4a4aab">
+                        <div class="svc-label" style="color: #4a4aab">Service 4 · Port 6003 / 6063</div>
+                        <h3>Ordering API</h3>
+                        <div class="svc-sub">訂單服務 — Clean Architecture · DDD · CQRS</div>
+                    </div>
+                    <div class="svc-card-body">
+                        <div class="tech-tags">
+                            <span class="tech-tag">Clean Architecture</span>
+                            <span class="tech-tag">DDD</span>
+                            <span class="tech-tag">MediatR</span>
+                            <span class="tech-tag">EF Core</span>
+                            <span class="tech-tag">MassTransit</span>
+                            <span class="tech-tag">MSSQL</span>
+                        </div>
+                        <div class="phases-info">
+                            <strong>7 個階段</strong>：Clean Arch 四層 → Domain 建模 → Domain Events / Interceptors →
+                            CQRS → EF Core 進階 → MassTransit Consumer → 對照原專案
+                        </div>
+                    </div>
+                    <div class="svc-card-footer">
+                        <a href="learn-ordering-api.html" style="background: linear-gradient(135deg, #4a4aab, #333390)"
+                            >開始學習 →</a
+                        >
+                    </div>
+                </div>
 
-    <!-- Ordering API -->
-    <div class="svc-card">
-      <div class="svc-card-header" style="border-left: 4px solid #4a4aab;">
-        <div class="svc-label" style="color:#4a4aab;">Service 4 · Port 6003 / 6063</div>
-        <h3>Ordering API</h3>
-        <div class="svc-sub">訂單服務 — Clean Architecture · DDD · CQRS</div>
-      </div>
-      <div class="svc-card-body">
-        <div class="tech-tags">
-          <span class="tech-tag">Clean Architecture</span>
-          <span class="tech-tag">DDD</span>
-          <span class="tech-tag">MediatR</span>
-          <span class="tech-tag">EF Core</span>
-          <span class="tech-tag">MassTransit</span>
-          <span class="tech-tag">MSSQL</span>
-        </div>
-        <div class="phases-info">
-          <strong>7 個階段</strong>：Clean Arch 四層 → Domain 建模 → Domain Events / Interceptors → CQRS → EF Core 進階 → MassTransit Consumer → 對照原專案
-        </div>
-      </div>
-      <div class="svc-card-footer">
-        <a href="learn-ordering-api.html" style="background: linear-gradient(135deg,#4a4aab,#333390);">開始學習 →</a>
-      </div>
-    </div>
+                <!-- YARP Gateway -->
+                <div class="svc-card">
+                    <div class="svc-card-header" style="border-left: 4px solid #5a6a7a">
+                        <div class="svc-label" style="color: #5a6a7a">Service 5 · Port 6004 / 6064</div>
+                        <h3>YARP API Gateway</h3>
+                        <div class="svc-sub">API 閘道 — 反向代理 · Rate Limiting</div>
+                    </div>
+                    <div class="svc-card-body">
+                        <div class="tech-tags">
+                            <span class="tech-tag">YARP</span>
+                            <span class="tech-tag">Reverse Proxy</span>
+                            <span class="tech-tag">Rate Limiting</span>
+                            <span class="tech-tag">Path Rewrite</span>
+                            <span class="tech-tag">appsettings.json</span>
+                        </div>
+                        <div class="phases-info">
+                            <strong>5 個階段</strong>：YARP 概念 → Route / Cluster 設定 → Rate Limiting → 進階功能 →
+                            對照原專案
+                        </div>
+                    </div>
+                    <div class="svc-card-footer">
+                        <a href="learn-yarp-gateway.html" style="background: linear-gradient(135deg, #5a6a7a, #3d4f5e)"
+                            >開始學習 →</a
+                        >
+                    </div>
+                </div>
 
-    <!-- YARP Gateway -->
-    <div class="svc-card">
-      <div class="svc-card-header" style="border-left: 4px solid #5a6a7a;">
-        <div class="svc-label" style="color:#5a6a7a;">Service 5 · Port 6004 / 6064</div>
-        <h3>YARP API Gateway</h3>
-        <div class="svc-sub">API 閘道 — 反向代理 · Rate Limiting</div>
-      </div>
-      <div class="svc-card-body">
-        <div class="tech-tags">
-          <span class="tech-tag">YARP</span>
-          <span class="tech-tag">Reverse Proxy</span>
-          <span class="tech-tag">Rate Limiting</span>
-          <span class="tech-tag">Path Rewrite</span>
-          <span class="tech-tag">appsettings.json</span>
-        </div>
-        <div class="phases-info">
-          <strong>5 個階段</strong>：YARP 概念 → Route / Cluster 設定 → Rate Limiting → 進階功能 → 對照原專案
-        </div>
-      </div>
-      <div class="svc-card-footer">
-        <a href="learn-yarp-gateway.html" style="background: linear-gradient(135deg,#5a6a7a,#3d4f5e);">開始學習 →</a>
-      </div>
-    </div>
+                <!-- Shopping Web -->
+                <div class="svc-card">
+                    <div class="svc-card-header" style="border-left: 4px solid #0d9488">
+                        <div class="svc-label" style="color: #0d9488">Service 6 · Port 6005 / 6065</div>
+                        <h3>Shopping Web</h3>
+                        <div class="svc-sub">前端應用 — Razor Pages · Refit HTTP Client</div>
+                    </div>
+                    <div class="svc-card-body">
+                        <div class="tech-tags">
+                            <span class="tech-tag">Razor Pages</span>
+                            <span class="tech-tag">Refit</span>
+                            <span class="tech-tag">PageModel</span>
+                            <span class="tech-tag">Tag Helpers</span>
+                            <span class="tech-tag">Bootstrap</span>
+                        </div>
+                        <div class="phases-info">
+                            <strong>6 個階段</strong>：Razor Pages 基礎 → Refit 宣告式 HTTP → PageModel 整合 → Razor
+                            語法深入 → 硬編碼問題與改善 → 對照原專案
+                        </div>
+                    </div>
+                    <div class="svc-card-footer">
+                        <a href="learn-shopping-web.html" style="background: linear-gradient(135deg, #0d9488, #0a7060)"
+                            >開始學習 →</a
+                        >
+                    </div>
+                </div>
+            </div>
+            <!-- /cards-grid -->
 
-    <!-- Shopping Web -->
-    <div class="svc-card">
-      <div class="svc-card-header" style="border-left: 4px solid #0d9488;">
-        <div class="svc-label" style="color:#0d9488;">Service 6 · Port 6005 / 6065</div>
-        <h3>Shopping Web</h3>
-        <div class="svc-sub">前端應用 — Razor Pages · Refit HTTP Client</div>
-      </div>
-      <div class="svc-card-body">
-        <div class="tech-tags">
-          <span class="tech-tag">Razor Pages</span>
-          <span class="tech-tag">Refit</span>
-          <span class="tech-tag">PageModel</span>
-          <span class="tech-tag">Tag Helpers</span>
-          <span class="tech-tag">Bootstrap</span>
-        </div>
-        <div class="phases-info">
-          <strong>6 個階段</strong>：Razor Pages 基礎 → Refit 宣告式 HTTP → PageModel 整合 → Razor 語法深入 → 硬編碼問題與改善 → 對照原專案
-        </div>
-      </div>
-      <div class="svc-card-footer">
-        <a href="learn-shopping-web.html" style="background: linear-gradient(135deg,#0d9488,#0a7060);">開始學習 →</a>
-      </div>
-    </div>
+            <!-- ── 技術棧對照 ── -->
+            <div class="section-heading"><h2>技術棧一覽</h2></div>
 
-  </div><!-- /cards-grid -->
-
-  <!-- ── 技術棧對照 ── -->
-  <div class="section-heading"><h2>技術棧一覽</h2></div>
-
-  <div class="arch-card">
-    <div class="arch-card-title">
-      <span>各服務使用技術對照</span>
-      <span class="lang-tag">TABLE</span>
-    </div>
-    <pre>
+            <div class="arch-card">
+                <div class="arch-card-title">
+                    <span>各服務使用技術對照</span>
+                    <span class="lang-tag">TABLE</span>
+                </div>
+                <pre>
 <span class="dim">┌─────────────────────┬───────────────────┬────────────────┬──────────────────────┬─────────────────────┐
 │ 服務                 │ 路由框架           │ 資料庫          │ 特色技術              │ 訊息/通訊            │
 ├─────────────────────┼───────────────────┼────────────────┼──────────────────────┼─────────────────────┤</span>
-│ <span class="svc-cat">Catalog.API</span>         │ Carter            │ <span class="svc-db">PostgreSQL</span>      │ Marten Doc Store    │ —                   │
-│ <span class="svc-bsk">Basket.API</span>          │ Carter            │ <span class="svc-db">Redis</span>           │ Scrutor Decorator   │ <span class="svc-mq">MassTransit Publish</span> │
-│ <span class="svc-dis">Discount.Grpc</span>       │ gRPC Service      │ <span class="svc-db">SQLite</span>          │ Protocol Buffers    │ <span class="proto">gRPC Server</span>         │
-│ <span class="svc-ord">Ordering.API</span>        │ Minimal API       │ <span class="svc-db">SQL Server</span>      │ Clean Arch + DDD    │ <span class="svc-mq">MassTransit Consume</span> │
+│ <span class="svc-cat">Catalog.API</span>         │ Carter            │ <span class="svc-db">PostgreSQL</span>     │ Marten Doc Store     │ —                   │
+│ <span class="svc-bsk">Basket.API</span>          │ Carter            │ <span class="svc-db">Redis</span>          │ Scrutor Decorator    │ <span class="svc-mq">MassTransit Publish</span> │
+│ <span class="svc-dis">Discount.Grpc</span>       │ gRPC Service      │ <span class="svc-db">SQLite</span>         │ Protocol Buffers     │ <span class="proto">gRPC Server</span>         │
+│ <span class="svc-ord">Ordering.API</span>        │ Minimal API       │ <span class="svc-db">SQL Server</span>     │ Clean Arch + DDD     │ <span class="svc-mq">MassTransit Consume</span> │
 │ <span class="svc-gw">YarpGateway</span>         │ YARP              │ —              │ Rate Limiting        │ HTTP Reverse Proxy  │
 │ <span class="svc-web">Shopping.Web</span>        │ Razor Pages       │ —              │ Refit HTTP Client    │ HTTP → Gateway      │
 <span class="dim">└─────────────────────┴───────────────────┴────────────────┴──────────────────────┴─────────────────────┘</span>
 
 <span class="dim">  共用：MediatR · FluentValidation · Mapster · Docker Compose · .NET 8</span>
 </pre>
-  </div>
+            </div>
+        </main>
 
-</main>
-
-<footer>
-  eShop Microservices 學習教材 · 以 <a href="https://github.com/mehmetozkaya/eshop-microservices" style="color:#a0aec0;">mehmetozkaya/eshop-microservices</a> 為基礎整理
-</footer>
-
-</body>
+        <footer>
+            eShop Microservices 學習教材 · 以
+            <a href="https://github.com/mehmetozkaya/eshop-microservices" style="color: #a0aec0"
+                >mehmetozkaya/eshop-microservices</a
+            >
+            為基礎整理
+        </footer>
+    </body>
 </html>
