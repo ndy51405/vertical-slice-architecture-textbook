@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>學習 Ordering API 架構</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.7;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e, #2d2d5e);
+      border-bottom: 3px solid #4a4aab;
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #c7d2fe;
+      font-size: 1rem;
+    }
+
+    .toc {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .toc h2 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #718096;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+
+    .toc-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .toc-list a {
+      display: inline-block;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      text-decoration: none;
+      background: #fff;
+      border: 1.5px solid #c7d2fe;
+      color: #4a4aab;
+      font-weight: 500;
+      transition: all 0.15s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    .toc-list a:hover {
+      background: #4a4aab;
+      border-color: #4a4aab;
+      color: #fff;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    .phase {
+      margin-bottom: 2.5rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1.5px solid #e2e8f0;
+    }
+
+    .phase-1 .phase-header { background: #eef2ff; }
+    .phase-2 .phase-header { background: #f5f3ff; }
+    .phase-3 .phase-header { background: #eff6ff; }
+    .phase-4 .phase-header { background: #f0fdf4; }
+    .phase-5 .phase-header { background: #fff7ed; }
+    .phase-6 .phase-header { background: #fdf2f8; }
+    .phase-7 .phase-header { background: #eef2ff; }
+
+    .phase-badge {
+      flex-shrink: 0;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .phase-1 .phase-badge { background: #4a4aab; color: #fff; }
+    .phase-2 .phase-badge { background: #6d28d9; color: #fff; }
+    .phase-3 .phase-badge { background: #1d4ed8; color: #fff; }
+    .phase-4 .phase-badge { background: #15803d; color: #fff; }
+    .phase-5 .phase-badge { background: #c2410c; color: #fff; }
+    .phase-6 .phase-badge { background: #9d174d; color: #fff; }
+    .phase-7 .phase-badge { background: #1e3a8a; color: #fff; }
+
+    .phase-header h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a202c;
+    }
+
+    .phase-header .subtitle {
+      font-size: 0.85rem;
+      color: #718096;
+      margin-top: 0.1rem;
+    }
+
+    .phase-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: #a0aec0;
+      margin-bottom: 0.55rem;
+      font-weight: 700;
+    }
+
+    .goal-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .goal-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.95rem;
+      color: #2d3748;
+    }
+
+    .goal-list li::before {
+      content: '→';
+      color: #a0aec0;
+      flex-shrink: 0;
+    }
+
+    .code-block {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .code-block-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background: #2d3748;
+      border-bottom: 1px solid #4a5568;
+      font-size: 0.8rem;
+      color: #a0aec0;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+    }
+
+    .lang-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: #4a5568;
+      color: #a0aec0;
+    }
+
+    pre {
+      padding: 1.1rem 1.2rem;
+      overflow-x: auto;
+      font-size: 0.855rem;
+      line-height: 1.65;
+    }
+
+    code {
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      color: #ba0923;
+    }
+
+    pre code {
+      color: #e2e8f0;
+    }
+
+    .kw  { color: #f6a3f9; }
+    .ty  { color: #93c5fd; }
+    .st  { color: #86efac; }
+    .cm  { color: #6b7280; font-style: italic; }
+    .me  { color: #67e8f9; }
+    .nu  { color: #fca5a5; }
+    .at  { color: #fde68a; }
+    .op  { color: #93c5fd; }
+
+    .callout {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.9rem 1.1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .callout-tip {
+      background: #eef2ff;
+      border: 1.5px solid #c7d2fe;
+      color: #3730a3;
+    }
+
+    .callout-warn {
+      background: #fffbeb;
+      border: 1.5px solid #fcd34d;
+      color: #92400e;
+    }
+
+    .callout-info {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      color: #14532d;
+    }
+
+    .callout-icon { flex-shrink: 0; font-size: 1rem; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .three-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 700px) {
+      .two-col, .three-col { grid-template-columns: 1fr; }
+    }
+
+    .checkpoint {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+    }
+
+    .checkpoint .section-label { color: #15803d; }
+
+    .checkpoint ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .checkpoint ul li {
+      font-size: 0.9rem;
+      color: #14532d;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .checkpoint ul li::before {
+      content: '✓';
+      color: #16a34a;
+      font-weight: 700;
+    }
+
+    .arch-table {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .arch-table table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .arch-table th {
+      background: #edf2f7;
+      padding: 0.6rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: #4a5568;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .arch-table td {
+      padding: 0.6rem 1rem;
+      border-top: 1px solid #e2e8f0;
+      color: #2d3748;
+      vertical-align: top;
+    }
+
+    .arch-table tr:hover td { background: #f7fafc; }
+
+    .layer-card {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .layer-card-header {
+      padding: 0.6rem 1rem;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .layer-domain   .layer-card-header { background: #eef2ff; color: #3730a3; border-bottom: 1.5px solid #c7d2fe; }
+    .layer-app      .layer-card-header { background: #f0fdf4; color: #14532d; border-bottom: 1.5px solid #86efac; }
+    .layer-infra    .layer-card-header { background: #fff7ed; color: #9a3412; border-bottom: 1.5px solid #fed7aa; }
+    .layer-api      .layer-card-header { background: #fdf2f8; color: #831843; border-bottom: 1.5px solid #f9a8d4; }
+
+    .layer-card ul {
+      list-style: none;
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .layer-card ul li {
+      font-size: 0.85rem;
+      color: #4a5568;
+    }
+
+    .layer-card ul li::before {
+      content: '· ';
+      color: #a0aec0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-new  { background: #c7d2fe; color: #3730a3; }
+    .badge-ddd  { background: #e9d8fd; color: #44337a; }
+    .badge-ef   { background: #c6f6d5; color: #22543d; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>學習 Ordering API 架構</h1>
+  <p>Clean Architecture · DDD · CQRS · Domain Events · EF Core Interceptors · MassTransit Consumer</p>
+</header>
+
+<nav class="toc">
+  <h2>目錄</h2>
+  <div class="toc-list">
+    <a href="#overview">架構總覽</a>
+    <a href="#phase1">階段一：Clean Architecture 分層</a>
+    <a href="#phase2">階段二：DDD — Value Objects 與 Aggregate</a>
+    <a href="#phase3">階段三：Domain Events 與 Interceptors</a>
+    <a href="#phase4">階段四：Application Layer — CQRS</a>
+    <a href="#phase5">階段五：Infrastructure — EF Core 進階設定</a>
+    <a href="#phase6">階段六：MassTransit Consumer</a>
+    <a href="#phase7">階段七：對照 Ordering 專案</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ─────────────────── 架構總覽 ─────────────────── -->
+  <section id="overview" style="margin-bottom:2.5rem;">
+    <div class="callout callout-tip">
+      <span class="callout-icon">🗺️</span>
+      <span>Ordering 是這個專案中<strong>最複雜</strong>的服務，同時示範了 Clean Architecture、DDD、CQRS、Domain Events、EF Core Interceptors 五個概念。建議先熟悉 Catalog 和 Basket 後再學習這份教材。</span>
+    </div>
+    <br/>
+    <div class="three-col">
+      <div class="layer-card layer-domain">
+        <div class="layer-card-header">Domain 層</div>
+        <ul>
+          <li>Aggregate（Order, OrderItem）</li>
+          <li>Value Objects（Address, Payment…）</li>
+          <li>Domain Events（OrderCreated…）</li>
+          <li>Enums（OrderStatus）</li>
+          <li>Abstractions（IEntity, IAggregate）</li>
+        </ul>
+      </div>
+      <div class="layer-card layer-app">
+        <div class="layer-card-header">Application 層</div>
+        <ul>
+          <li>Commands / Queries（CQRS）</li>
+          <li>Validators（FluentValidation）</li>
+          <li>Domain Event Handlers</li>
+          <li>Integration Event Consumer</li>
+          <li>DTOs 和 Mapping Extensions</li>
+        </ul>
+      </div>
+      <div class="layer-card layer-infra">
+        <div class="layer-card-header">Infrastructure 層</div>
+        <ul>
+          <li>ApplicationDbContext（EF Core）</li>
+          <li>Entity Configurations（Value Object 對應）</li>
+          <li>DispatchDomainEventsInterceptor</li>
+          <li>AuditableEntityInterceptor</li>
+          <li>Migration + Seed Data</li>
+        </ul>
+      </div>
+    </div>
+    <br/>
+    <div class="layer-card layer-api">
+      <div class="layer-card-header">API 層</div>
+      <ul style="flex-direction: row; flex-wrap: wrap; gap: 0.4rem 2rem;">
+        <li>Carter Endpoints（6 個）</li>
+        <li>DI 組合（AddApplicationServices / AddInfrastructureServices）</li>
+        <li>Health Check（SQL Server）</li>
+        <li>Feature Management</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 1 ─────────────────── -->
+  <section class="phase phase-1" id="phase1">
+    <div class="phase-header">
+      <div class="phase-badge">1</div>
+      <div>
+        <h2>Clean Architecture 分層</h2>
+        <div class="subtitle">理解四層結構的依賴方向，以及為什麼這樣設計</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 Clean Architecture 四層的職責與邊界</li>
+          <li>理解依賴規則：外層依賴內層，內層不知道外層的存在</li>
+          <li>理解 <code>IApplicationDbContext</code> 介面如何讓 Application 層不依賴 EF Core</li>
+          <li>理解為什麼 Domain 層只有 MediatR，沒有任何基礎設施相關的套件</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">依賴方向</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>專案依賴關係</span><span class="lang-tag">text</span></div>
+          <pre><code>Ordering.API
+    └── 依賴 Ordering.Application
+            └── 依賴 Ordering.Domain
+    └── 依賴 Ordering.Infrastructure
+            └── 依賴 Ordering.Application（實作其介面）
+            └── 依賴 Ordering.Domain
+
+<span class="cm">重點：Domain 層不依賴任何其他層
+       Application 層只依賴 Domain，不知道 EF Core 的存在
+       Infrastructure 層實作 Application 定義的介面</span></code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">各層套件一覽</div>
+        <div class="arch-table">
+          <table>
+            <thead>
+              <tr><th>層</th><th>NuGet 套件</th><th>原因</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Domain</strong></td>
+                <td>MediatR 12.2.0</td>
+                <td>Domain Event 繼承 <code>INotification</code>，僅此而已</td>
+              </tr>
+              <tr>
+                <td><strong>Application</strong></td>
+                <td>MediatR、FluentValidation、BuildingBlocks、BuildingBlocks.Messaging</td>
+                <td>CQRS handlers、驗證、事件消費</td>
+              </tr>
+              <tr>
+                <td><strong>Infrastructure</strong></td>
+                <td>EF Core 8.0.2、EF Core SQL Server、EF Core Tools</td>
+                <td>資料存取，不對外暴露</td>
+              </tr>
+              <tr>
+                <td><strong>API</strong></td>
+                <td>Carter、HealthChecks.SqlServer、EF Core Design</td>
+                <td>路由、健康檢查、Migration 設計期工具</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Application 如何存取資料庫（不依賴 EF Core）</div>
+        <div class="two-col">
+          <div class="code-block">
+            <div class="code-block-title"><span>Application/Data/IApplicationDbContext.cs</span><span class="lang-tag">C#</span></div>
+            <pre><code><span class="cm">// Application 層只知道這個介面</span>
+<span class="cm">// 完全不知道 EF Core、SQL Server 的存在</span>
+<span class="kw">public interface</span> <span class="ty">IApplicationDbContext</span>
+{
+    <span class="ty">DbSet</span>&lt;<span class="ty">Customer</span>&gt; Customers { <span class="kw">get</span>; }
+    <span class="ty">DbSet</span>&lt;<span class="ty">Product</span>&gt; Products { <span class="kw">get</span>; }
+    <span class="ty">DbSet</span>&lt;<span class="ty">Order</span>&gt; Orders { <span class="kw">get</span>; }
+    <span class="ty">DbSet</span>&lt;<span class="ty">OrderItem</span>&gt; OrderItems { <span class="kw">get</span>; }
+
+    <span class="ty">Task</span>&lt;<span class="kw">int</span>&gt; <span class="me">SaveChangesAsync</span>(<span class="ty">CancellationToken</span> ct);
+}</code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-block-title"><span>Infrastructure/ApplicationDbContext.cs</span><span class="lang-tag">C#</span></div>
+            <pre><code><span class="cm">// Infrastructure 層實作這個介面</span>
+<span class="cm">// Application 層的 Handler 只注入 IApplicationDbContext</span>
+<span class="kw">public class</span> <span class="ty">ApplicationDbContext</span>
+    : <span class="ty">DbContext</span>, <span class="ty">IApplicationDbContext</span>
+{
+    <span class="kw">public</span> <span class="ty">DbSet</span>&lt;<span class="ty">Customer</span>&gt; Customers => <span class="me">Set</span>&lt;<span class="ty">Customer</span>&gt;();
+    <span class="kw">public</span> <span class="ty">DbSet</span>&lt;<span class="ty">Product</span>&gt; Products  => <span class="me">Set</span>&lt;<span class="ty">Product</span>&gt;();
+    <span class="kw">public</span> <span class="ty">DbSet</span>&lt;<span class="ty">Order</span>&gt; Orders      => <span class="me">Set</span>&lt;<span class="ty">Order</span>&gt;();
+    <span class="kw">public</span> <span class="ty">DbSet</span>&lt;<span class="ty">OrderItem</span>&gt; OrderItems => <span class="me">Set</span>&lt;<span class="ty">OrderItem</span>&gt;();
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">DI 組合方式</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>API/Program.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="cm">// 各層各自管理自己的 DI 註冊，API 層只負責呼叫</span>
+builder.Services.<span class="me">AddApplicationServices</span>(builder.Configuration);   <span class="cm">// Application 層</span>
+builder.Services.<span class="me">AddInfrastructureServices</span>(builder.Configuration); <span class="cm">// Infrastructure 層</span>
+builder.Services.<span class="me">AddApiServices</span>(builder.Configuration);           <span class="cm">// API 層自己</span>
+
+<span class="cm">// 開發環境自動執行 Migration 並 Seed 初始資料</span>
+<span class="kw">if</span> (app.Environment.<span class="me">IsDevelopment</span>())
+    <span class="kw">await</span> app.<span class="me">InitialiseDatabaseAsync</span>();</code></pre>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>能說明四層各自的職責，以及為什麼 Domain 層幾乎沒有套件依賴</li>
+          <li>能說明 IApplicationDbContext 在依賴反轉中扮演的角色</li>
+          <li>能說明為什麼 Handler 注入 IApplicationDbContext 而不是 ApplicationDbContext</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 2 ─────────────────── -->
+  <section class="phase phase-2" id="phase2">
+    <div class="phase-header">
+      <div class="phase-badge">2</div>
+      <div>
+        <h2>DDD — Value Objects 與 Aggregate</h2>
+        <div class="subtitle">用強型別取代原始型別，讓業務概念在程式碼中清晰表達</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 Value Object 的三個特性：不可變、以值比較、沒有身份識別</li>
+          <li>理解 Aggregate 和 Aggregate Root 的概念，以及為什麼 OrderItem 不是 Aggregate Root</li>
+          <li>理解工廠方法（Factory Method）在 Aggregate 中的用途</li>
+          <li>理解 EF Core 如何透過 <code>HasConversion</code> 把 Value Object 儲存到資料庫</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">Value Object vs 原始型別</div>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>
+            <strong>不用 Value Object：</strong><code>Guid customerId</code> 和 <code>Guid orderId</code> 都是 Guid，
+            編譯器無法阻止你把 customerId 傳到需要 orderId 的地方。<br/><br/>
+            <strong>用 Value Object：</strong><code>CustomerId</code> 和 <code>OrderId</code> 是不同的型別，
+            傳錯型別會在<strong>編譯時期</strong>就報錯，而不是在執行時期才發現。
+          </span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">簡單 Value Object（ID 類型）</div>
+        <div class="two-col">
+          <div class="code-block">
+            <div class="code-block-title"><span>Domain/ValueObjects/OrderId.cs</span><span class="lang-tag">C#</span></div>
+            <pre><code><span class="cm">// record 天生不可變且以值比較</span>
+<span class="kw">public record</span> <span class="ty">OrderId</span>
+{
+    <span class="kw">public</span> <span class="ty">Guid</span> Value { <span class="kw">get</span>; }
+
+    <span class="kw">private</span> <span class="me">OrderId</span>(<span class="ty">Guid</span> value) => Value = value;
+
+    <span class="cm">// 工廠方法：集中驗證邏輯</span>
+    <span class="kw">public static</span> <span class="ty">OrderId</span> <span class="me">Of</span>(<span class="ty">Guid</span> value)
+    {
+        <span class="ty">ArgumentNullException</span>.<span class="me">ThrowIfNull</span>(value);
+        <span class="kw">if</span> (value == <span class="ty">Guid</span>.Empty)
+            <span class="kw">throw new</span> <span class="ty">DomainException</span>(<span class="st">"OrderId cannot be empty"</span>);
+        <span class="kw">return new</span> <span class="ty">OrderId</span>(value);
+    }
+}
+
+<span class="cm">// 用法：OrderId.Of(someGuid) 而不是 new OrderId(someGuid)
+// 外部無法繞過驗證直接建立</span></code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-block-title"><span>Domain/ValueObjects/OrderName.cs</span><span class="lang-tag">C#</span></div>
+            <pre><code><span class="kw">public record</span> <span class="ty">OrderName</span>
+{
+    <span class="kw">public string</span> Value { <span class="kw">get</span>; }
+
+    <span class="kw">private</span> <span class="me">OrderName</span>(<span class="kw">string</span> value) => Value = value;
+
+    <span class="kw">public static</span> <span class="ty">OrderName</span> <span class="me">Of</span>(<span class="kw">string</span> value)
+    {
+        <span class="ty">ArgumentNullException</span>.<span class="me">ThrowIfNullOrWhiteSpace</span>(value);
+        <span class="kw">return new</span> <span class="ty">OrderName</span>(value);
+    }
+}
+
+<span class="cm">// 比較：
+// string name1 = "ORD_1"; string name2 = "ORD_1";
+// name1 == name2 → true（字串比較）
+
+// var n1 = OrderName.Of("ORD_1");
+// var n2 = OrderName.Of("ORD_1");
+// n1 == n2 → true（record 以值比較）</span></code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">複雜 Value Object（包含多個欄位）</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Domain/ValueObjects/Address.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="cm">// Address 是一個概念，不是一個實體
+// 它沒有 Id，以所有欄位的值來識別是否相同</span>
+<span class="kw">public record</span> <span class="ty">Address</span>
+{
+    <span class="kw">public string</span> FirstName    { <span class="kw">get</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public string</span> LastName     { <span class="kw">get</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public string</span> EmailAddress { <span class="kw">get</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public string</span> AddressLine  { <span class="kw">get</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public string</span> Country      { <span class="kw">get</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public string</span> State        { <span class="kw">get</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public string</span> ZipCode      { <span class="kw">get</span>; } = <span class="kw">default</span>!;
+
+    <span class="kw">protected</span> <span class="me">Address</span>() { }
+
+    <span class="kw">public static</span> <span class="ty">Address</span> <span class="me">Of</span>(
+        <span class="kw">string</span> firstName, <span class="kw">string</span> lastName, <span class="kw">string</span> email,
+        <span class="kw">string</span> addressLine, <span class="kw">string</span> country, <span class="kw">string</span> state, <span class="kw">string</span> zipCode)
+    {
+        <span class="ty">ArgumentNullException</span>.<span class="me">ThrowIfNullOrWhiteSpace</span>(firstName);
+        <span class="ty">ArgumentNullException</span>.<span class="me">ThrowIfNullOrWhiteSpace</span>(email);
+        <span class="kw">return new</span> <span class="ty">Address</span>
+        {
+            FirstName = firstName, LastName = lastName,
+            EmailAddress = email, AddressLine = addressLine,
+            Country = country, State = state, ZipCode = zipCode
+        };
+    }
+}
+
+<span class="cm">// EF Core 會用 ComplexProperty 把 Address 展平成多個欄位儲存在同一張資料表</span></code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Aggregate Root — Order</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Domain/Models/Order.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="cm">// Order 是 Aggregate Root，外部只能透過 Order 操作 OrderItem
+// 不能直接 new OrderItem() 然後儲存，必須透過 order.Add()</span>
+<span class="kw">public class</span> <span class="ty">Order</span> : <span class="ty">Aggregate</span>&lt;<span class="ty">OrderId</span>&gt;
+{
+    <span class="kw">private readonly</span> <span class="ty">List</span>&lt;<span class="ty">OrderItem</span>&gt; _orderItems = [];
+    <span class="kw">public</span> <span class="ty">IReadOnlyList</span>&lt;<span class="ty">OrderItem</span>&gt; OrderItems => _orderItems.<span class="me">AsReadOnly</span>();
+
+    <span class="kw">public</span> <span class="ty">CustomerId</span> CustomerId { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public</span> <span class="ty">OrderName</span>  OrderName  { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public</span> <span class="ty">Address</span>    ShippingAddress { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public</span> <span class="ty">Address</span>    BillingAddress  { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public</span> <span class="ty">Payment</span>    Payment    { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public</span> <span class="ty">OrderStatus</span> Status   { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="ty">OrderStatus</span>.Draft;
+    <span class="kw">public decimal</span> TotalPrice => _orderItems.<span class="me">Sum</span>(i => i.Price * i.Quantity);
+
+    <span class="cm">// 工廠方法：建立 Order 的唯一合法入口</span>
+    <span class="kw">public static</span> <span class="ty">Order</span> <span class="me">Create</span>(
+        <span class="ty">OrderId</span> id, <span class="ty">CustomerId</span> customerId, <span class="ty">OrderName</span> orderName,
+        <span class="ty">Address</span> shippingAddress, <span class="ty">Address</span> billingAddress, <span class="ty">Payment</span> payment)
+    {
+        <span class="kw">var</span> order = <span class="kw">new</span> <span class="ty">Order</span>
+        {
+            Id = id, CustomerId = customerId, OrderName = orderName,
+            ShippingAddress = shippingAddress, BillingAddress = billingAddress,
+            Payment = payment
+        };
+
+        <span class="cm">// 建立後立即發出 Domain Event</span>
+        order.<span class="me">AddDomainEvent</span>(<span class="kw">new</span> <span class="ty">OrderCreatedEvent</span>(order));
+        <span class="kw">return</span> order;
+    }
+
+    <span class="cm">// 外部只能透過這個方法新增 OrderItem，確保 Aggregate 的一致性</span>
+    <span class="kw">public void</span> <span class="me">Add</span>(<span class="ty">ProductId</span> productId, <span class="kw">int</span> quantity, <span class="kw">decimal</span> price)
+    {
+        var orderItem = <span class="kw">new</span> <span class="ty">OrderItem</span>(Id, productId, quantity, price);
+        _orderItems.<span class="me">Add</span>(orderItem);
+    }
+
+    <span class="kw">public void</span> <span class="me">Remove</span>(<span class="ty">ProductId</span> productId)
+    {
+        <span class="kw">var</span> item = _orderItems
+            .<span class="me">FirstOrDefault</span>(i => i.ProductId == productId);
+        <span class="kw">if</span> (item <span class="kw">is not null</span>)
+            _orderItems.<span class="me">Remove</span>(item);
+    }
+
+    <span class="kw">public void</span> <span class="me">Update</span>(
+        <span class="ty">OrderName</span> orderName, <span class="ty">Address</span> shippingAddress,
+        <span class="ty">Address</span> billingAddress, <span class="ty">Payment</span> payment, <span class="ty">OrderStatus</span> status)
+    {
+        OrderName = orderName; ShippingAddress = shippingAddress;
+        BillingAddress = billingAddress; Payment = payment; Status = status;
+        <span class="me">AddDomainEvent</span>(<span class="kw">new</span> <span class="ty">OrderUpdatedEvent</span>(<span class="kw">this</span>));
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Aggregate 基底類別</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Domain/Abstractions/Aggregate.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public abstract class</span> <span class="ty">Aggregate</span>&lt;<span class="ty">TId</span>&gt; : <span class="ty">Entity</span>&lt;<span class="ty">TId</span>&gt;, <span class="ty">IAggregate</span>&lt;<span class="ty">TId</span>&gt;
+{
+    <span class="kw">private readonly</span> <span class="ty">List</span>&lt;<span class="ty">IDomainEvent</span>&gt; _domainEvents = [];
+    <span class="kw">public</span> <span class="ty">IReadOnlyList</span>&lt;<span class="ty">IDomainEvent</span>&gt; DomainEvents => _domainEvents.<span class="me">AsReadOnly</span>();
+
+    <span class="cm">// Order.Create() 和 Order.Update() 呼叫這個方法把事件加入暫存清單</span>
+    <span class="kw">public void</span> <span class="me">AddDomainEvent</span>(<span class="ty">IDomainEvent</span> domainEvent)
+        => _domainEvents.<span class="me">Add</span>(domainEvent);
+
+    <span class="cm">// DispatchDomainEventsInterceptor 在 SaveChanges 前呼叫這個</span>
+    <span class="kw">public</span> <span class="ty">IDomainEvent</span>[] <span class="me">ClearDomainEvents</span>()
+    {
+        <span class="kw">var</span> events = _domainEvents.<span class="me">ToArray</span>();
+        _domainEvents.<span class="me">Clear</span>();
+        <span class="kw">return</span> events;
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>能說明 Value Object 和 Entity 的差異（有無身份識別）</li>
+          <li>能說明為什麼 <code>OrderId.Of(Guid.Empty)</code> 會拋例外，而 <code>new OrderId(Guid.Empty)</code> 不行</li>
+          <li>能說明為什麼 OrderItem 不是 Aggregate Root</li>
+          <li>能說明工廠方法 <code>Order.Create()</code> 和直接 <code>new Order()</code> 的差異</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 3 ─────────────────── -->
+  <section class="phase phase-3" id="phase3">
+    <div class="phase-header">
+      <div class="phase-badge">3</div>
+      <div>
+        <h2>Domain Events 與 Interceptors</h2>
+        <div class="subtitle">在 SaveChanges 前自動發布事件，無需在 Handler 手動呼叫</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 Domain Event 和 Integration Event 的差異</li>
+          <li>理解 EF Core Interceptor 的攔截時機，以及為什麼在 SavingChanges 而不是 SavedChanges</li>
+          <li>理解 DispatchDomainEventsInterceptor 的完整執行流程</li>
+          <li>理解 AuditableEntityInterceptor 如何自動填入稽核欄位</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">Domain Event 定義</div>
+        <div class="two-col">
+          <div class="code-block">
+            <div class="code-block-title"><span>Domain/Events/OrderCreatedEvent.cs</span><span class="lang-tag">C#</span></div>
+            <pre><code><span class="cm">// IDomainEvent 繼承 MediatR 的 INotification
+// 代表「在這個服務的邊界內發生了某件事」</span>
+<span class="kw">public record</span> <span class="ty">OrderCreatedEvent</span>(<span class="ty">Order</span> Order)
+    : <span class="ty">IDomainEvent</span>;</code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-block-title"><span>Domain/Abstractions/IDomainEvent.cs</span><span class="lang-tag">C#</span></div>
+            <pre><code><span class="cm">// INotification 讓 MediatR 可以 Publish 這個事件
+// 可以有多個 INotificationHandler 訂閱同一個事件</span>
+<span class="kw">public interface</span> <span class="ty">IDomainEvent</span> : <span class="ty">INotification</span> { }</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">DispatchDomainEventsInterceptor — 核心機制</div>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>這個 Interceptor 讓 Handler 不需要手動發布 Domain Event。
+          Handler 只需要呼叫 <code>order.Update()</code>，事件會在 SaveChanges 執行前自動被收集並發布。</span>
+        </div>
+        <br/>
+        <div class="code-block">
+          <div class="code-block-title"><span>Infrastructure/Interceptors/DispatchDomainEventsInterceptor.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">DispatchDomainEventsInterceptor</span>(<span class="ty">IMediator</span> mediator)
+    : <span class="ty">SaveChangesInterceptor</span>
+{
+    <span class="cm">// 攔截 SaveChanges 之前（SavingChanges，不是 SavedChanges）
+    // 原因：確保事件和資料在同一個交易範圍內</span>
+    <span class="kw">public override</span> <span class="ty">InterceptionResult</span>&lt;<span class="kw">int</span>&gt; <span class="me">SavingChanges</span>(
+        <span class="ty">DbContextEventData</span> eventData, <span class="ty">InterceptionResult</span>&lt;<span class="kw">int</span>&gt; result)
+    {
+        <span class="me">DispatchDomainEvents</span>(eventData.Context).<span class="me">GetAwaiter</span>().<span class="me">GetResult</span>();
+        <span class="kw">return base</span>.<span class="me">SavingChanges</span>(eventData, result);
+    }
+
+    <span class="kw">public override async</span> <span class="ty">ValueTask</span>&lt;<span class="ty">InterceptionResult</span>&lt;<span class="kw">int</span>&gt;&gt; <span class="me">SavingChangesAsync</span>(
+        <span class="ty">DbContextEventData</span> eventData, <span class="ty">InterceptionResult</span>&lt;<span class="kw">int</span>&gt; result,
+        <span class="ty">CancellationToken</span> ct = <span class="kw">default</span>)
+    {
+        <span class="kw">await</span> <span class="me">DispatchDomainEvents</span>(eventData.Context);
+        <span class="kw">return await base</span>.<span class="me">SavingChangesAsync</span>(eventData, result, ct);
+    }
+
+    <span class="kw">private async</span> <span class="ty">Task</span> <span class="me">DispatchDomainEvents</span>(<span class="ty">DbContext</span>? context)
+    {
+        <span class="kw">if</span> (context <span class="kw">is null</span>) <span class="kw">return</span>;
+
+        <span class="cm">// ① 找出所有 Aggregate（IAggregate 實作者），取出它們的 DomainEvents</span>
+        <span class="kw">var</span> aggregates = context.ChangeTracker.Entries&lt;<span class="ty">IAggregate</span>&gt;()
+            .<span class="me">Where</span>(a => a.Entity.DomainEvents.<span class="me">Any</span>())
+            .<span class="me">Select</span>(a => a.Entity)
+            .<span class="me">ToList</span>();
+
+        <span class="kw">var</span> events = aggregates
+            .<span class="me">SelectMany</span>(a => a.DomainEvents)
+            .<span class="me">ToList</span>();
+
+        <span class="cm">// ② 清除 Aggregate 上的事件（避免重複發布）</span>
+        aggregates.<span class="me">ForEach</span>(a => a.<span class="me">ClearDomainEvents</span>());
+
+        <span class="cm">// ③ 透過 MediatR 發布每個事件</span>
+        <span class="kw">foreach</span> (<span class="kw">var</span> @event <span class="kw">in</span> events)
+            <span class="kw">await</span> mediator.<span class="me">Publish</span>(@event);
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">AuditableEntityInterceptor — 自動填入稽核欄位</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Infrastructure/Interceptors/AuditableEntityInterceptor.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">AuditableEntityInterceptor</span> : <span class="ty">SaveChangesInterceptor</span>
+{
+    <span class="kw">public override</span> <span class="ty">InterceptionResult</span>&lt;<span class="kw">int</span>&gt; <span class="me">SavingChanges</span>(
+        <span class="ty">DbContextEventData</span> eventData, <span class="ty">InterceptionResult</span>&lt;<span class="kw">int</span>&gt; result)
+    {
+        <span class="me">UpdateAuditableEntities</span>(eventData.Context);
+        <span class="kw">return base</span>.<span class="me">SavingChanges</span>(eventData, result);
+    }
+
+    <span class="kw">private static void</span> <span class="me">UpdateAuditableEntities</span>(<span class="ty">DbContext</span>? context)
+    {
+        <span class="kw">if</span> (context <span class="kw">is null</span>) <span class="kw">return</span>;
+
+        <span class="kw">var</span> entries = context.ChangeTracker.<span class="me">Entries</span>&lt;<span class="ty">IEntity</span>&gt;();
+
+        <span class="kw">foreach</span> (<span class="kw">var</span> entry <span class="kw">in</span> entries)
+        {
+            <span class="kw">if</span> (entry.State == <span class="ty">EntityState</span>.Added)
+            {
+                entry.Entity.CreatedBy = <span class="st">"mehmet"</span>;  <span class="cm">// 正式環境從 ICurrentUser 取得</span>
+                entry.Entity.CreatedAt = <span class="ty">DateTime</span>.UtcNow;
+            }
+
+            <span class="kw">if</span> (entry.State == <span class="ty">EntityState</span>.Modified ||
+                entry.<span class="me">HasChangedOwnedEntities</span>())
+            {
+                entry.Entity.LastModifiedBy = <span class="st">"mehmet"</span>;
+                entry.Entity.LastModified = <span class="ty">DateTime</span>.UtcNow;
+            }
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">完整的建立訂單執行流程</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>POST /orders 的執行順序</span><span class="lang-tag">text</span></div>
+          <pre><code>POST /orders（HTTP/JSON）
+    ↓ Carter Endpoint → Mapster → CreateOrderCommand
+    ↓ ValidationBehavior（FluentValidation）
+    ↓ LoggingBehavior
+CreateOrderCommandHandler
+    ↓ Order.Create()        ← 建立 Aggregate，內部呼叫 AddDomainEvent(OrderCreatedEvent)
+    ↓ dbContext.Orders.Add(order)
+    ↓ dbContext.SaveChangesAsync()
+        ↓ AuditableEntityInterceptor.SavingChanges()
+          → 填入 CreatedBy, CreatedAt
+        ↓ DispatchDomainEventsInterceptor.SavingChanges()
+          → 收集 OrderCreatedEvent，清除 Aggregate 上的事件
+          → mediator.Publish(OrderCreatedEvent)
+              ↓ OrderCreatedEventHandler.Handle()
+                → 若 FeatureManagement "OrderFullfilment" = true
+                  → 發布 Integration Event 到 RabbitMQ
+        ↓ 實際 SQL INSERT 執行
+    ↓
+HTTP 201 Created（回傳新訂單 ID）</code></pre>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>能說明為什麼在 <code>SavingChanges</code> 而不是 <code>SavedChanges</code> 發布事件</li>
+          <li>能說明 <code>ClearDomainEvents()</code> 的用途，以及不清除會發生什麼</li>
+          <li>能說明 AuditableEntityInterceptor 和 <code>HasChangedOwnedEntities()</code> 的關係</li>
+          <li>能說明 Domain Event 和 Integration Event 在這個服務中各自的角色</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 4 ─────────────────── -->
+  <section class="phase phase-4" id="phase4">
+    <div class="phase-header">
+      <div class="phase-badge">4</div>
+      <div>
+        <h2>Application Layer — CQRS</h2>
+        <div class="subtitle">Commands 修改狀態並觸發事件，Queries 只讀取資料</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 Command Handler 如何透過 Aggregate 的方法操作資料，而不是直接修改屬性</li>
+          <li>理解 Query Handler 為什麼用 <code>AsNoTracking()</code></li>
+          <li>理解 OrderExtensions 手動映射和 Mapster 自動映射各自的使用場景</li>
+          <li>理解 <code>OrderNotFoundException</code> 在 Handler 中的用途</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">Command Handler — 透過 Aggregate 操作</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Application/Orders/Commands/CreateOrder/CreateOrderCommandHandler.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">CreateOrderCommandHandler</span>(<span class="ty">IApplicationDbContext</span> dbContext)
+    : <span class="ty">ICommandHandler</span>&lt;<span class="ty">CreateOrderCommand</span>, <span class="ty">CreateOrderResult</span>&gt;
+{
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">CreateOrderResult</span>&gt; <span class="me">Handle</span>(
+        <span class="ty">CreateOrderCommand</span> command, <span class="ty">CancellationToken</span> ct)
+    {
+        <span class="cm">// ① 把 DTO 轉成 Value Object（透過工廠方法，包含驗證）</span>
+        <span class="kw">var</span> order = <span class="me">CreateNewOrder</span>(command.Order);
+
+        <span class="cm">// ② 加入 DbContext（EF Core 開始追蹤）</span>
+        dbContext.Orders.<span class="me">Add</span>(order);
+
+        <span class="cm">// ③ 儲存，Interceptors 在這裡自動執行</span>
+        <span class="kw">await</span> dbContext.<span class="me">SaveChangesAsync</span>(ct);
+
+        <span class="kw">return new</span> <span class="ty">CreateOrderResult</span>(order.Id.Value);
+    }
+
+    <span class="kw">private static</span> <span class="ty">Order</span> <span class="me">CreateNewOrder</span>(<span class="ty">OrderDto</span> orderDto)
+    {
+        <span class="cm">// 所有 Value Object 都透過 Of() 工廠方法建立，確保驗證</span>
+        <span class="kw">var</span> shippingAddress = <span class="ty">Address</span>.<span class="me">Of</span>(
+            orderDto.ShippingAddress.FirstName,
+            orderDto.ShippingAddress.LastName,
+            orderDto.ShippingAddress.EmailAddress,
+            orderDto.ShippingAddress.AddressLine,
+            orderDto.ShippingAddress.Country,
+            orderDto.ShippingAddress.State,
+            orderDto.ShippingAddress.ZipCode);
+
+        <span class="kw">var</span> order = <span class="ty">Order</span>.<span class="me">Create</span>(
+            id:              <span class="ty">OrderId</span>.<span class="me">Of</span>(<span class="ty">Guid</span>.<span class="me">NewGuid</span>()),
+            customerId:      <span class="ty">CustomerId</span>.<span class="me">Of</span>(orderDto.CustomerId),
+            orderName:       <span class="ty">OrderName</span>.<span class="me">Of</span>(orderDto.OrderName),
+            shippingAddress: shippingAddress,
+            billingAddress:  <span class="cm">/* 同上 */</span> shippingAddress,
+            payment:         <span class="ty">Payment</span>.<span class="me">Of</span>(...));
+
+        <span class="cm">// 透過 Aggregate Root 的方法新增 Items</span>
+        <span class="kw">foreach</span> (<span class="kw">var</span> item <span class="kw">in</span> orderDto.OrderItems)
+            order.<span class="me">Add</span>(<span class="ty">ProductId</span>.<span class="me">Of</span>(item.ProductId), item.Quantity, item.Price);
+
+        <span class="kw">return</span> order;
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Query Handler — 讀取效能優化</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Application/Orders/Queries/GetOrders/GetOrdersQueryHandler.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">GetOrdersQueryHandler</span>(<span class="ty">IApplicationDbContext</span> dbContext)
+    : <span class="ty">IQueryHandler</span>&lt;<span class="ty">GetOrdersQuery</span>, <span class="ty">GetOrdersResult</span>&gt;
+{
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">GetOrdersResult</span>&gt; <span class="me">Handle</span>(
+        <span class="ty">GetOrdersQuery</span> query, <span class="ty">CancellationToken</span> ct)
+    {
+        <span class="kw">var</span> pageIndex = query.PaginationRequest.PageIndex;
+        <span class="kw">var</span> pageSize  = query.PaginationRequest.PageSize;
+
+        <span class="kw">var</span> total = <span class="kw">await</span> dbContext.Orders.<span class="me">LongCountAsync</span>(ct);
+
+        <span class="kw">var</span> orders = <span class="kw">await</span> dbContext.Orders
+            <span class="cm">// AsNoTracking：Query 不需要 EF Core 追蹤變更，效能較好</span>
+            .<span class="me">AsNoTracking</span>()
+            .<span class="me">Include</span>(o => o.OrderItems)
+            .<span class="me">OrderBy</span>(o => o.OrderName.Value)
+            .<span class="me">Skip</span>(pageIndex * pageSize)
+            .<span class="me">Take</span>(pageSize)
+            .<span class="me">ToListAsync</span>(ct);
+
+        <span class="kw">return new</span> <span class="ty">GetOrdersResult</span>(
+            <span class="kw">new</span> <span class="ty">PaginatedResult</span>&lt;<span class="ty">OrderDto</span>&gt;(
+                pageIndex, pageSize, total,
+                orders.<span class="me">ToOrderDtoList</span>()));  <span class="cm">// 手動映射</span>
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">為什麼 Query 用手動映射而不是 Mapster</div>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>Order 的屬性都是 Value Object（<code>OrderName.Value</code>、<code>CustomerId.Value</code>），
+          Mapster 自動映射到扁平的 DTO 需要複雜的設定。
+          手動映射雖然程式碼較多，但更明確、不易出錯，也不依賴 Mapster 的設定。
+          Command 端的映射（DTO → Value Object）則因為有工廠方法驗證，直接手動建立更安全。</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">FluentValidation — Command 驗證</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Application/Orders/Commands/CreateOrder/CreateOrderCommandValidator.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">CreateOrderCommandValidator</span>
+    : <span class="ty">AbstractValidator</span>&lt;<span class="ty">CreateOrderCommand</span>&gt;
+{
+    <span class="kw">public</span> <span class="me">CreateOrderCommandValidator</span>()
+    {
+        <span class="me">RuleFor</span>(x => x.Order.OrderName)
+            .<span class="me">NotEmpty</span>().<span class="me">WithMessage</span>(<span class="st">"OrderName is required"</span>);
+
+        <span class="me">RuleFor</span>(x => x.Order.CustomerId)
+            .<span class="me">NotEmpty</span>().<span class="me">WithMessage</span>(<span class="st">"CustomerId is required"</span>);
+
+        <span class="me">RuleFor</span>(x => x.Order.OrderItems)
+            .<span class="me">NotEmpty</span>().<span class="me">WithMessage</span>(<span class="st">"OrderItems is required"</span>);
+    }
+}
+
+<span class="cm">// 注意：這裡驗證 DTO 的原始欄位（string、Guid）
+// Value Object 的驗證（空值、格式）在 Of() 工廠方法裡做
+// 兩層驗證各司其職：DTO 層在這裡，Domain 層在 Value Object 裡</span></code></pre>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>能說明為什麼 Command Handler 透過 <code>order.Add()</code> 而不是直接操作 <code>_orderItems</code></li>
+          <li>能說明 <code>AsNoTracking()</code> 的作用和適用時機</li>
+          <li>能說明 DTO 驗證（FluentValidation）和 Domain 驗證（Value Object Of()）各自負責什麼</li>
+          <li>能說明 <code>OrderNotFoundException</code> 會被哪個元件轉成 HTTP 404</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 5 ─────────────────── -->
+  <section class="phase phase-5" id="phase5">
+    <div class="phase-header">
+      <div class="phase-badge">5</div>
+      <div>
+        <h2>Infrastructure — EF Core 進階設定</h2>
+        <div class="subtitle">Value Object 的資料庫對應、ComplexProperty、HasConversion</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 <code>HasConversion</code> 如何把 Value Object 存成對應的資料庫型別</li>
+          <li>理解 <code>ComplexProperty</code> 如何把複合 Value Object 展平成多個資料庫欄位</li>
+          <li>理解 <code>ApplyConfigurationsFromAssembly</code> 的自動掃描機制</li>
+          <li>理解 Interceptor 如何透過 DI 注入到 DbContext</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">HasConversion — ID Value Object 對應</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Infrastructure/Configurations/OrderConfiguration.cs（節錄）</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">OrderConfiguration</span> : <span class="ty">IEntityTypeConfiguration</span>&lt;<span class="ty">Order</span>&gt;
+{
+    <span class="kw">public void</span> <span class="me">Configure</span>(<span class="ty">EntityTypeBuilder</span>&lt;<span class="ty">Order</span>&gt; builder)
+    {
+        builder.<span class="me">HasKey</span>(o => o.Id);
+
+        <span class="cm">// HasConversion：告訴 EF Core 如何在 C# 型別和資料庫型別之間轉換
+        // OrderId（C#）↔ Guid（資料庫）
+        // 讀取時：Guid → OrderId.Of(guid)
+        // 寫入時：orderId.Value → Guid</span>
+        builder.<span class="me">Property</span>(o => o.Id)
+            .<span class="me">HasConversion</span>(id => id.Value, value => <span class="ty">OrderId</span>.<span class="me">Of</span>(value));
+
+        builder.<span class="me">Property</span>(o => o.CustomerId)
+            .<span class="me">HasConversion</span>(id => id.Value, value => <span class="ty">CustomerId</span>.<span class="me">Of</span>(value));
+
+        <span class="cm">// OrderName：string → OrderName.Value
+        // ComplexProperty 展平到同一張資料表，而不是建立子資料表</span>
+        builder.<span class="me">ComplexProperty</span>(o => o.OrderName, nameBuilder =>
+        {
+            nameBuilder.<span class="me">Property</span>(n => n.Value)
+                .<span class="me">HasColumnName</span>(<span class="st">"OrderName"</span>)
+                .<span class="me">HasMaxLength</span>(<span class="nu">100</span>)
+                .<span class="me">IsRequired</span>();
+        });
+
+        <span class="cm">// Address 展平成多個欄位，兩個 Address 共用相同的結構</span>
+        builder.<span class="me">ComplexProperty</span>(o => o.ShippingAddress, addrBuilder =>
+        {
+            addrBuilder.<span class="me">Property</span>(a => a.FirstName)
+                .<span class="me">HasMaxLength</span>(<span class="nu">50</span>).<span class="me">IsRequired</span>();
+            addrBuilder.<span class="me">Property</span>(a => a.ZipCode)
+                .<span class="me">HasMaxLength</span>(<span class="nu">5</span>);
+            <span class="cm">// ... 其他欄位</span>
+        });
+
+        builder.<span class="me">ComplexProperty</span>(o => o.BillingAddress, addrBuilder =>
+        {
+            <span class="cm">// 和 ShippingAddress 相同的結構，但欄位名稱不同</span>
+        });
+
+        <span class="cm">// OrderStatus 以字串儲存（"Draft"、"Pending"）而非數字
+        // 好處：資料庫可讀性高，新增 enum 值不影響現有資料</span>
+        builder.<span class="me">Property</span>(o => o.Status)
+            .<span class="me">HasDefaultValue</span>(<span class="ty">OrderStatus</span>.Draft)
+            .<span class="me">HasConversion</span>(s => s.<span class="me">ToString</span>(), value =>
+                (<span class="ty">OrderStatus</span>)<span class="ty">Enum</span>.<span class="me">Parse</span>(<span class="kw">typeof</span>(<span class="ty">OrderStatus</span>), value));
+
+        <span class="cm">// OrderItem 一對多關係</span>
+        builder.<span class="me">HasMany</span>(o => o.OrderItems)
+            .<span class="me">WithOne</span>()
+            .<span class="me">HasForeignKey</span>(<span class="st">"OrderId"</span>);  <span class="cm">// Shadow property</span>
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Interceptor 注入到 DbContext</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Infrastructure/DependencyInjection.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public static</span> <span class="ty">IServiceCollection</span> <span class="me">AddInfrastructureServices</span>(
+    <span class="kw">this</span> <span class="ty">IServiceCollection</span> services,
+    <span class="ty">IConfiguration</span> configuration)
+{
+    <span class="cm">// ① 先把 Interceptors 獨立註冊為 Singleton</span>
+    services.<span class="me">AddSingleton</span>&lt;<span class="ty">AuditableEntityInterceptor</span>&gt;();
+    services.<span class="me">AddSingleton</span>&lt;<span class="ty">DispatchDomainEventsInterceptor</span>&gt;();
+
+    services.<span class="me">AddDbContext</span>&lt;<span class="ty">ApplicationDbContext</span>&gt;((sp, options) =>
+    {
+        <span class="cm">// ② 透過 Service Provider 取得 Interceptors</span>
+        <span class="kw">var</span> auditInterceptor   = sp.<span class="me">GetRequiredService</span>&lt;<span class="ty">AuditableEntityInterceptor</span>&gt;();
+        <span class="kw">var</span> dispatchInterceptor = sp.<span class="me">GetRequiredService</span>&lt;<span class="ty">DispatchDomainEventsInterceptor</span>&gt;();
+
+        options
+            .<span class="me">AddInterceptors</span>(auditInterceptor, dispatchInterceptor)
+            .<span class="me">UseSqlServer</span>(configuration.<span class="me">GetConnectionString</span>(<span class="st">"Database"</span>));
+    });
+
+    <span class="cm">// ③ 讓 Application 層透過介面存取 DbContext</span>
+    services.<span class="me">AddScoped</span>&lt;<span class="ty">IApplicationDbContext</span>,
+        <span class="ty">ApplicationDbContext</span>&gt;();
+
+    <span class="kw">return</span> services;
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">ApplyConfigurationsFromAssembly</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Infrastructure/ApplicationDbContext.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">protected override void</span> <span class="me">OnModelCreating</span>(<span class="ty">ModelBuilder</span> modelBuilder)
+{
+    <span class="cm">// 自動掃描同一個 Assembly 裡所有實作 IEntityTypeConfiguration&lt;T&gt; 的類別
+    // 不需要手動呼叫 modelBuilder.ApplyConfiguration(new OrderConfiguration()) 等
+    // 新增 Entity 只需要新增對應的 Configuration 類別，這裡不需要改動</span>
+    modelBuilder.<span class="me">ApplyConfigurationsFromAssembly</span>(<span class="ty">Assembly</span>.<span class="me">GetExecutingAssembly</span>());
+    <span class="kw">base</span>.<span class="me">OnModelCreating</span>(modelBuilder);
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>能說明 <code>HasConversion</code> 在讀取和寫入時各自做了什麼</li>
+          <li>能說明 <code>ComplexProperty</code> 和 <code>OwnsOne</code> 的差異（EF Core 8.0 新增）</li>
+          <li>能說明為什麼 OrderStatus 以字串而非數字儲存</li>
+          <li>能說明 Interceptor 為什麼用 Singleton 而不是 Scoped</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 6 ─────────────────── -->
+  <section class="phase phase-6" id="phase6">
+    <div class="phase-header">
+      <div class="phase-badge">6</div>
+      <div>
+        <h2>MassTransit Consumer</h2>
+        <div class="subtitle">接收 Basket 發出的 BasketCheckoutEvent，自動建立訂單</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 Consumer 如何透過 MassTransit 訂閱 RabbitMQ 的訊息</li>
+          <li>理解 Consumer 內部使用 MediatR 發送 Command 的意義（和其他 Handler 共用邏輯）</li>
+          <li>理解 Feature Management 如何控制功能的開啟與關閉</li>
+          <li>能追蹤從 Basket 結帳到 Order 建立的完整跨服務流程</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">BasketCheckoutEventHandler — Integration Event Consumer</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Application/Orders/EventHandlers/Integration/BasketCheckoutEventHandler.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="cm">// IConsumer&lt;T&gt; 是 MassTransit 的介面，不是 MediatR</span>
+<span class="cm">// 當 RabbitMQ 收到 BasketCheckoutEvent，MassTransit 自動呼叫 Consume()</span>
+<span class="kw">public class</span> <span class="ty">BasketCheckoutEventHandler</span>(<span class="ty">ISender</span> sender)
+    : <span class="ty">IConsumer</span>&lt;<span class="ty">BasketCheckoutEvent</span>&gt;
+{
+    <span class="kw">public async</span> <span class="ty">Task</span> <span class="me">Consume</span>(<span class="ty">ConsumeContext</span>&lt;<span class="ty">BasketCheckoutEvent</span>&gt; context)
+    {
+        <span class="cm">// 把 Integration Event 轉成 Command，交給 MediatR 處理
+        // 這樣 Consumer 不需要重複實作建立訂單的邏輯
+        // 和 POST /orders 走同一條 Handler 路徑</span>
+        <span class="kw">var</span> command = <span class="me">MapToCreateOrderCommand</span>(context.Message);
+        <span class="kw">await</span> sender.<span class="me">Send</span>(command);
+    }
+
+    <span class="kw">private static</span> <span class="ty">CreateOrderCommand</span> <span class="me">MapToCreateOrderCommand</span>(<span class="ty">BasketCheckoutEvent</span> message)
+    {
+        <span class="kw">var</span> addressDto = <span class="kw">new</span> <span class="ty">AddressDto</span>(
+            message.FirstName, message.LastName, message.EmailAddress,
+            message.AddressLine, message.Country, message.State, message.ZipCode);
+
+        <span class="kw">var</span> paymentDto = <span class="kw">new</span> <span class="ty">PaymentDto</span>(
+            message.CardName, message.CardNumber,
+            message.Expiration, message.CVV, message.PaymentMethod);
+
+        <span class="cm">// 注意：OrderItems 是硬編碼的商品 ID
+        // 因為 BasketCheckoutEvent 裡只有商品名稱和價格，沒有商品 ID
+        // 這是這個教學專案的簡化設計</span>
+        <span class="kw">var</span> orderId = <span class="ty">Guid</span>.<span class="me">NewGuid</span>();
+        <span class="kw">return new</span> <span class="ty">CreateOrderCommand</span>(<span class="kw">new</span> <span class="ty">OrderDto</span>(
+            orderId,
+            message.CustomerId,
+            message.UserName,
+            addressDto,
+            addressDto,
+            paymentDto,
+            <span class="ty">OrderStatus</span>.Pending,
+            <span class="kw">new</span> <span class="ty">List</span>&lt;<span class="ty">OrderItemDto</span>&gt;
+            {
+                <span class="kw">new</span>(<span class="ty">Guid</span>.<span class="me">Parse</span>(<span class="st">"5334c996-8457-4cf0-815c-ed2b77c4ff61"</span>), <span class="nu">2</span>, <span class="nu">500</span>), <span class="cm">// iPhone X</span>
+                <span class="kw">new</span>(<span class="ty">Guid</span>.<span class="me">Parse</span>(<span class="st">"c67d6323-e8b1-4bdf-9a75-b0d0d2e7e914"</span>), <span class="nu">1</span>, <span class="nu">500</span>)  <span class="cm">// Samsung 10</span>
+            }
+        ));
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Feature Management — OrderCreatedEventHandler</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Application/Orders/EventHandlers/Domain/OrderCreatedEventHandler.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">OrderCreatedEventHandler</span>(
+    <span class="ty">IPublishEndpoint</span> publishEndpoint,
+    <span class="ty">IFeatureManager</span> featureManager,
+    <span class="ty">ILogger</span>&lt;<span class="ty">OrderCreatedEventHandler</span>&gt; logger)
+    : <span class="ty">INotificationHandler</span>&lt;<span class="ty">OrderCreatedEvent</span>&gt;
+{
+    <span class="kw">public async</span> <span class="ty">Task</span> <span class="me">Handle</span>(<span class="ty">OrderCreatedEvent</span> notification, <span class="ty">CancellationToken</span> ct)
+    {
+        logger.<span class="me">LogInformation</span>(<span class="st">"OrderCreatedEvent handled: {OrderId}"</span>,
+            notification.Order.Id);
+
+        <span class="cm">// Feature Flag 控制：只有在 "OrderFullfilment" = true 時才發布
+        // 現在設定為 false，所以不會觸發後續的出貨流程
+        // 未來啟用只需要改設定檔，不需要改程式碼</span>
+        <span class="kw">if</span> (<span class="kw">await</span> featureManager.<span class="me">IsEnabledAsync</span>(<span class="st">"OrderFullfilment"</span>))
+        {
+            <span class="kw">var</span> orderDto = notification.Order.<span class="me">ToOrderDto</span>();
+            <span class="kw">await</span> publishEndpoint.<span class="me">Publish</span>(orderDto, ct);
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">完整跨服務流程</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>POST /basket/checkout → 建立 Order 的完整路徑</span><span class="lang-tag">text</span></div>
+          <pre><code>Basket.API
+    POST /basket/checkout
+    → CheckoutBasketCommandHandler
+        → publishEndpoint.Publish(BasketCheckoutEvent)  → RabbitMQ
+        → repository.DeleteBasket()
+    ← HTTP 200
+
+              ↓（非同步，Basket 不需要等待）
+
+Ordering.API（MassTransit 背景消費）
+    BasketCheckoutEventHandler.Consume()
+        → MapToCreateOrderCommand()
+        → sender.Send(CreateOrderCommand)
+            → ValidationBehavior
+            → CreateOrderCommandHandler
+                → Order.Create()        ← AddDomainEvent(OrderCreatedEvent)
+                → dbContext.SaveChangesAsync()
+                    → AuditableEntityInterceptor（填入稽核欄位）
+                    → DispatchDomainEventsInterceptor
+                        → mediator.Publish(OrderCreatedEvent)
+                            → OrderCreatedEventHandler
+                                → FeatureManagement 檢查（目前 false，不繼續）
+                    → SQL INSERT</code></pre>
+        </div>
+      </div>
+
+      <div class="callout callout-warn">
+        <span class="callout-icon">⚠️</span>
+        <span><strong>硬編碼商品 ID 是教學簡化</strong>：真實專案中，
+        <code>BasketCheckoutEvent</code> 應該包含完整的商品 ID 清單，
+        而不是在 Consumer 裡寫死。
+        這個專案為了示範跨服務事件流程而做了這個妥協。</span>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>能說明 Consumer 為什麼用 <code>ISender.Send()</code> 而不是直接實作建立訂單的邏輯</li>
+          <li>能說明 Feature Flag 的優點：不需要改程式碼即可控制功能開關</li>
+          <li>能追蹤從 POST /basket/checkout 到訂單入庫的完整路徑</li>
+          <li>能說明為什麼 Consumer 和 REST Endpoint 可以走同一條 Handler 路徑</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 7 ─────────────────── -->
+  <section class="phase phase-7" id="phase7">
+    <div class="phase-header">
+      <div class="phase-badge">7</div>
+      <div>
+        <h2>對照 Ordering 專案</h2>
+        <div class="subtitle">理解所有設計決策的脈絡，能獨立閱讀每個檔案</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>能獨立閱讀 Ordering 四個專案的任意檔案，說明每一行的用途</li>
+          <li>理解 Domain 和 DTO 之間的映射為何要手動而非自動</li>
+          <li>理解 Seed Data 在開發環境的作用，以及 InitialiseDatabaseAsync 的執行時機</li>
+          <li>能畫出完整的架構圖，包含四層依賴關係和事件流向</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">閱讀順序建議</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Ordering 閱讀路徑</span><span class="lang-tag">text</span></div>
+          <pre><code>Ordering.Domain（從內往外讀）
+    1. Abstractions/IEntity.cs + Entity.cs       → 稽核欄位基底
+    2. Abstractions/IAggregate.cs + Aggregate.cs → Domain Event 管理機制
+    3. ValueObjects/OrderId.cs                   → 最簡單的 Value Object
+    4. ValueObjects/Address.cs                   → 複合 Value Object
+    5. Models/OrderItem.cs                       → 非 Aggregate Root 的 Entity
+    6. Models/Order.cs                           → Aggregate Root，工廠方法，Domain Events
+    7. Events/OrderCreatedEvent.cs               → Domain Event 定義
+
+Ordering.Application
+    8. Data/IApplicationDbContext.cs             → 依賴反轉的介面
+    9. Orders/Commands/CreateOrder/              → 完整的 Command + Handler + Validator
+   10. Orders/Queries/GetOrders/                 → Query + 分頁 Handler
+   11. Orders/EventHandlers/Domain/              → Domain Event Handler + Feature Flag
+   12. Orders/EventHandlers/Integration/         → MassTransit Consumer
+
+Ordering.Infrastructure
+   13. Data/Configurations/OrderConfiguration.cs → HasConversion + ComplexProperty
+   14. Data/Interceptors/DispatchDomainEventsInterceptor.cs → 核心機制
+   15. Data/Interceptors/AuditableEntityInterceptor.cs
+   16. Data/Extensions/DatabaseExtensions.cs    → 自動 Migration + Seed
+
+Ordering.API
+   17. Endpoints/CreateOrder.cs                 → 最完整的 Endpoint（含 Produces）
+   18. Program.cs                               → 三層 DI 組合</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">這個服務和前三個服務的比較</div>
+        <div class="arch-table">
+          <table>
+            <thead>
+              <tr><th>特性</th><th>Catalog</th><th>Basket</th><th>Discount</th><th>Ordering</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>架構複雜度</td>
+                <td>⭐⭐</td>
+                <td>⭐⭐⭐</td>
+                <td>⭐</td>
+                <td>⭐⭐⭐⭐⭐</td>
+              </tr>
+              <tr>
+                <td>DDD</td>
+                <td>❌</td>
+                <td>❌</td>
+                <td>❌</td>
+                <td><span class="badge badge-ddd">✦ 完整 DDD</span></td>
+              </tr>
+              <tr>
+                <td>Clean Architecture</td>
+                <td>❌（單專案）</td>
+                <td>❌（單專案）</td>
+                <td>❌（單專案）</td>
+                <td><span class="badge badge-new">✦ 4 層</span></td>
+              </tr>
+              <tr>
+                <td>Domain Events</td>
+                <td>❌</td>
+                <td>❌</td>
+                <td>❌</td>
+                <td><span class="badge badge-ddd">✦ Interceptor</span></td>
+              </tr>
+              <tr>
+                <td>ORM</td>
+                <td>Marten</td>
+                <td>Marten</td>
+                <td>EF Core + SQLite</td>
+                <td><span class="badge badge-ef">EF Core + SQL Server</span></td>
+              </tr>
+              <tr>
+                <td>MassTransit</td>
+                <td>❌</td>
+                <td>Publisher</td>
+                <td>❌</td>
+                <td><span class="badge badge-new">✦ Consumer</span></td>
+              </tr>
+              <tr>
+                <td>Feature Management</td>
+                <td>❌</td>
+                <td>❌</td>
+                <td>❌</td>
+                <td><span class="badge badge-new">✦ IFeatureManager</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>能不看程式碼說明 Order.Create() 到 SQL INSERT 之間的完整流程</li>
+          <li>能說明為什麼 Ordering 需要四個專案，而 Catalog 只需要一個</li>
+          <li>能說明 <code>IApplicationDbContext</code> 如何讓 Application 層在測試時可以替換成 Mock</li>
+          <li>能說明 Feature Flag "OrderFullfilment" 設為 true 後會多觸發什麼行為</li>
+          <li>能從零建出相同架構的四層服務</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

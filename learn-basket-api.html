@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>學習 Basket API 架構</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.7;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a365d, #2a4a7f);
+      border-bottom: 3px solid #2b6cb0;
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #bee3f8;
+      font-size: 1rem;
+    }
+
+    .toc {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .toc h2 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #718096;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+
+    .toc-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .toc-list a {
+      display: inline-block;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      text-decoration: none;
+      background: #fff;
+      border: 1.5px solid #bee3f8;
+      color: #2b6cb0;
+      font-weight: 500;
+      transition: all 0.15s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    .toc-list a:hover {
+      background: #2b6cb0;
+      border-color: #2b6cb0;
+      color: #fff;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    .phase {
+      margin-bottom: 2.5rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1.5px solid #e2e8f0;
+    }
+
+    .phase-1 .phase-header { background: #ebf8ff; }
+    .phase-2 .phase-header { background: #f0fff4; }
+    .phase-3 .phase-header { background: #faf5ff; }
+    .phase-4 .phase-header { background: #fffaf0; }
+    .phase-5 .phase-header { background: #fff5f5; }
+    .phase-6 .phase-header { background: #f0f4ff; }
+
+    .phase-badge {
+      flex-shrink: 0;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .phase-1 .phase-badge { background: #2b6cb0; color: #fff; }
+    .phase-2 .phase-badge { background: #276749; color: #fff; }
+    .phase-3 .phase-badge { background: #6b46c1; color: #fff; }
+    .phase-4 .phase-badge { background: #c05621; color: #fff; }
+    .phase-5 .phase-badge { background: #c53030; color: #fff; }
+    .phase-6 .phase-badge { background: #2c5282; color: #fff; }
+
+    .phase-header h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a202c;
+    }
+
+    .phase-header .subtitle {
+      font-size: 0.85rem;
+      color: #718096;
+      margin-top: 0.1rem;
+    }
+
+    .phase-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: #a0aec0;
+      margin-bottom: 0.55rem;
+      font-weight: 700;
+    }
+
+    .goal-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .goal-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.95rem;
+      color: #2d3748;
+    }
+
+    .goal-list li::before {
+      content: '→';
+      color: #a0aec0;
+      flex-shrink: 0;
+    }
+
+    .code-block {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .code-block-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background: #2d3748;
+      border-bottom: 1px solid #4a5568;
+      font-size: 0.8rem;
+      color: #a0aec0;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+    }
+
+    .lang-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: #4a5568;
+      color: #a0aec0;
+    }
+
+    pre {
+      padding: 1.1rem 1.2rem;
+      overflow-x: auto;
+      font-size: 0.855rem;
+      line-height: 1.65;
+    }
+
+    code {
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      color: #e2e8f0;
+    }
+    
+    span > code {
+      color: #ba0923;
+    }
+
+    .kw  { color: #f6a3f9; }
+    .ty  { color: #93c5fd; }
+    .st  { color: #86efac; }
+    .cm  { color: #6b7280; font-style: italic; }
+    .me  { color: #67e8f9; }
+    .nu  { color: #fca5a5; }
+    .at  { color: #fde68a; }
+    .op  { color: #93c5fd; }
+
+    .callout {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.9rem 1.1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .callout-tip {
+      background: #ebf8ff;
+      border: 1.5px solid #bee3f8;
+      color: #2c5282;
+    }
+
+    .callout-warn {
+      background: #fffbeb;
+      border: 1.5px solid #fcd34d;
+      color: #92400e;
+    }
+
+    .callout-info {
+      background: #f0fff4;
+      border: 1.5px solid #9ae6b4;
+      color: #22543d;
+    }
+
+    .callout-icon { flex-shrink: 0; font-size: 1rem; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    .checkpoint {
+      background: #f0fff4;
+      border: 1.5px solid #9ae6b4;
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+    }
+
+    .checkpoint .section-label { color: #276749; }
+
+    .checkpoint ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .checkpoint ul li {
+      font-size: 0.9rem;
+      color: #22543d;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .checkpoint ul li::before {
+      content: '✓';
+      color: #38a169;
+      font-weight: 700;
+    }
+
+    .arch-diff {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .arch-diff table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .arch-diff th {
+      background: #edf2f7;
+      padding: 0.6rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: #4a5568;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .arch-diff td {
+      padding: 0.6rem 1rem;
+      border-top: 1px solid #e2e8f0;
+      color: #2d3748;
+      vertical-align: top;
+    }
+
+    .arch-diff tr:hover td { background: #f7fafc; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-new { background: #c6f6d5; color: #22543d; }
+    .badge-same { background: #e2e8f0; color: #4a5568; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>學習 Basket API 架構</h1>
+  <p>在 Catalog 基礎上，逐步加入 Redis 快取、gRPC 整合、Repository 裝飾器、MassTransit 事件發布</p>
+</header>
+
+<nav class="toc">
+  <h2>目錄</h2>
+  <div class="toc-list">
+    <a href="#diff">和 Catalog 的差異</a>
+    <a href="#phase1">階段一：Repository Pattern</a>
+    <a href="#phase2">階段二：Redis 快取 + Scrutor 裝飾器</a>
+    <a href="#phase3">階段三：gRPC 呼叫 Discount 服務</a>
+    <a href="#phase4">階段四：MassTransit + RabbitMQ</a>
+    <a href="#phase5">階段五：IntegrationEvent 跨服務事件</a>
+    <a href="#phase6">階段六：對照 Basket.API</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ─────────────────── 差異對照 ─────────────────── -->
+  <section id="diff" style="margin-bottom:2.5rem;">
+    <div class="arch-diff">
+      <table>
+        <thead>
+          <tr>
+            <th>技術 / 模式</th>
+            <th>Catalog.API</th>
+            <th>Basket.API</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>MediatR + CQRS</td>
+            <td><span class="badge badge-same">✓ 相同</span></td>
+            <td><span class="badge badge-same">✓ 相同</span></td>
+          </tr>
+          <tr>
+            <td>FluentValidation + Pipeline</td>
+            <td><span class="badge badge-same">✓ 相同</span></td>
+            <td><span class="badge badge-same">✓ 相同</span></td>
+          </tr>
+          <tr>
+            <td>Carter 路由</td>
+            <td><span class="badge badge-same">✓ 相同</span></td>
+            <td><span class="badge badge-same">✓ 相同</span></td>
+          </tr>
+          <tr>
+            <td>Marten / PostgreSQL</td>
+            <td><span class="badge badge-same">✓ 相同</span></td>
+            <td><span class="badge badge-same">✓ 相同</span></td>
+          </tr>
+          <tr>
+            <td>Repository Pattern</td>
+            <td>❌ 直接用 Session</td>
+            <td><span class="badge badge-new">✦ 新增</span> IBasketRepository</td>
+          </tr>
+          <tr>
+            <td>Redis 分散式快取</td>
+            <td>❌</td>
+            <td><span class="badge badge-new">✦ 新增</span> IDistributedCache</td>
+          </tr>
+          <tr>
+            <td>Scrutor 裝飾器</td>
+            <td>❌</td>
+            <td><span class="badge badge-new">✦ 新增</span> Decorate&lt;&gt;()</td>
+          </tr>
+          <tr>
+            <td>gRPC Client</td>
+            <td>❌</td>
+            <td><span class="badge badge-new">✦ 新增</span> Discount.Grpc</td>
+          </tr>
+          <tr>
+            <td>MassTransit / RabbitMQ</td>
+            <td>❌</td>
+            <td><span class="badge badge-new">✦ 新增</span> IPublishEndpoint</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 1 ─────────────────── -->
+  <section class="phase phase-1" id="phase1">
+    <div class="phase-header">
+      <div class="phase-badge">1</div>
+      <div>
+        <h2>Repository Pattern</h2>
+        <div class="subtitle">把資料存取邏輯從 Handler 抽出，透過介面隔離</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解為什麼 Basket 要用 Repository，而 Catalog 不用</li>
+          <li>理解 Interface 在 Repository Pattern 中的角色：讓 Handler 不依賴具體實作</li>
+          <li>理解 Marten 在 Basket 中如何以 UserName 作為自然主鍵</li>
+          <li>理解 BasketNotFoundException 和 NotFoundException 的繼承關係</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">為什麼 Basket 需要 Repository</div>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>Catalog 的 Handler 直接注入 <code>IQuerySession</code>，因為資料存取邏輯簡單。
+          Basket 的 Handler 注入 <code>IBasketRepository</code>，因為後面要在這個介面上加快取裝飾器（階段二）。
+          如果沒有介面，裝飾器就無從掛載。</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">定義 Model</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Models/ShoppingCart.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">ShoppingCart</span>
+{
+    <span class="kw">public string</span> UserName { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">ShoppingCartItem</span>&gt; Items { <span class="kw">get</span>; <span class="kw">set</span>; } = [];
+
+    <span class="cm">// 計算屬性，不存入資料庫，每次從 Items 即時計算</span>
+    <span class="kw">public decimal</span> TotalPrice => Items.<span class="me">Sum</span>(x => x.Price * x.Quantity);
+}
+
+<span class="kw">public class</span> <span class="ty">ShoppingCartItem</span>
+{
+    <span class="kw">public</span> <span class="ty">Guid</span> ProductId { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public string</span> ProductName { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public int</span> Quantity { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public string</span> Color { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public decimal</span> Price { <span class="kw">get</span>; <span class="kw">set</span>; }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">定義 Repository 介面與實作</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Data/IBasketRepository.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public interface</span> <span class="ty">IBasketRepository</span>
+{
+    <span class="ty">Task</span>&lt;<span class="ty">ShoppingCart</span>&gt; <span class="me">GetBasket</span>(<span class="kw">string</span> userName, <span class="ty">CancellationToken</span> ct = <span class="kw">default</span>);
+    <span class="ty">Task</span>&lt;<span class="ty">ShoppingCart</span>&gt; <span class="me">StoreBasket</span>(<span class="ty">ShoppingCart</span> basket, <span class="ty">CancellationToken</span> ct = <span class="kw">default</span>);
+    <span class="ty">Task</span>&lt;<span class="kw">bool</span>&gt; <span class="me">DeleteBasket</span>(<span class="kw">string</span> userName, <span class="ty">CancellationToken</span> ct = <span class="kw">default</span>);
+}</code></pre>
+        </div>
+        <br/>
+        <div class="code-block">
+          <div class="code-block-title"><span>Data/BasketRepository.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">BasketRepository</span>(<span class="ty">IDocumentSession</span> session) : <span class="ty">IBasketRepository</span>
+{
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">ShoppingCart</span>&gt; <span class="me">GetBasket</span>(<span class="kw">string</span> userName, <span class="ty">CancellationToken</span> ct = <span class="kw">default</span>)
+    {
+        <span class="kw">var</span> basket = <span class="kw">await</span> session.<span class="me">LoadAsync</span>&lt;<span class="ty">ShoppingCart</span>&gt;(userName, ct);
+
+        <span class="cm">// 找不到就拋出例外，交給 CustomExceptionHandler 轉成 HTTP 404</span>
+        <span class="kw">return</span> basket <span class="kw">is null</span>
+            ? <span class="kw">throw new</span> <span class="ty">BasketNotFoundException</span>(userName)
+            : basket;
+    }
+
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">ShoppingCart</span>&gt; <span class="me">StoreBasket</span>(<span class="ty">ShoppingCart</span> basket, <span class="ty">CancellationToken</span> ct = <span class="kw">default</span>)
+    {
+        session.<span class="me">Store</span>(basket);
+        <span class="kw">await</span> session.<span class="me">SaveChangesAsync</span>(ct);
+        <span class="kw">return</span> basket;
+    }
+
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="kw">bool</span>&gt; <span class="me">DeleteBasket</span>(<span class="kw">string</span> userName, <span class="ty">CancellationToken</span> ct = <span class="kw">default</span>)
+    {
+        session.<span class="me">Delete</span>&lt;<span class="ty">ShoppingCart</span>&gt;(userName);
+        <span class="kw">await</span> session.<span class="me">SaveChangesAsync</span>(ct);
+        <span class="kw">return true</span>;
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">自訂例外與 Marten 主鍵設定</div>
+        <div class="two-col">
+          <div class="code-block">
+            <div class="code-block-title"><span>Exceptions/BasketNotFoundException.cs</span><span class="lang-tag">C#</span></div>
+            <pre><code><span class="cm">// 繼承 BuildingBlocks 的 NotFoundException</span>
+<span class="cm">// CustomExceptionHandler 會自動對應到 HTTP 404</span>
+<span class="kw">public class</span> <span class="ty">BasketNotFoundException</span>(<span class="kw">string</span> userName)
+    : <span class="ty">NotFoundException</span>(<span class="st">$"Basket for '{userName}' not found"</span>);</code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-block-title"><span>Program.cs — Marten 設定</span><span class="lang-tag">C#</span></div>
+            <pre><code>builder.Services.<span class="me">AddMarten</span>(opts =>
+{
+    opts.<span class="me">Connection</span>(connStr);
+
+    <span class="cm">// UserName 作為自然主鍵</span>
+    <span class="cm">// Catalog 用 Guid Id，Basket 用 string UserName</span>
+    opts.Schema.<span class="me">For</span>&lt;<span class="ty">ShoppingCart</span>&gt;()
+        .<span class="me">Identity</span>(x => x.UserName);
+}).<span class="me">UseLightweightSessions</span>();
+
+<span class="cm">// 注入 Repository</span>
+builder.Services.<span class="me">AddScoped</span>&lt;<span class="ty">IBasketRepository</span>, <span class="ty">BasketRepository</span>&gt;();</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>GET /basket/{userName} 從 PostgreSQL 讀取，找不到回傳 404</li>
+          <li>POST /basket 寫入 PostgreSQL</li>
+          <li>DELETE /basket/{userName} 刪除資料</li>
+          <li>能說明為什麼 Handler 注入 IBasketRepository 而不是 IDocumentSession</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 2 ─────────────────── -->
+  <section class="phase phase-2" id="phase2">
+    <div class="phase-header">
+      <div class="phase-badge">2</div>
+      <div>
+        <h2>Redis 快取 + Scrutor 裝飾器</h2>
+        <div class="subtitle">不修改任何現有程式碼，透明地加上快取層</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 Decorator Pattern：在不修改原始類別的前提下擴充行為</li>
+          <li>理解 Scrutor 的 Decorate&lt;&gt;() 如何把兩個實作串接起來</li>
+          <li>理解 IDistributedCache 和 Redis 的關係</li>
+          <li>理解快取的 Cache-Aside 策略：先查快取，沒有再查資料庫</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">安裝套件與啟動 Redis</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Terminal</span><span class="lang-tag">shell</span></div>
+          <pre><code>dotnet add package Microsoft.Extensions.Caching.StackExchangeRedis
+dotnet add package Scrutor
+
+<span class="cm"># 用 Docker 啟動 Redis</span>
+docker run -d --name learnredis -p 6379:6379 redis</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">裝飾器模式說明</div>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>
+            <strong>不用裝飾器的做法：</strong>直接在 BasketRepository 裡加快取邏輯，
+            導致一個 class 同時負責資料庫存取和快取，違反單一職責原則。<br/><br/>
+            <strong>裝飾器的做法：</strong>建立 CachedBasketRepository，
+            它包住 BasketRepository，在外層攔截呼叫，處理快取邏輯，
+            兩個 class 各自只做一件事。
+          </span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">實作快取裝飾器</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Data/CachedBasketRepository.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">CachedBasketRepository</span>(
+    <span class="ty">IBasketRepository</span> repository,   <span class="cm">// 注入被裝飾的原始 Repository</span>
+    <span class="ty">IDistributedCache</span> cache)         <span class="cm">// 注入 Redis</span>
+    : <span class="ty">IBasketRepository</span>              <span class="cm">// 實作同一個介面</span>
+{
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">ShoppingCart</span>&gt; <span class="me">GetBasket</span>(<span class="kw">string</span> userName, <span class="ty">CancellationToken</span> ct = <span class="kw">default</span>)
+    {
+        <span class="cm">// ① 先查 Redis</span>
+        <span class="kw">var</span> cached = <span class="kw">await</span> cache.<span class="me">GetStringAsync</span>(userName, ct);
+        <span class="kw">if</span> (cached <span class="kw">is not null</span>)
+            <span class="kw">return</span> <span class="ty">JsonSerializer</span>.<span class="me">Deserialize</span>&lt;<span class="ty">ShoppingCart</span>&gt;(cached)!;
+
+        <span class="cm">// ② Cache Miss：去資料庫拿</span>
+        <span class="kw">var</span> basket = <span class="kw">await</span> repository.<span class="me">GetBasket</span>(userName, ct);
+
+        <span class="cm">// ③ 存進 Redis 供下次使用</span>
+        <span class="kw">await</span> cache.<span class="me">SetStringAsync</span>(userName, <span class="ty">JsonSerializer</span>.<span class="me">Serialize</span>(basket), ct);
+
+        <span class="kw">return</span> basket;
+    }
+
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">ShoppingCart</span>&gt; <span class="me">StoreBasket</span>(<span class="ty">ShoppingCart</span> basket, <span class="ty">CancellationToken</span> ct = <span class="kw">default</span>)
+    {
+        <span class="cm">// 寫入資料庫</span>
+        <span class="kw">await</span> repository.<span class="me">StoreBasket</span>(basket, ct);
+
+        <span class="cm">// 同步更新 Redis</span>
+        <span class="kw">await</span> cache.<span class="me">SetStringAsync</span>(basket.UserName, <span class="ty">JsonSerializer</span>.<span class="me">Serialize</span>(basket), ct);
+
+        <span class="kw">return</span> basket;
+    }
+
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="kw">bool</span>&gt; <span class="me">DeleteBasket</span>(<span class="kw">string</span> userName, <span class="ty">CancellationToken</span> ct = <span class="kw">default</span>)
+    {
+        <span class="cm">// 刪資料庫</span>
+        <span class="kw">await</span> repository.<span class="me">DeleteBasket</span>(userName, ct);
+
+        <span class="cm">// 同步移除 Redis</span>
+        <span class="kw">await</span> cache.<span class="me">RemoveAsync</span>(userName, ct);
+
+        <span class="kw">return true</span>;
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">用 Scrutor 串接，Handler 完全不需要改</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Program.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="cm">// Redis 設定</span>
+builder.Services.<span class="me">AddStackExchangeRedisCache</span>(options =>
+{
+    options.Configuration = builder.Configuration.<span class="me">GetConnectionString</span>(<span class="st">"Redis"</span>);
+});
+
+<span class="cm">// ① 先註冊原始實作</span>
+builder.Services.<span class="me">AddScoped</span>&lt;<span class="ty">IBasketRepository</span>, <span class="ty">BasketRepository</span>&gt;();
+
+<span class="cm">// ② Scrutor 把 CachedBasketRepository 包在外面</span>
+<span class="cm">// 當任何地方注入 IBasketRepository，實際上拿到的是：</span>
+<span class="cm">// CachedBasketRepository（包著 BasketRepository（包著 IDocumentSession））</span>
+builder.Services.<span class="me">Decorate</span>&lt;<span class="ty">IBasketRepository</span>, <span class="ty">CachedBasketRepository</span>&gt;();
+
+<span class="cm">// Handler 的程式碼完全不需要改動！</span></code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">驗證快取是否生效</div>
+        <div class="callout callout-info">
+          <span class="callout-icon">🔍</span>
+          <span>
+            第一次 GET /basket/swn → Redis 沒有 → 查 PostgreSQL → 存進 Redis<br/>
+            第二次 GET /basket/swn → Redis 有 → 直接回傳，不查 PostgreSQL<br/><br/>
+            可以用 <code>redis-cli</code> 或 RedisInsight 工具查看 Redis 裡的資料：<br/>
+            <code>docker exec -it learnredis redis-cli keys *</code>
+          </span>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>第一次 GET 後 Redis 裡出現對應的 key</li>
+          <li>第二次 GET 沒有查 PostgreSQL（可從 log 觀察）</li>
+          <li>DELETE 後 Redis 的 key 也消失</li>
+          <li>能說明 Scrutor Decorate 和直接 new CachedBasketRepository 的差別</li>
+          <li>能說明為什麼 Handler 完全不需要修改</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 3 ─────────────────── -->
+  <section class="phase phase-3" id="phase3">
+    <div class="phase-header">
+      <div class="phase-badge">3</div>
+      <div>
+        <h2>gRPC 呼叫 Discount 服務</h2>
+        <div class="subtitle">在儲存購物車前，同步呼叫 Discount.Grpc 取得折扣金額</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 gRPC 和 REST API 的差異，以及為什麼微服務間通訊選 gRPC</li>
+          <li>理解 .proto 檔案如何定義服務合約，以及 C# client 如何自動產生</li>
+          <li>理解同步呼叫的含義：StoreBasket 必須等 Discount 回應才能繼續</li>
+          <li>理解在開發環境中如何繞過 gRPC 的 SSL 憑證驗證</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">gRPC vs REST 比較</div>
+        <div class="arch-diff">
+          <table>
+            <thead>
+              <tr><th>特性</th><th>REST</th><th>gRPC</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>傳輸格式</td><td>JSON（文字，較大）</td><td>Protobuf（二進位，較小）</td></tr>
+              <tr><td>效能</td><td>一般</td><td>較快（約快 5~10 倍）</td></tr>
+              <tr><td>合約</td><td>OpenAPI（非強制）</td><td>.proto（強制，雙方共用）</td></tr>
+              <tr><td>適用場景</td><td>對外 API、瀏覽器</td><td>內部微服務間通訊</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">安裝套件</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Terminal</span><span class="lang-tag">shell</span></div>
+          <pre><code>dotnet add package Grpc.AspNetCore</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">定義 .proto 合約</div>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>這個 .proto 檔案是 Discount.Grpc 服務定義的，Basket.API 拿同一份來產生 Client。
+          雙方都用同一份合約，保證介面一致。</span>
+        </div>
+        <br/>
+        <div class="code-block">
+          <div class="code-block-title"><span>Protos/discount.proto</span><span class="lang-tag">protobuf</span></div>
+          <pre><code>syntax = "proto3";
+
+option csharp_namespace = "Basket.API";
+
+package discount;
+
+service DiscountProtoService {
+    rpc GetDiscount (GetDiscountRequest) returns (CouponModel);
+}
+
+message GetDiscountRequest {
+    string productName = 1;
+}
+
+message CouponModel {
+    int32 id = 1;
+    string productName = 2;
+    string description = 3;
+    int32 amount = 4;
+}</code></pre>
+        </div>
+        <br/>
+        <div class="code-block">
+          <div class="code-block-title"><span>Basket.API.csproj — 設定自動產生 Client</span><span class="lang-tag">XML</span></div>
+          <pre><code>&lt;ItemGroup&gt;
+  &lt;Protobuf Include="Protos\discount.proto" GrpcServices="Client" /&gt;
+&lt;/ItemGroup&gt;</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">在 Handler 中呼叫 gRPC</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Basket/StoreBasket/StoreBasketCommandHandler.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">StoreBasketCommandHandler</span>(
+    <span class="ty">IBasketRepository</span> repository,
+    <span class="ty">DiscountProtoService</span>.<span class="ty">DiscountProtoServiceClient</span> discountProto)  <span class="cm">// gRPC Client</span>
+    : <span class="ty">ICommandHandler</span>&lt;<span class="ty">StoreBasketCommand</span>, <span class="ty">StoreBasketResult</span>&gt;
+{
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">StoreBasketResult</span>&gt; <span class="me">Handle</span>(
+        <span class="ty">StoreBasketCommand</span> command, <span class="ty">CancellationToken</span> ct)
+    {
+        <span class="cm">// ① 對購物車中每件商品呼叫 Discount 服務取得折扣</span>
+        <span class="kw">await</span> <span class="me">DeductDiscount</span>(command.Cart, ct);
+
+        <span class="cm">// ② 儲存已套用折扣的購物車</span>
+        <span class="kw">await</span> repository.<span class="me">StoreBasket</span>(command.Cart, ct);
+
+        <span class="kw">return new</span> <span class="ty">StoreBasketResult</span>(command.Cart.UserName);
+    }
+
+    <span class="kw">private async</span> <span class="ty">Task</span> <span class="me">DeductDiscount</span>(<span class="ty">ShoppingCart</span> cart, <span class="ty">CancellationToken</span> ct)
+    {
+        <span class="kw">foreach</span> (<span class="kw">var</span> item <span class="kw">in</span> cart.Items)
+        {
+            <span class="kw">var</span> coupon = <span class="kw">await</span> discountProto.<span class="me">GetDiscountAsync</span>(
+                <span class="kw">new</span> <span class="ty">GetDiscountRequest</span> { ProductName = item.ProductName },
+                cancellationToken: ct);
+
+            <span class="cm">// 直接修改 item.Price，存進去的價格已是折扣後的</span>
+            item.Price -= coupon.Amount;
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">註冊 gRPC Client</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Program.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code>builder.Services
+    .<span class="me">AddGrpcClient</span>&lt;<span class="ty">DiscountProtoService</span>.<span class="ty">DiscountProtoServiceClient</span>&gt;(options =>
+    {
+        options.Address = <span class="kw">new</span> <span class="ty">Uri</span>(builder.Configuration[<span class="st">"GrpcSettings:DiscountUrl"</span>]!);
+    })
+    .<span class="me">ConfigurePrimaryHttpMessageHandler</span>(() =>
+    {
+        <span class="cm">// 開發環境：略過 SSL 憑證驗證</span>
+        <span class="cm">// 正式環境：移除這段，使用正式憑證</span>
+        <span class="kw">var</span> handler = <span class="kw">new</span> <span class="ty">HttpClientHandler</span>();
+        handler.ServerCertificateCustomValidationCallback =
+            <span class="ty">HttpClientHandler</span>.DangerousAcceptAnyServerCertificateValidator;
+        <span class="kw">return</span> handler;
+    });</code></pre>
+        </div>
+      </div>
+
+      <div class="callout callout-warn">
+        <span class="callout-icon">⚠️</span>
+        <span><strong>同步呼叫的代價：</strong>購物車每次儲存，都必須對 Discount.Grpc 發出 N 次 gRPC 呼叫（N = 商品數量）。
+        如果 Discount 服務無回應，StoreBasket 整個請求也會失敗。
+        這是 Basket 和 Discount 之間的<strong>同步耦合</strong>，和 MassTransit 的非同步解耦形成對比。</span>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>POST /basket 後，商品價格已扣除折扣金額</li>
+          <li>能說明 .proto 檔案和 C# 自動產生的 Client 程式碼之間的關係</li>
+          <li>能說明為什麼開發環境需要 DangerousAcceptAnyServerCertificateValidator</li>
+          <li>能說明同步 gRPC 和非同步 MassTransit 各自適合什麼場景</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 4 ─────────────────── -->
+  <section class="phase phase-4" id="phase4">
+    <div class="phase-header">
+      <div class="phase-badge">4</div>
+      <div>
+        <h2>MassTransit + RabbitMQ</h2>
+        <div class="subtitle">結帳時發布非同步事件，解耦 Basket 和 Order 服務</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解非同步訊息和同步 HTTP/gRPC 呼叫的根本差異</li>
+          <li>理解 MassTransit 是什麼，以及它和 RabbitMQ 的關係</li>
+          <li>理解 Publisher 和 Consumer 的角色，以及兩者如何透過訊息佇列解耦</li>
+          <li>理解 CheckoutBasket 為什麼發布事件後立即刪除購物車</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">同步 vs 非同步通訊</div>
+        <div class="two-col">
+          <div class="callout callout-tip">
+            <span class="callout-icon">🔗</span>
+            <span><strong>同步（gRPC / REST）</strong><br/>
+            呼叫方等待回應才繼續。<br/>
+            被呼叫方掛掉 → 呼叫方也失敗。<br/>
+            適合：需要即時結果（取得折扣金額）</span>
+          </div>
+          <div class="callout callout-info">
+            <span class="callout-icon">📨</span>
+            <span><strong>非同步（MassTransit / RabbitMQ）</strong><br/>
+            發布訊息後立即繼續，不等回應。<br/>
+            Order 服務掛掉 → 訊息在佇列等候，不影響 Basket。<br/>
+            適合：不需要即時回應（結帳通知）</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">安裝套件與啟動 RabbitMQ</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Terminal</span><span class="lang-tag">shell</span></div>
+          <pre><code>dotnet add package MassTransit.RabbitMQ
+
+<span class="cm"># 啟動 RabbitMQ，management 介面在 http://localhost:15672</span>
+docker run -d --name learnrabbitmq \
+  -e RABBITMQ_DEFAULT_USER=guest \
+  -e RABBITMQ_DEFAULT_PASS=guest \
+  -p 5672:5672 -p 15672:15672 \
+  rabbitmq:management</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">定義 Integration Event</div>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span><strong>Integration Event</strong> 是跨服務邊界的事件，代表「某件事已經發生」。
+          和 Domain Event（服務內部）不同，Integration Event 需要能被序列化並透過訊息佇列傳遞。
+          在這個專案裡定義在 BuildingBlocks.Messaging，讓 Basket 和 Order 都可以引用同一個定義。</span>
+        </div>
+        <br/>
+        <div class="code-block">
+          <div class="code-block-title"><span>Events/BasketCheckoutEvent.cs（BuildingBlocks.Messaging）</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="cm">// 所有 Integration Event 的基底類別</span>
+<span class="kw">public record</span> <span class="ty">IntegrationEvent</span>
+{
+    <span class="kw">public</span> <span class="ty">Guid</span> Id => <span class="ty">Guid</span>.<span class="me">NewGuid</span>();
+    <span class="kw">public</span> <span class="ty">DateTime</span> OccurredOn => <span class="ty">DateTime</span>.Now;
+    <span class="kw">public string</span> EventType => <span class="me">GetType</span>().<span class="me">AssemblyQualifiedName</span>!;
+}
+
+<span class="cm">// Basket 發布，Order 訂閱</span>
+<span class="kw">public record</span> <span class="ty">BasketCheckoutEvent</span> : <span class="ty">IntegrationEvent</span>
+{
+    <span class="kw">public string</span> UserName { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public</span> <span class="ty">Guid</span> CustomerId { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public decimal</span> TotalPrice { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public string</span> FirstName { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public string</span> LastName { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public string</span> EmailAddress { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">default</span>!;
+    <span class="cm">// ... 地址、付款資訊欄位 ...</span>
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">在 Handler 中發布事件</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Basket/CheckoutBasket/CheckoutBasketCommandHandler.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">CheckoutBasketCommandHandler</span>(
+    <span class="ty">IBasketRepository</span> repository,
+    <span class="ty">IPublishEndpoint</span> publishEndpoint)  <span class="cm">// MassTransit 注入</span>
+    : <span class="ty">ICommandHandler</span>&lt;<span class="ty">CheckoutBasketCommand</span>, <span class="ty">CheckoutBasketResult</span>&gt;
+{
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">CheckoutBasketResult</span>&gt; <span class="me">Handle</span>(
+        <span class="ty">CheckoutBasketCommand</span> command, <span class="ty">CancellationToken</span> ct)
+    {
+        <span class="cm">// ① 取得現有購物車（包含 TotalPrice）</span>
+        <span class="kw">var</span> basket = <span class="kw">await</span> repository.<span class="me">GetBasket</span>(command.BasketCheckoutDto.UserName, ct);
+
+        <span class="cm">// ② 把 DTO 對應成 Event，補上 TotalPrice</span>
+        <span class="kw">var</span> eventMessage = command.BasketCheckoutDto.<span class="me">Adapt</span>&lt;<span class="ty">BasketCheckoutEvent</span>&gt;();
+        eventMessage.TotalPrice = basket.TotalPrice;
+
+        <span class="cm">// ③ 發布到 RabbitMQ，Order 服務會收到並建立訂單</span>
+        <span class="cm">// 這是非同步的：不等 Order 服務確認，直接繼續</span>
+        <span class="kw">await</span> publishEndpoint.<span class="me">Publish</span>(eventMessage, ct);
+
+        <span class="cm">// ④ 購物車使命完成，刪除</span>
+        <span class="kw">await</span> repository.<span class="me">DeleteBasket</span>(command.BasketCheckoutDto.UserName, ct);
+
+        <span class="kw">return new</span> <span class="ty">CheckoutBasketResult</span>(<span class="kw">true</span>);
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">註冊 MassTransit</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Program.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code>builder.Services.<span class="me">AddMassTransit</span>(config =>
+{
+    <span class="cm">// kebab-case 命名佇列：basket-checkout-event</span>
+    config.<span class="me">SetKebabCaseEndpointNameFormatter</span>();
+
+    config.<span class="me">UsingRabbitMq</span>((context, cfg) =>
+    {
+        cfg.<span class="me">Host</span>(<span class="kw">new</span> <span class="ty">Uri</span>(builder.Configuration[<span class="st">"MessageBroker:Host"</span>]!), host =>
+        {
+            host.<span class="me">Username</span>(builder.Configuration[<span class="st">"MessageBroker:UserName"</span>]);
+            host.<span class="me">Password</span>(builder.Configuration[<span class="st">"MessageBroker:Password"</span>]);
+        });
+        cfg.<span class="me">ConfigureEndpoints</span>(context);
+    });
+});
+
+<span class="cm">// Basket 只負責 Publish，不需要註冊 Consumer</span>
+<span class="cm">// Consumer 在 Ordering.API 那邊定義</span></code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">觀察 RabbitMQ Management UI</div>
+        <div class="callout callout-info">
+          <span class="callout-icon">🔍</span>
+          <span>
+            開啟 <strong>http://localhost:15672</strong>（帳號 guest / 密碼 guest）<br/>
+            POST /basket/checkout 後，在 <strong>Queues</strong> 頁籤可以看到
+            <code>basket-checkout-event</code> 佇列出現訊息。<br/>
+            如果 Order 服務沒在跑，訊息會留在佇列等候，不會消失。
+          </span>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>POST /basket/checkout 後 RabbitMQ 佇列出現訊息</li>
+          <li>購物車在結帳後被刪除（GET /basket/{userName} 回傳 404）</li>
+          <li>能說明 IPublishEndpoint.Publish 和 gRPC 呼叫的本質差異</li>
+          <li>能說明為什麼結帳用非同步訊息而不是直接呼叫 Order API</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 5 ─────────────────── -->
+  <section class="phase phase-5" id="phase5">
+    <div class="phase-header">
+      <div class="phase-badge">5</div>
+      <div>
+        <h2>IntegrationEvent 跨服務契約</h2>
+        <div class="subtitle">理解 BuildingBlocks.Messaging 在微服務架構中的角色</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解為什麼 BasketCheckoutEvent 要定義在 BuildingBlocks.Messaging 而不是 Basket.API</li>
+          <li>理解 Consumer（Ordering.API）如何接收並處理事件</li>
+          <li>理解 MassTransit 的 SetKebabCaseEndpointNameFormatter 如何決定佇列名稱</li>
+          <li>理解 IntegrationEvent 和 Domain Event 的差異</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">為什麼事件定義在共用套件</div>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>
+            Publisher（Basket）和 Consumer（Order）必須對同一個訊息型別達成共識，
+            才能正確序列化和反序列化。<br/><br/>
+            <strong>不好的做法：</strong>Basket 和 Order 各自定義一個名字相同但可能不同的 class，靠名稱字串比對。<br/>
+            <strong>好的做法：</strong>定義在 BuildingBlocks.Messaging，兩邊都引用同一份，編譯時就能保證一致。
+          </span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Ordering.API 的 Consumer 端（對照用）</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Ordering.API — Consumer 範例（對照理解）</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="cm">// Ordering.API 訂閱同一個 BasketCheckoutEvent</span>
+<span class="kw">public class</span> <span class="ty">BasketCheckoutEventConsumer</span>(<span class="ty">ISender</span> sender)
+    : <span class="ty">IConsumer</span>&lt;<span class="ty">BasketCheckoutEvent</span>&gt;  <span class="cm">// 同一個型別</span>
+{
+    <span class="kw">public async</span> <span class="ty">Task</span> <span class="me">Consume</span>(<span class="ty">ConsumeContext</span>&lt;<span class="ty">BasketCheckoutEvent</span>&gt; context)
+    {
+        <span class="cm">// 把 event 轉成 CreateOrderCommand 交給 MediatR 處理</span>
+        <span class="kw">var</span> command = context.Message.<span class="me">Adapt</span>&lt;<span class="ty">CreateOrderCommand</span>&gt;();
+        <span class="kw">await</span> sender.<span class="me">Send</span>(command);
+    }
+}
+
+<span class="cm">// Ordering.API Program.cs 的 MassTransit 設定</span>
+builder.Services.<span class="me">AddMassTransit</span>(config =>
+{
+    config.<span class="me">SetKebabCaseEndpointNameFormatter</span>();
+    config.<span class="me">AddConsumers</span>(<span class="kw">typeof</span>(<span class="ty">Program</span>).Assembly);  <span class="cm">// 自動掃描所有 Consumer</span>
+    config.<span class="me">UsingRabbitMq</span>(...);
+});</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">佇列命名規則</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>SetKebabCaseEndpointNameFormatter 的效果</span><span class="lang-tag">text</span></div>
+          <pre><code>BasketCheckoutEvent → basket-checkout-event（RabbitMQ 佇列名稱）
+
+MassTransit 自動：
+  Basket.API    → Publish  → basket-checkout-event（Exchange）
+  Ordering.API  → Subscribe → basket-checkout-event（Queue）</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Domain Event vs Integration Event</div>
+        <div class="arch-diff">
+          <table>
+            <thead>
+              <tr><th>特性</th><th>Domain Event</th><th>Integration Event</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>範圍</td><td>服務內部</td><td>跨服務邊界</td></tr>
+              <tr><td>傳遞方式</td><td>MediatR（記憶體）</td><td>RabbitMQ（網路）</td></tr>
+              <tr><td>需要序列化</td><td>否</td><td>是</td></tr>
+              <tr><td>例子</td><td>OrderCreatedDomainEvent</td><td>BasketCheckoutEvent</td></tr>
+              <tr><td>定義位置</td><td>Domain 專案內</td><td>BuildingBlocks.Messaging</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>能說明 BuildingBlocks.Messaging 的職責，以及為什麼要獨立</li>
+          <li>能追蹤一次完整的結帳流程：HTTP → Handler → Event → RabbitMQ → Consumer → Order</li>
+          <li>能說明 SetKebabCaseEndpointNameFormatter 的作用</li>
+          <li>能說明 Domain Event 和 Integration Event 的差異</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 6 ─────────────────── -->
+  <section class="phase phase-6" id="phase6">
+    <div class="phase-header">
+      <div class="phase-badge">6</div>
+      <div>
+        <h2>對照 Basket.API</h2>
+        <div class="subtitle">回頭看原始專案，理解每個設計決策的完整脈絡</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>能獨立閱讀 Basket.API 任意一個功能的完整程式碼，說明每個檔案的職責</li>
+          <li>理解 Program.cs 裡所有服務的依賴關係和注入順序</li>
+          <li>理解健康檢查同時監控 PostgreSQL 和 Redis 的設定</li>
+          <li>能畫出完整的資料流：HTTP Request → Handler → Repository → PostgreSQL / Redis</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">完整的依賴關係圖</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Basket.API 依賴圖</span><span class="lang-tag">text</span></div>
+          <pre><code>HTTP Request
+    ↓ Carter Endpoint
+ISender (MediatR)
+    ↓ ValidationBehavior（FluentValidation）
+    ↓ LoggingBehavior（效能監控）
+    ↓
+Handler
+    ├── IBasketRepository
+    │       └── CachedBasketRepository（Scrutor Decorator）
+    │               ├── IDistributedCache → Redis
+    │               └── BasketRepository
+    │                       └── IDocumentSession → PostgreSQL
+    │
+    ├── DiscountProtoServiceClient（StoreBasket 用）
+    │       └── gRPC → Discount.Grpc 服務
+    │
+    └── IPublishEndpoint（CheckoutBasket 用）
+            └── MassTransit → RabbitMQ → Ordering.API Consumer</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">閱讀順序建議</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Basket.API 閱讀路徑</span><span class="lang-tag">text</span></div>
+          <pre><code>1. Models/ShoppingCart.cs + ShoppingCartItem.cs
+   → 理解資料結構，特別注意 TotalPrice 是計算屬性
+
+2. Data/IBasketRepository.cs + BasketRepository.cs
+   → 理解 Repository 介面定義和 Marten 操作
+
+3. Data/CachedBasketRepository.cs
+   → 理解 Cache-Aside 策略和裝飾器的實作
+
+4. Basket/GetBasket/ （最簡單的 CQRS，先從這裡開始）
+   → Query → Handler → Repository
+
+5. Basket/StoreBasket/
+   → Command → gRPC 折扣 → Repository（含快取更新）
+
+6. Basket/CheckoutBasket/
+   → Command → 取得購物車 → 發布事件 → 刪除購物車
+
+7. Program.cs
+   → 所有服務的注入順序，以及 Decorate 的位置</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">健康檢查設定</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Program.cs — Health Checks</span><span class="lang-tag">C#</span></div>
+          <pre><code>builder.Services.<span class="me">AddHealthChecks</span>()
+    .<span class="me">AddNpgSql</span>(builder.Configuration.<span class="me">GetConnectionString</span>(<span class="st">"Database"</span>)!)
+    .<span class="me">AddRedis</span>(builder.Configuration.<span class="me">GetConnectionString</span>(<span class="st">"Redis"</span>)!);
+
+app.<span class="me">UseHealthChecks</span>(<span class="st">"/health"</span>, <span class="kw">new</span> <span class="ty">HealthCheckOptions</span>
+{
+    ResponseWriter = <span class="ty">UIResponseWriter</span>.<span class="me">WriteHealthCheckUIResponse</span>
+});
+
+<span class="cm">// GET /health 會回傳：
+// {
+//   "status": "Healthy",
+//   "entries": {
+//     "npgsql": { "status": "Healthy" },
+//     "redis": { "status": "Healthy" }
+//   }
+// }</span></code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">和 Catalog 相比，Basket 多了哪些複雜度</div>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>
+            Basket 的複雜度來自它橫跨了三種通訊模式：<br/><br/>
+            <strong>同步讀寫</strong>：使用者操作購物車（GET / POST / DELETE）→ PostgreSQL + Redis<br/>
+            <strong>同步呼叫</strong>：儲存時取折扣 → gRPC（需要即時結果）<br/>
+            <strong>非同步事件</strong>：結帳 → RabbitMQ（不需要即時結果，解耦服務）<br/><br/>
+            三種模式都在同一個服務裡，是學習微服務通訊模式的最佳範本。
+          </span>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>能從頭描述一次完整的結帳流程，不需要看程式碼</li>
+          <li>能說明 Scrutor Decorate 的注入順序，以及 DI 容器如何解析 IBasketRepository</li>
+          <li>能說明為什麼 GetBasket 用 IQuerySession 但 StoreBasket 用 IDocumentSession</li>
+          <li>能自己從零建出相同架構的購物車服務</li>
+          <li>能說明這個服務中三種通訊模式各自的選擇原因</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

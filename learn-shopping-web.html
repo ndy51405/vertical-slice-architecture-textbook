@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>學習 Shopping.Web Razor Pages 前端</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.7;
+    }
+
+    header {
+      background: linear-gradient(135deg, #134e4a, #0f766e);
+      border-bottom: 3px solid #0d9488;
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #ccfbf1;
+      font-size: 1rem;
+    }
+
+    .toc {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .toc h2 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #718096;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+
+    .toc-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .toc-list a {
+      display: inline-block;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      text-decoration: none;
+      background: #fff;
+      border: 1.5px solid #99f6e4;
+      color: #0d9488;
+      font-weight: 500;
+      transition: all 0.15s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    .toc-list a:hover {
+      background: #0d9488;
+      border-color: #0d9488;
+      color: #fff;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    .phase {
+      margin-bottom: 2.5rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1.5px solid #e2e8f0;
+    }
+
+    .phase-1 .phase-header { background: #f0fdfa; }
+    .phase-2 .phase-header { background: #f0fdf4; }
+    .phase-3 .phase-header { background: #eff6ff; }
+    .phase-4 .phase-header { background: #faf5ff; }
+    .phase-5 .phase-header { background: #fff7ed; }
+    .phase-6 .phase-header { background: #f0fdfa; }
+
+    .phase-badge {
+      flex-shrink: 0;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .phase-1 .phase-badge { background: #0d9488; color: #fff; }
+    .phase-2 .phase-badge { background: #15803d; color: #fff; }
+    .phase-3 .phase-badge { background: #1d4ed8; color: #fff; }
+    .phase-4 .phase-badge { background: #7c3aed; color: #fff; }
+    .phase-5 .phase-badge { background: #c2410c; color: #fff; }
+    .phase-6 .phase-badge { background: #0f766e; color: #fff; }
+
+    .phase-header h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a202c;
+    }
+
+    .phase-header .subtitle {
+      font-size: 0.85rem;
+      color: #718096;
+      margin-top: 0.1rem;
+    }
+
+    .phase-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: #a0aec0;
+      margin-bottom: 0.55rem;
+      font-weight: 700;
+    }
+
+    .goal-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .goal-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.95rem;
+      color: #2d3748;
+    }
+
+    .goal-list li::before {
+      content: '→';
+      color: #a0aec0;
+      flex-shrink: 0;
+    }
+
+    .code-block {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .code-block-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background: #2d3748;
+      border-bottom: 1px solid #4a5568;
+      font-size: 0.8rem;
+      color: #a0aec0;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+    }
+
+    .lang-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: #4a5568;
+      color: #a0aec0;
+    }
+
+    pre {
+      padding: 1.1rem 1.2rem;
+      overflow-x: auto;
+      font-size: 0.855rem;
+      line-height: 1.65;
+    }
+
+    code {
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      color: #ba0923;
+    }
+
+    pre code {
+      color: #e2e8f0;
+    }
+
+    .kw  { color: #f6a3f9; }
+    .ty  { color: #93c5fd; }
+    .st  { color: #86efac; }
+    .cm  { color: #6b7280; font-style: italic; }
+    .me  { color: #67e8f9; }
+    .nu  { color: #fca5a5; }
+    .at  { color: #fde68a; }
+    .op  { color: #93c5fd; }
+
+    .callout {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.9rem 1.1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .callout-tip {
+      background: #f0fdfa;
+      border: 1.5px solid #99f6e4;
+      color: #134e4a;
+    }
+
+    .callout-warn {
+      background: #fffbeb;
+      border: 1.5px solid #fcd34d;
+      color: #92400e;
+    }
+
+    .callout-info {
+      background: #eff6ff;
+      border: 1.5px solid #93c5fd;
+      color: #1e3a8a;
+    }
+
+    .callout-icon { flex-shrink: 0; font-size: 1rem; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    .checkpoint {
+      background: #f0fdfa;
+      border: 1.5px solid #99f6e4;
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+    }
+
+    .checkpoint .section-label { color: #0f766e; }
+
+    .checkpoint ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .checkpoint ul li {
+      font-size: 0.9rem;
+      color: #134e4a;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .checkpoint ul li::before {
+      content: '✓';
+      color: #0d9488;
+      font-weight: 700;
+    }
+
+    .arch-diff {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .arch-diff table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .arch-diff th {
+      background: #edf2f7;
+      padding: 0.6rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: #4a5568;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .arch-diff td {
+      padding: 0.6rem 1rem;
+      border-top: 1px solid #e2e8f0;
+      color: #2d3748;
+      vertical-align: top;
+    }
+
+    .arch-diff tr:hover td { background: #f7fafc; }
+
+    .arch-table {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .arch-table table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .arch-table th {
+      background: #edf2f7;
+      padding: 0.6rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: #4a5568;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .arch-table td {
+      padding: 0.6rem 1rem;
+      border-top: 1px solid #e2e8f0;
+      color: #2d3748;
+      vertical-align: top;
+    }
+
+    .arch-table tr:hover td { background: #f7fafc; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-razor  { background: #ccfbf1; color: #134e4a; }
+    .badge-rest   { background: #bee3f8; color: #2c5282; }
+    .badge-refit  { background: #d1fae5; color: #065f46; }
+    .badge-mvc    { background: #e9d8fd; color: #44337a; }
+
+    p { font-size: 0.95rem; color: #2d3748; }
+
+    .flow-block {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: #e2e8f0;
+      overflow-x: auto;
+    }
+
+    .flow-block .fl-head { color: #67e8f9; font-weight: 700; }
+    .flow-block .fl-arrow { color: #6b7280; }
+    .flow-block .fl-node { color: #86efac; }
+    .flow-block .fl-route { color: #fde68a; }
+    .flow-block .fl-svc { color: #f6a3f9; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>學習 Shopping.Web Razor Pages 前端</h1>
+  <p>理解 Razor Pages 架構、Refit 宣告式 HTTP Client，以及如何透過 YARP Gateway 呼叫後端微服務</p>
+</header>
+
+<nav class="toc">
+  <h2>目錄</h2>
+  <div class="toc-list">
+    <a href="#phase1">階段一：Razor Pages 基本概念</a>
+    <a href="#phase2">階段二：Refit 宣告式 HTTP Client</a>
+    <a href="#phase3">階段三：PageModel 和 Refit 整合</a>
+    <a href="#phase4">階段四：Razor Pages 檢視語法</a>
+    <a href="#phase5">階段五：硬編碼問題與改善方向</a>
+    <a href="#phase6">階段六：對照 Shopping.Web 專案</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ─────────────────── PHASE 1 ─────────────────── -->
+  <section class="phase phase-1" id="phase1">
+    <div class="phase-header">
+      <div class="phase-badge">1</div>
+      <div>
+        <h2>Razor Pages 基本概念</h2>
+        <div class="subtitle">理解以頁面為中心的 ASP.NET Core 前端架構</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 Razor Pages vs MVC Controller 的差異</li>
+          <li>理解 PageModel 的角色與職責</li>
+          <li>理解 OnGet / OnPost handler 命名慣例</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">核心概念</div>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>Razor Pages 每個頁面由兩個檔案組成：<code>.cshtml</code>（畫面）和 <code>.cshtml.cs</code>（PageModel，邏輯）。
+          不需要 Controller，路由由檔案路徑決定，適合以頁面為中心的應用。
+          例如 <code>Pages/Cart.cshtml</code> 自動對應 <code>/Cart</code> 路由。</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Razor Pages vs MVC 對照表</div>
+        <div class="arch-diff">
+          <table>
+            <thead>
+              <tr><th>特性</th><th>ASP.NET Core MVC</th><th>Razor Pages</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>處理邏輯位置</td>
+                <td><span class="badge badge-mvc">Controller</span> 類別（獨立檔案）</td>
+                <td><span class="badge badge-razor">PageModel</span> 類別（與頁面同目錄）</td>
+              </tr>
+              <tr>
+                <td>Action 方法</td>
+                <td>任意命名，搭配 <code>[HttpGet]</code> / <code>[HttpPost]</code></td>
+                <td>固定命名慣例：<code>OnGet</code> / <code>OnPost</code></td>
+              </tr>
+              <tr>
+                <td>路由設定</td>
+                <td>需要 <code>[Route]</code> / <code>[HttpGet("path")]</code></td>
+                <td>由 <code>@page</code> 指示詞和目錄結構決定</td>
+              </tr>
+              <tr>
+                <td>View 綁定</td>
+                <td>回傳 <code>View(model)</code>，model 是獨立物件</td>
+                <td>PageModel 本身就是 model，<code>@Model.屬性</code></td>
+              </tr>
+              <tr>
+                <td>適合場景</td>
+                <td>複雜 API、多 action 的資源操作</td>
+                <td>以頁面為中心的 UI、電商前端</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">建立專案</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Terminal</span><span class="lang-tag">shell</span></div>
+          <pre><code><span class="cm"># webapp 範本即為 Razor Pages 專案</span>
+dotnet new webapp -n LearnRazorPages -o LearnRazorPages
+<span class="kw">cd</span> LearnRazorPages
+dotnet run</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">最簡單的 PageModel 範例</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Pages/Index.cshtml.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">using</span> Microsoft.<span class="me">AspNetCore</span>.<span class="me">Mvc</span>.<span class="me">RazorPages</span>;
+
+<span class="kw">public class</span> <span class="ty">IndexModel</span> : <span class="ty">PageModel</span>
+{
+    <span class="cm">// 屬性會在 cshtml 中以 @Model.Products 取用</span>
+    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">string</span>&gt; Products { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">new</span>();
+
+    <span class="cm">// OnGet 對應 HTTP GET，頁面載入時執行</span>
+    <span class="kw">public void</span> <span class="me">OnGet</span>()
+    {
+        Products = <span class="kw">new</span> <span class="ty">List</span>&lt;<span class="ty">string</span>&gt;
+        {
+            <span class="st">"IPhone X"</span>, <span class="st">"Samsung 10"</span>, <span class="st">"HuaWei Plus"</span>
+        };
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">對應的 Razor 頁面</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Pages/Index.cshtml</span><span class="lang-tag">Razor</span></div>
+          <pre><code><span class="cm">@* @page 指示詞讓這個 .cshtml 自己處理路由，不需要 Controller *@</span>
+@page
+@model <span class="ty">IndexModel</span>
+
+&lt;h1&gt;商品清單&lt;/h1&gt;
+&lt;ul&gt;
+@<span class="kw">foreach</span> (<span class="kw">var</span> product <span class="kw">in</span> Model.Products)
+{
+    &lt;li&gt;@product&lt;/li&gt;
+}
+&lt;/ul&gt;</code></pre>
+        </div>
+        <br/>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span><code>@page</code> 是 Razor Pages 和一般 MVC View 的關鍵差異。加上 <code>@page</code> 後，這個檔案就能獨立處理 HTTP 請求，
+          不需要透過 Controller 轉發。路由預設為 <code>/頁面名稱</code>，也可以在 <code>@page "{id}"</code> 中定義路由參數。</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Handler 命名慣例</div>
+        <div class="arch-table">
+          <table>
+            <thead>
+              <tr><th>Handler 名稱</th><th>對應情境</th><th>說明</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>OnGet()</code></td><td>HTTP GET</td><td>頁面初次載入</td></tr>
+              <tr><td><code>OnPost()</code></td><td>HTTP POST</td><td>表單提交</td></tr>
+              <tr><td><code>OnGetAsync()</code></td><td>HTTP GET（非同步）</td><td>需要 await 時使用</td></tr>
+              <tr><td><code>OnPostAsync()</code></td><td>HTTP POST（非同步）</td><td>需要 await 時使用</td></tr>
+              <tr><td><code>OnPostAddToCartAsync()</code></td><td>POST + handler 名稱</td><td>多個 POST 按鈕時用 asp-page-handler 區分</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 2 ─────────────────── -->
+  <section class="phase phase-2" id="phase2">
+    <div class="phase-header">
+      <div class="phase-badge">2</div>
+      <div>
+        <h2>Refit — 宣告式 HTTP Client</h2>
+        <div class="subtitle">只寫 Interface，Refit 自動產生 HttpClient 實作</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 Refit 如何把 Interface 轉成 HttpClient</li>
+          <li>理解 Refit 和手動 HttpClient 的差異</li>
+          <li>理解 AddRefitClient 和 DI 的關係</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">安裝</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Terminal</span><span class="lang-tag">shell</span></div>
+          <pre><code>dotnet add package Refit.HttpClientFactory</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">手動 HttpClient vs Refit 對照</div>
+        <div class="arch-diff">
+          <table>
+            <thead>
+              <tr><th>特性</th><th>手動 HttpClient</th><th>Refit</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>設定 BaseAddress</td>
+                <td>每次 <code>new HttpClient()</code> 後手動設定</td>
+                <td>在 <code>AddRefitClient</code> 時集中設定</td>
+              </tr>
+              <tr>
+                <td>發送請求</td>
+                <td><code>client.GetAsync("/catalog/products")</code></td>
+                <td>直接呼叫 Interface 方法 <code>GetProducts()</code></td>
+              </tr>
+              <tr>
+                <td>JSON 序列化</td>
+                <td>需手動 <code>JsonSerializer.Deserialize()</code></td>
+                <td>Refit 自動處理</td>
+              </tr>
+              <tr>
+                <td>介面定義</td>
+                <td>無，邏輯分散各處</td>
+                <td>集中在 Interface，一目瞭然</td>
+              </tr>
+              <tr>
+                <td>DI 整合</td>
+                <td>需手動註冊 <code>IHttpClientFactory</code></td>
+                <td><code>AddRefitClient&lt;T&gt;()</code> 一行搞定</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">ICatalogService 完整定義</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Services/ICatalogService.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">using</span> Refit;
+
+<span class="kw">public interface</span> <span class="ty">ICatalogService</span>
+{
+    <span class="cm">// [Get] attribute 對應 HTTP GET，路徑即為 API 端點</span>
+    [<span class="at">Get</span>(<span class="st">"/catalog-service/products"</span>)]
+    <span class="ty">Task</span>&lt;<span class="ty">IEnumerable</span>&lt;<span class="ty">ProductModel</span>&gt;&gt; <span class="me">GetProducts</span>();
+
+    [<span class="at">Get</span>(<span class="st">"/catalog-service/products/{id}"</span>)]
+    <span class="ty">Task</span>&lt;<span class="ty">ProductModel</span>&gt; <span class="me">GetProduct</span>(<span class="ty">string</span> id);
+
+    [<span class="at">Get</span>(<span class="st">"/catalog-service/products/category/{category}"</span>)]
+    <span class="ty">Task</span>&lt;<span class="ty">IEnumerable</span>&lt;<span class="ty">ProductModel</span>&gt;&gt; <span class="me">GetProductsByCategory</span>(<span class="ty">string</span> category);
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">IBasketService 完整定義</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Services/IBasketService.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">using</span> Refit;
+
+<span class="kw">public interface</span> <span class="ty">IBasketService</span>
+{
+    [<span class="at">Get</span>(<span class="st">"/basket-service/basket/{userName}"</span>)]
+    <span class="ty">Task</span>&lt;<span class="ty">ShoppingCartModel</span>&gt; <span class="me">GetBasket</span>(<span class="ty">string</span> userName);
+
+    <span class="cm">// [Post] 對應 HTTP POST，body 參數用 [Body] attribute 標記</span>
+    [<span class="at">Post</span>(<span class="st">"/basket-service/basket"</span>)]
+    <span class="ty">Task</span>&lt;<span class="ty">ShoppingCartModel</span>&gt; <span class="me">StoreBasket</span>([<span class="at">Body</span>] <span class="ty">ShoppingCartModel</span> basket);
+
+    [<span class="at">Delete</span>(<span class="st">"/basket-service/basket/{userName}"</span>)]
+    <span class="ty">Task</span> <span class="me">DeleteBasket</span>(<span class="ty">string</span> userName);
+
+    [<span class="at">Post</span>(<span class="st">"/basket-service/basket/checkout"</span>)]
+    <span class="ty">Task</span>&lt;<span class="ty">IApiResponse</span>&gt; <span class="me">CheckoutBasket</span>([<span class="at">Body</span>] <span class="ty">BasketCheckoutModel</span> model);
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">IOrderingService 完整定義</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Services/IOrderingService.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">using</span> Refit;
+
+<span class="kw">public interface</span> <span class="ty">IOrderingService</span>
+{
+    [<span class="at">Get</span>(<span class="st">"/ordering-service/orders"</span>)]
+    <span class="ty">Task</span>&lt;<span class="ty">IEnumerable</span>&lt;<span class="ty">OrderModel</span>&gt;&gt; <span class="me">GetOrders</span>();
+
+    [<span class="at">Get</span>(<span class="st">"/ordering-service/orders/{orderName}/search"</span>)]
+    <span class="ty">Task</span>&lt;<span class="ty">IEnumerable</span>&lt;<span class="ty">OrderModel</span>&gt;&gt; <span class="me">GetOrdersByName</span>(<span class="ty">string</span> orderName);
+
+    [<span class="at">Get</span>(<span class="st">"/ordering-service/orders/customer/{customerId}"</span>)]
+    <span class="ty">Task</span>&lt;<span class="ty">IEnumerable</span>&lt;<span class="ty">OrderModel</span>&gt;&gt; <span class="me">GetOrdersByCustomer</span>(<span class="ty">Guid</span> customerId);
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Program.cs 註冊方式</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Program.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">var</span> builder = <span class="ty">WebApplication</span>.<span class="me">CreateBuilder</span>(args);
+
+<span class="cm">// 三個 service 共用同一個 GatewayAddress</span>
+<span class="cm">// YARP 根據路徑前綴 /catalog-service/ /basket-service/ /ordering-service/ 路由</span>
+builder.<span class="me">Services</span>
+    .<span class="me">AddRefitClient</span>&lt;<span class="ty">ICatalogService</span>&gt;()
+    .<span class="me">ConfigureHttpClient</span>(c =&gt;
+        c.<span class="me">BaseAddress</span> = <span class="kw">new</span> <span class="ty">Uri</span>(config[<span class="st">"ApiSettings:GatewayAddress"</span>]!));
+
+builder.<span class="me">Services</span>
+    .<span class="me">AddRefitClient</span>&lt;<span class="ty">IBasketService</span>&gt;()
+    .<span class="me">ConfigureHttpClient</span>(c =&gt;
+        c.<span class="me">BaseAddress</span> = <span class="kw">new</span> <span class="ty">Uri</span>(config[<span class="st">"ApiSettings:GatewayAddress"</span>]!));
+
+builder.<span class="me">Services</span>
+    .<span class="me">AddRefitClient</span>&lt;<span class="ty">IOrderingService</span>&gt;()
+    .<span class="me">ConfigureHttpClient</span>(c =&gt;
+        c.<span class="me">BaseAddress</span> = <span class="kw">new</span> <span class="ty">Uri</span>(config[<span class="st">"ApiSettings:GatewayAddress"</span>]!));</code></pre>
+        </div>
+        <br/>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>三個 Refit service 都指向同一個 <code>GatewayAddress</code>（YARP API Gateway）。
+          區分不同後端微服務的方式是 URL 路徑前綴：<code>/catalog-service/*</code> 對應 Catalog.API、
+          <code>/basket-service/*</code> 對應 Basket.API、<code>/ordering-service/*</code> 對應 Ordering.API。
+          Shopping.Web 永遠不直接呼叫微服務，一律透過 Gateway。</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 3 ─────────────────── -->
+  <section class="phase phase-3" id="phase3">
+    <div class="phase-header">
+      <div class="phase-badge">3</div>
+      <div>
+        <h2>PageModel 和 Refit 整合</h2>
+        <div class="subtitle">在 PageModel 注入 Refit service，處理 GET/POST 資料流</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解如何在 PageModel 注入 Refit service</li>
+          <li>理解 OnGet / OnPost 的 async 版本</li>
+          <li>理解 BindProperty 綁定表單資料</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">IndexModel 完整範例（首頁商品列表）</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Pages/Index.cshtml.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">IndexModel</span> : <span class="ty">PageModel</span>
+{
+    <span class="kw">private readonly</span> <span class="ty">ICatalogService</span> _catalogService;
+    <span class="kw">private readonly</span> <span class="ty">IBasketService</span> _basketService;
+
+    <span class="cm">// DI：ASP.NET Core 自動注入 Refit 產生的實作</span>
+    <span class="kw">public</span> <span class="me">IndexModel</span>(<span class="ty">ICatalogService</span> catalogService, <span class="ty">IBasketService</span> basketService)
+    {
+        _catalogService = catalogService;
+        _basketService = basketService;
+    }
+
+    <span class="kw">public</span> <span class="ty">IEnumerable</span>&lt;<span class="ty">ProductModel</span>&gt; ProductList { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="ty">Enumerable</span>.<span class="me">Empty</span>&lt;<span class="ty">ProductModel</span>&gt;();
+
+    <span class="cm">// OnGetAsync：頁面載入時呼叫 Catalog API 取得商品</span>
+    <span class="kw">public async</span> <span class="ty">Task</span> <span class="me">OnGetAsync</span>()
+    {
+        ProductList = <span class="kw">await</span> _catalogService.<span class="me">GetProducts</span>();
+    }
+
+    <span class="cm">// OnPostAddToCartAsync：名稱中的 "AddToCart" 對應 asp-page-handler="AddToCart"</span>
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">IActionResult</span>&gt; <span class="me">OnPostAddToCartAsync</span>(<span class="ty">string</span> productId)
+    {
+        <span class="kw">var</span> product = <span class="kw">await</span> _catalogService.<span class="me">GetProduct</span>(productId);
+
+        <span class="cm">// 取得或建立使用者的購物車</span>
+        <span class="kw">var</span> basket = <span class="kw">await</span> <span class="me">LoadUserBasket</span>();
+
+        <span class="cm">// 將商品加入購物車</span>
+        basket.<span class="me">Items</span>.<span class="me">Add</span>(<span class="kw">new</span> <span class="ty">ShoppingCartItemModel</span>
+        {
+            ProductId = product.<span class="me">Id</span>,
+            ProductName = product.<span class="me">Name</span>,
+            Price = product.<span class="me">Price</span>,
+            Quantity = <span class="nu">1</span>,
+            Color = <span class="st">"Black"</span>
+        });
+
+        <span class="cm">// 儲存購物車並導向 Cart 頁面</span>
+        <span class="kw">await</span> _basketService.<span class="me">StoreBasket</span>(basket);
+        <span class="kw">return</span> <span class="me">RedirectToPage</span>(<span class="st">"Cart"</span>);
+    }
+
+    <span class="kw">private async</span> <span class="ty">Task</span>&lt;<span class="ty">ShoppingCartModel</span>&gt; <span class="me">LoadUserBasket</span>()
+    {
+        <span class="kw">try</span>
+        {
+            <span class="cm">// 嘗試取得現有購物車</span>
+            <span class="kw">return await</span> _basketService.<span class="me">GetBasket</span>(<span class="st">"swn"</span>);
+        }
+        <span class="kw">catch</span> (<span class="ty">ApiException</span> ex) <span class="kw">when</span> (ex.<span class="me">StatusCode</span> == <span class="ty">HttpStatusCode</span>.<span class="me">NotFound</span>)
+        {
+            <span class="cm">// 找不到購物車時建立新的空購物車</span>
+            <span class="kw">return new</span> <span class="ty">ShoppingCartModel</span> { UserName = <span class="st">"swn"</span> };
+        }
+    }
+}</code></pre>
+        </div>
+        <br/>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>加入購物車的流程：<strong>LoadUserBasket()</strong>（取得或建立空購物車）
+          → 加入商品 item → <strong>StoreBasket()</strong>（寫回 API）→ 導向 Cart 頁面。
+          這是一個典型的「讀取→修改→寫回」模式（Read-Modify-Write）。</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">CheckoutModel 範例（BindProperty 表單綁定）</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Pages/Checkout.cshtml.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">CheckoutModel</span> : <span class="ty">PageModel</span>
+{
+    <span class="kw">private readonly</span> <span class="ty">IBasketService</span> _basketService;
+
+    <span class="kw">public</span> <span class="me">CheckoutModel</span>(<span class="ty">IBasketService</span> basketService)
+    {
+        _basketService = basketService;
+    }
+
+    <span class="cm">// [BindProperty] 讓 ASP.NET Core 在 POST 時</span>
+    <span class="cm">// 自動把表單欄位的值填入這個屬性</span>
+    [<span class="at">BindProperty</span>]
+    <span class="kw">public</span> <span class="ty">BasketCheckoutModel</span> Order { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">default</span>!;
+
+    <span class="kw">public async</span> <span class="ty">Task</span> <span class="me">OnGetAsync</span>()
+    {
+        <span class="cm">// 取得購物車資訊，預填表單</span>
+        <span class="kw">var</span> basket = <span class="kw">await</span> _basketService.<span class="me">GetBasket</span>(<span class="st">"swn"</span>);
+        Order = <span class="kw">new</span> <span class="ty">BasketCheckoutModel</span>
+        {
+            UserName = basket.<span class="me">UserName</span>,
+            TotalPrice = basket.<span class="me">TotalPrice</span>
+        };
+    }
+
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">IActionResult</span>&gt; <span class="me">OnPostCheckOutAsync</span>()
+    {
+        <span class="cm">// Order 屬性已由框架自動填入表單送出的值</span>
+        <span class="kw">if</span> (!<span class="me">ModelState</span>.<span class="me">IsValid</span>) <span class="kw">return</span> <span class="me">Page</span>();
+
+        Order.<span class="me">CustomerId</span> = <span class="kw">new</span> <span class="ty">Guid</span>(<span class="st">"8bce5a2b-b494-4552-a3eb-290c87a2eb6a"</span>);
+        <span class="kw">await</span> _basketService.<span class="me">CheckoutBasket</span>(Order);
+
+        <span class="kw">return</span> <span class="me">RedirectToPage</span>(<span class="st">"Confirmation"</span>, <span class="kw">new</span> { orderId = Order.<span class="me">UserName</span> });
+    }
+}</code></pre>
+        </div>
+        <br/>
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <span><code>[BindProperty]</code> 的運作方式：表單送出（HTTP POST）時，ASP.NET Core 會掃描 PageModel 中標記
+          <code>[BindProperty]</code> 的屬性，並嘗試從表單欄位、路由值、查詢字串中對應填入。
+          屬性名稱 <code>Order</code> 會對應 <code>name="Order.FirstName"</code>、<code>name="Order.LastName"</code> 等表單欄位。</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 4 ─────────────────── -->
+  <section class="phase phase-4" id="phase4">
+    <div class="phase-header">
+      <div class="phase-badge">4</div>
+      <div>
+        <h2>Razor Pages 檢視語法</h2>
+        <div class="subtitle">cshtml 中 C# 與 HTML 混合、Tag Helpers、Partial Views</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 cshtml 中 C# 和 HTML 的混合語法</li>
+          <li>理解 Tag Helpers（取代傳統 HTML href / form action）</li>
+          <li>理解 Partial Views 的用途和呼叫方式</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">常用語法速查</div>
+        <div class="arch-table">
+          <table>
+            <thead>
+              <tr><th>語法</th><th>說明</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>@page</code></td>
+                <td>宣告此頁面為 Razor Page，可加路由參數：<code>@page "{id}"</code></td>
+              </tr>
+              <tr>
+                <td><code>@model IndexModel</code></td>
+                <td>指定 PageModel 類別，之後可用 <code>@Model.屬性</code> 存取</td>
+              </tr>
+              <tr>
+                <td><code>@{ ... }</code></td>
+                <td>C# 程式碼區塊，可宣告變數、設定 ViewData</td>
+              </tr>
+              <tr>
+                <td><code>@foreach</code> / <code>@if</code></td>
+                <td>控制流程，<code>@</code> 開頭後接一般 C# 語法</td>
+              </tr>
+              <tr>
+                <td><code>asp-page="/Cart"</code></td>
+                <td>Tag Helper：產生指向 Cart 頁面的連結，取代 <code>href="/Cart"</code></td>
+              </tr>
+              <tr>
+                <td><code>asp-route-id="@item.Id"</code></td>
+                <td>Tag Helper：附加路由參數，產生 <code>/Product/abc123</code></td>
+              </tr>
+              <tr>
+                <td><code>asp-for="Order.FirstName"</code></td>
+                <td>表單 Tag Helper：綁定至 <code>[BindProperty]</code> 的屬性</td>
+              </tr>
+              <tr>
+                <td><code>asp-validation-for="Order.Email"</code></td>
+                <td>顯示驗證錯誤訊息（需搭配 DataAnnotations）</td>
+              </tr>
+              <tr>
+                <td><code>asp-page-handler="AddToCart"</code></td>
+                <td>指定 POST 要觸發 <code>OnPostAddToCartAsync</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">_ProductItemPartial.cshtml 節錄</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Pages/Shared/_ProductItemPartial.cshtml</span><span class="lang-tag">Razor</span></div>
+          <pre><code>@model <span class="ty">ProductModel</span>
+
+&lt;div class=<span class="st">"col-sm-6 col-md-4 col-lg-3"</span>&gt;
+  &lt;div class=<span class="st">"thumbnail"</span>&gt;
+    &lt;img src=<span class="st">"~/images/@Model.ImageFile"</span> alt=<span class="st">"@Model.Name"</span> /&gt;
+
+    &lt;div class=<span class="st">"caption"</span>&gt;
+      &lt;h4&gt;@Model.Name&lt;/h4&gt;
+      &lt;p&gt;@Model.Description&lt;/p&gt;
+      &lt;h5&gt;&lt;strong&gt;$@Model.Price&lt;/strong&gt;&lt;/h5&gt;
+
+      <span class="cm">@* asp-page-handler 對應 OnPostAddToCartAsync *@</span>
+      &lt;form method=<span class="st">"post"</span>&gt;
+        &lt;input type=<span class="st">"hidden"</span> name=<span class="st">"productId"</span> value=<span class="st">"@Model.Id"</span> /&gt;
+        &lt;button type=<span class="st">"submit"</span>
+                asp-page=<span class="st">"/Index"</span>
+                asp-page-handler=<span class="st">"AddToCart"</span>
+                class=<span class="st">"btn btn-warning"</span>&gt;
+          Add to cart
+        &lt;/button&gt;
+      &lt;/form&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">從父頁面呼叫 Partial View</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Pages/Index.cshtml（節錄）</span><span class="lang-tag">Razor</span></div>
+          <pre><code>@<span class="kw">foreach</span> (<span class="kw">var</span> product <span class="kw">in</span> Model.ProductList)
+{
+    <span class="cm">@* 將每個 product 傳入 Partial View 渲染商品卡片 *@</span>
+    <span class="kw">await</span> Html.<span class="me">RenderPartialAsync</span>(<span class="st">"_ProductItemPartial"</span>, product);
+}</code></pre>
+        </div>
+        <br/>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>Partial View 命名慣例以底線 <code>_</code> 開頭（如 <code>_ProductItemPartial.cshtml</code>），
+          放在 <code>Pages/Shared/</code> 目錄下，所有頁面都可以引用。
+          使用 <code>Html.RenderPartialAsync</code> 可傳入任意 model 物件給 Partial。</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">_Layout.cshtml 說明</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Pages/Shared/_Layout.cshtml（結構）</span><span class="lang-tag">Razor</span></div>
+          <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  <span class="cm">&lt;!-- Bootstrap 4.0 --&gt;</span>
+  &lt;link rel=<span class="st">"stylesheet"</span> href=<span class="st">"~/lib/bootstrap/css/bootstrap.min.css"</span> /&gt;
+  &lt;title&gt;@ViewData["Title"] - EShop&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  <span class="cm">&lt;!-- 導覽列：品牌名稱 + 購物車連結 --&gt;</span>
+  &lt;nav class=<span class="st">"navbar navbar-default"</span>&gt;
+    &lt;a class=<span class="st">"navbar-brand"</span> asp-page=<span class="st">"/Index"</span>&gt;EShop&lt;/a&gt;
+    &lt;a asp-page=<span class="st">"/Cart"</span>&gt;
+      &lt;span class=<span class="st">"glyphicon glyphicon-shopping-cart"</span>&gt;&lt;/span&gt; Cart
+    &lt;/a&gt;
+  &lt;/nav&gt;
+
+  &lt;div class=<span class="st">"container"</span>&gt;
+    <span class="cm">@* @RenderBody() 是子頁面內容插入的位置 *@</span>
+    @<span class="me">RenderBody</span>()
+  &lt;/div&gt;
+
+  &lt;script src=<span class="st">"~/lib/bootstrap/js/bootstrap.min.js"</span>&gt;&lt;/script&gt;
+  @<span class="kw">await</span> <span class="me">RenderSectionAsync</span>(<span class="st">"Scripts"</span>, required: <span class="kw">false</span>)
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 5 ─────────────────── -->
+  <section class="phase phase-5" id="phase5">
+    <div class="phase-header">
+      <div class="phase-badge">5</div>
+      <div>
+        <h2>硬編碼問題與改善方向</h2>
+        <div class="subtitle">重要實務觀察：識別教學專案的簡化設計</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>識別這個教學專案的簡化設計，知道正式環境應如何改善</li>
+          <li>了解 ASP.NET Core Identity / JWT Claims 在電商前端的應用</li>
+          <li>了解這個服務目前缺少的安全性和 UX 功能</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">三個主要硬編碼問題</div>
+        <div class="callout callout-warn">
+          <span class="callout-icon">⚠️</span>
+          <span>以下問題在學習專案中是刻意簡化的，實際生產環境必須改善。</span>
+        </div>
+        <br/>
+        <div class="arch-diff">
+          <table>
+            <thead>
+              <tr><th>#</th><th>問題</th><th>目前做法</th><th>正式環境應改為</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>UserName 寫死</td>
+                <td><code>IBasketService.GetBasket("swn")</code></td>
+                <td>從 ASP.NET Core Identity 或 JWT Claims 取得：<code>User.Identity?.Name</code></td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>CustomerId 寫死</td>
+                <td><code>Order.CustomerId = new Guid("8bce...")</code></td>
+                <td>從 JWT Claim 取得：<code>User.FindFirstValue("sub")</code></td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>商品顏色預設</td>
+                <td><code>Color = "Black"</code>（寫死在加入購物車邏輯）</td>
+                <td>加入顏色選擇器，從表單取得 <code>selectedColor</code> 參數</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">正式環境應加入的功能</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>正確取得當前使用者（參考做法）</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">IndexModel</span> : <span class="ty">PageModel</span>
+{
+    <span class="kw">private readonly</span> <span class="ty">IHttpContextAccessor</span> _httpContextAccessor;
+
+    <span class="cm">// 注入 IHttpContextAccessor 以存取當前使用者</span>
+    <span class="kw">public</span> <span class="me">IndexModel</span>(<span class="ty">IHttpContextAccessor</span> httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    <span class="kw">private string</span> <span class="me">GetCurrentUserName</span>()
+    {
+        <span class="cm">// ASP.NET Core Identity：取得登入的使用者名稱</span>
+        <span class="kw">return</span> _httpContextAccessor.<span class="me">HttpContext</span>?.<span class="me">User</span>.<span class="me">Identity</span>?.<span class="me">Name</span>
+               ?? <span class="kw">throw new</span> <span class="ty">UnauthorizedAccessException</span>();
+    }
+
+    <span class="kw">private</span> <span class="ty">Guid</span> <span class="me">GetCurrentCustomerId</span>()
+    {
+        <span class="cm">// JWT Claim：取得 "sub" claim 作為 CustomerId</span>
+        <span class="kw">var</span> sub = _httpContextAccessor.<span class="me">HttpContext</span>?.<span class="me">User</span>
+                      .<span class="me">FindFirstValue</span>(<span class="ty">ClaimTypes</span>.<span class="me">NameIdentifier</span>);
+        <span class="kw">return</span> <span class="ty">Guid</span>.<span class="me">Parse</span>(sub!);
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">其他已知限制</div>
+        <div class="two-col">
+          <div>
+            <div class="section-label">安全性</div>
+            <ul class="goal-list">
+              <li>未強化 CSRF Token（雖然 Razor Pages 預設有 AntiForgery，但未驗證 AJAX 請求）</li>
+              <li>無身份驗證機制（應加入 ASP.NET Core Identity 或 OpenID Connect）</li>
+              <li>未授權使用者可直接訪問 /Cart /Checkout /OrderList</li>
+            </ul>
+          </div>
+          <div>
+            <div class="section-label">使用者體驗</div>
+            <ul class="goal-list">
+              <li>表單驗證錯誤沒有對應的 UI 提示（ModelState 錯誤被忽略）</li>
+              <li>商品列表無分頁，大量資料時效能差</li>
+              <li>無 Loading 狀態指示，API 呼叫期間畫面沒有回饋</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 6 ─────────────────── -->
+  <section class="phase phase-6" id="phase6">
+    <div class="phase-header">
+      <div class="phase-badge">6</div>
+      <div>
+        <h2>對照 Shopping.Web 專案</h2>
+        <div class="subtitle">理解原始專案的完整架構與資料流</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>能讀懂原始專案每個頁面的 PageModel</li>
+          <li>理解整體資料流：瀏覽器 → Razor Pages → YARP → 各微服務</li>
+          <li>理解為什麼 Shopping.Web 不直接呼叫微服務</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">建議閱讀順序</div>
+        <div class="arch-table">
+          <table>
+            <thead>
+              <tr><th>順序</th><th>檔案</th><th>重點</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td><code>Shopping.Web.csproj</code></td><td>確認 Refit.HttpClientFactory 已加入</td></tr>
+              <tr><td>2</td><td><code>Program.cs</code></td><td>三個 AddRefitClient 的設定方式</td></tr>
+              <tr><td>3</td><td><code>Services/ICatalogService.cs</code></td><td>了解 Refit Interface 語法</td></tr>
+              <tr><td>4</td><td><code>Services/IBasketService.cs</code></td><td>注意 CheckoutBasket 的 IApiResponse</td></tr>
+              <tr><td>5</td><td><code>Services/IOrderingService.cs</code></td><td>了解訂單查詢方式</td></tr>
+              <tr><td>6</td><td><code>Models/</code></td><td>理解 DTO 和 API 回傳值的對應</td></tr>
+              <tr><td>7</td><td><code>Pages/Index.cshtml.cs</code></td><td>首頁商品列表 + 加入購物車邏輯</td></tr>
+              <tr><td>8</td><td><code>Pages/Cart.cshtml.cs</code></td><td>購物車載入 + 數量修改</td></tr>
+              <tr><td>9</td><td><code>Pages/Checkout.cshtml.cs</code></td><td>BindProperty 表單綁定結帳</td></tr>
+              <tr><td>10</td><td><code>Pages/OrderList.cshtml.cs</code></td><td>訂單歷史查詢</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">完整資料流</div>
+        <div class="flow-block">
+<span class="fl-head">瀏覽器</span>
+   <span class="fl-arrow">↓  HTTP 請求（:6005 HTTP / :6065 HTTPS）</span>
+<span class="fl-node">Razor Pages（Shopping.Web）</span>
+   <span class="fl-arrow">↓  Refit HTTP Client（所有請求都指向同一個 GatewayAddress）</span>
+<span class="fl-node">YarpApiGateway（:6004 HTTP / :6064 HTTPS）</span>
+   <span class="fl-arrow">↓  依路徑前綴路由（YARP Reverse Proxy）</span>
+   ├─ <span class="fl-route">/catalog-service/*</span>  <span class="fl-arrow">→</span>  <span class="fl-svc">Catalog.API（:6000）</span>
+   ├─ <span class="fl-route">/basket-service/*</span>   <span class="fl-arrow">→</span>  <span class="fl-svc">Basket.API（:6001）</span>
+   └─ <span class="fl-route">/ordering-service/*</span> <span class="fl-arrow">→</span>  <span class="fl-svc">Ordering.API（:6003）</span></div>
+        <br/>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>Shopping.Web 不直接呼叫微服務的原因：<br/>
+          1. <strong>單一入口</strong>：前端只需知道一個 Gateway 位址，不需維護多個 API 端點設定<br/>
+          2. <strong>安全隔離</strong>：微服務不需暴露在公網，Gateway 可做認證/限流/轉換<br/>
+          3. <strong>靈活性</strong>：後端服務可以遷移、重命名，只要更新 Gateway 設定即可，前端不受影響</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">各頁面職責</div>
+        <div class="arch-table">
+          <table>
+            <thead>
+              <tr><th>頁面</th><th>路由</th><th>職責</th><th>使用的 Service</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Index</code></td>
+                <td><code>/</code></td>
+                <td>首頁商品列表，加入購物車</td>
+                <td>ICatalogService、IBasketService</td>
+              </tr>
+              <tr>
+                <td><code>ProductList</code></td>
+                <td><code>/ProductList</code></td>
+                <td>依分類瀏覽商品</td>
+                <td>ICatalogService</td>
+              </tr>
+              <tr>
+                <td><code>ProductDetail</code></td>
+                <td><code>/ProductDetail/{id}</code></td>
+                <td>單一商品詳情頁</td>
+                <td>ICatalogService</td>
+              </tr>
+              <tr>
+                <td><code>Cart</code></td>
+                <td><code>/Cart</code></td>
+                <td>購物車檢視，可移除商品</td>
+                <td>IBasketService</td>
+              </tr>
+              <tr>
+                <td><code>Checkout</code></td>
+                <td><code>/Checkout</code></td>
+                <td>填寫收件資訊並送出訂單</td>
+                <td>IBasketService</td>
+              </tr>
+              <tr>
+                <td><code>Confirmation</code></td>
+                <td><code>/Confirmation</code></td>
+                <td>訂單送出後的確認頁面</td>
+                <td>無（靜態頁面）</td>
+              </tr>
+              <tr>
+                <td><code>OrderList</code></td>
+                <td><code>/OrderList</code></td>
+                <td>查看歷史訂單</td>
+                <td>IOrderingService</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">學習檢核點</div>
+        <ul>
+          <li>能說明 Refit Interface 的 <code>[Get]</code> / <code>[Post]</code> attribute 如何對應到實際的 HTTP 請求（路徑、方法、Body）</li>
+          <li>能在現有專案中新增一個新的 Razor Page，並在對應的 Refit Interface 加入新的 API 方法</li>
+          <li>能說明 <code>[BindProperty]</code> 的運作方式：POST 時框架如何把表單欄位自動對應到 PageModel 屬性</li>
+          <li>能解釋為什麼所有 Refit service 都指向 GatewayAddress，以及 YARP 如何根據路徑前綴路由到不同微服務</li>
+          <li>能指出這個教學專案中的三個硬編碼問題，並說明正式環境的改善方向</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

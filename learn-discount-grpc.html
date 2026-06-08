@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>學習 Discount gRPC 架構</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.7;
+    }
+
+    header {
+      background: linear-gradient(135deg, #3b1f6e, #5a3da0);
+      border-bottom: 3px solid #7c5cbf;
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #ddd6fe;
+      font-size: 1rem;
+    }
+
+    .toc {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .toc h2 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #718096;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+
+    .toc-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .toc-list a {
+      display: inline-block;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      text-decoration: none;
+      background: #fff;
+      border: 1.5px solid #ddd6fe;
+      color: #6b46c1;
+      font-weight: 500;
+      transition: all 0.15s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    .toc-list a:hover {
+      background: #6b46c1;
+      border-color: #6b46c1;
+      color: #fff;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    .phase {
+      margin-bottom: 2.5rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1.5px solid #e2e8f0;
+    }
+
+    .phase-1 .phase-header { background: #faf5ff; }
+    .phase-2 .phase-header { background: #f0fff4; }
+    .phase-3 .phase-header { background: #ebf8ff; }
+    .phase-4 .phase-header { background: #fffaf0; }
+    .phase-5 .phase-header { background: #fff5f5; }
+
+    .phase-badge {
+      flex-shrink: 0;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .phase-1 .phase-badge { background: #6b46c1; color: #fff; }
+    .phase-2 .phase-badge { background: #276749; color: #fff; }
+    .phase-3 .phase-badge { background: #2b6cb0; color: #fff; }
+    .phase-4 .phase-badge { background: #c05621; color: #fff; }
+    .phase-5 .phase-badge { background: #c53030; color: #fff; }
+
+    .phase-header h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a202c;
+    }
+
+    .phase-header .subtitle {
+      font-size: 0.85rem;
+      color: #718096;
+      margin-top: 0.1rem;
+    }
+
+    .phase-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: #a0aec0;
+      margin-bottom: 0.55rem;
+      font-weight: 700;
+    }
+
+    .goal-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .goal-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.95rem;
+      color: #2d3748;
+    }
+
+    .goal-list li::before {
+      content: '→';
+      color: #a0aec0;
+      flex-shrink: 0;
+    }
+
+    .code-block {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .code-block-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background: #2d3748;
+      border-bottom: 1px solid #4a5568;
+      font-size: 0.8rem;
+      color: #a0aec0;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+    }
+
+    .lang-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: #4a5568;
+      color: #a0aec0;
+    }
+
+    pre {
+      padding: 1.1rem 1.2rem;
+      overflow-x: auto;
+      font-size: 0.855rem;
+      line-height: 1.65;
+    }
+
+    code {
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      color: #ba0923;
+    }
+
+    pre code {
+      color: #e2e8f0;
+    }
+
+    .kw  { color: #f6a3f9; }
+    .ty  { color: #93c5fd; }
+    .st  { color: #86efac; }
+    .cm  { color: #6b7280; font-style: italic; }
+    .me  { color: #67e8f9; }
+    .nu  { color: #fca5a5; }
+    .at  { color: #fde68a; }
+    .op  { color: #93c5fd; }
+
+    .callout {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.9rem 1.1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .callout-tip {
+      background: #faf5ff;
+      border: 1.5px solid #ddd6fe;
+      color: #44337a;
+    }
+
+    .callout-warn {
+      background: #fffbeb;
+      border: 1.5px solid #fcd34d;
+      color: #92400e;
+    }
+
+    .callout-info {
+      background: #f0fff4;
+      border: 1.5px solid #9ae6b4;
+      color: #22543d;
+    }
+
+    .callout-icon { flex-shrink: 0; font-size: 1rem; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    .checkpoint {
+      background: #f0fff4;
+      border: 1.5px solid #9ae6b4;
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+    }
+
+    .checkpoint .section-label { color: #276749; }
+
+    .checkpoint ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .checkpoint ul li {
+      font-size: 0.9rem;
+      color: #22543d;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .checkpoint ul li::before {
+      content: '✓';
+      color: #38a169;
+      font-weight: 700;
+    }
+
+    .arch-diff {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .arch-diff table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .arch-diff th {
+      background: #edf2f7;
+      padding: 0.6rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: #4a5568;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .arch-diff td {
+      padding: 0.6rem 1rem;
+      border-top: 1px solid #e2e8f0;
+      color: #2d3748;
+      vertical-align: top;
+    }
+
+    .arch-diff tr:hover td { background: #f7fafc; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-grpc   { background: #e9d8fd; color: #44337a; }
+    .badge-rest   { background: #bee3f8; color: #2c5282; }
+    .badge-sqlite { background: #fefcbf; color: #744210; }
+    .badge-ef     { background: #c6f6d5; color: #22543d; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>學習 Discount gRPC 架構</h1>
+  <p>理解 gRPC 服務如何定義合約、實作 CRUD、搭配 EF Core + SQLite，並被 Basket 呼叫</p>
+</header>
+
+<nav class="toc">
+  <h2>目錄</h2>
+  <div class="toc-list">
+    <a href="#diff">和 Catalog / Basket 的差異</a>
+    <a href="#phase1">階段一：gRPC 基本概念與 .proto</a>
+    <a href="#phase2">階段二：EF Core + SQLite</a>
+    <a href="#phase3">階段三：實作 gRPC Service</a>
+    <a href="#phase4">階段四：從 Basket 呼叫這個服務</a>
+    <a href="#phase5">階段五：對照 Discount.Grpc</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ─────────────────── 差異對照 ─────────────────── -->
+  <section id="diff" style="margin-bottom:2.5rem;">
+    <div class="arch-diff">
+      <table>
+        <thead>
+          <tr>
+            <th>特性</th>
+            <th>Catalog.API</th>
+            <th>Basket.API</th>
+            <th>Discount.Grpc</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>通訊協定</td>
+            <td><span class="badge badge-rest">REST / JSON</span></td>
+            <td><span class="badge badge-rest">REST / JSON</span></td>
+            <td><span class="badge badge-grpc">gRPC / Protobuf</span></td>
+          </tr>
+          <tr>
+            <td>資料庫</td>
+            <td>PostgreSQL（Marten）</td>
+            <td>PostgreSQL（Marten）+ Redis</td>
+            <td><span class="badge badge-sqlite">SQLite</span></td>
+          </tr>
+          <tr>
+            <td>ORM</td>
+            <td>Marten（Document Store）</td>
+            <td>Marten（Document Store）</td>
+            <td><span class="badge badge-ef">EF Core</span></td>
+          </tr>
+          <tr>
+            <td>架構模式</td>
+            <td>CQRS + Vertical Slice</td>
+            <td>CQRS + Vertical Slice</td>
+            <td>直接 Service 實作（無 MediatR）</td>
+          </tr>
+          <tr>
+            <td>Carter / Minimal API</td>
+            <td>✓</td>
+            <td>✓</td>
+            <td>❌（gRPC 不需要）</td>
+          </tr>
+          <tr>
+            <td>對外呼叫者</td>
+            <td>瀏覽器 / API Gateway</td>
+            <td>瀏覽器 / API Gateway</td>
+            <td>Basket.API（內部服務）</td>
+          </tr>
+          <tr>
+            <td>Migration</td>
+            <td>無（Marten 自動管理）</td>
+            <td>無（Marten 自動管理）</td>
+            <td>✓ EF Core Migration</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 1 ─────────────────── -->
+  <section class="phase phase-1" id="phase1">
+    <div class="phase-header">
+      <div class="phase-badge">1</div>
+      <div>
+        <h2>gRPC 基本概念與 .proto</h2>
+        <div class="subtitle">用合約先行的方式定義服務，取代 Swagger/OpenAPI</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 gRPC 和 REST API 的根本差異：二進位傳輸、強型別合約、HTTP/2</li>
+          <li>理解 .proto 檔案的語法：service、rpc、message 三個核心概念</li>
+          <li>理解 protoc 編譯器如何從 .proto 自動產生 C# 的 Server base class 和 Client stub</li>
+          <li>理解 Unary RPC 是什麼（一個請求、一個回應），以及它和 REST 的相似之處</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">gRPC vs REST 比較</div>
+        <div class="arch-diff">
+          <table>
+            <thead>
+              <tr><th>特性</th><th>REST</th><th>gRPC</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>傳輸格式</td><td>JSON（可讀文字）</td><td>Protocol Buffers（二進位）</td></tr>
+              <tr><td>HTTP 版本</td><td>HTTP/1.1 或 HTTP/2</td><td>強制 HTTP/2</td></tr>
+              <tr><td>合約定義</td><td>OpenAPI（選用）</td><td>.proto 檔案（強制）</td></tr>
+              <tr><td>程式碼產生</td><td>需要工具（如 NSwag）</td><td>內建，自動產生</td></tr>
+              <tr><td>適用場景</td><td>對外 API、瀏覽器</td><td>內部微服務通訊</td></tr>
+              <tr><td>效能</td><td>較慢（文字解析）</td><td>較快（二進位、壓縮）</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">建立專案</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Terminal</span><span class="lang-tag">shell</span></div>
+          <pre><code><span class="cm"># 選擇 ASP.NET Core gRPC Service 範本</span>
+dotnet new grpc -n LearnDiscount -o LearnDiscount
+cd LearnDiscount
+dotnet run</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">認識 .proto 檔案語法</div>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>.proto 是 gRPC 的「合約文件」，相當於 REST 的 OpenAPI spec。
+          差別在於 .proto 是強制的，而且可以直接從它產生 Server 和 Client 的程式碼，
+          不需要任何額外工具。</span>
+        </div>
+        <br/>
+        <div class="code-block">
+          <div class="code-block-title"><span>Protos/discount.proto</span><span class="lang-tag">protobuf</span></div>
+          <pre><code>syntax = "proto3";
+
+<span class="cm">// 產生的 C# 類別會放在這個 namespace</span>
+option csharp_namespace = "Discount.Grpc";
+
+package discount;
+
+<span class="cm">// service：定義這個 gRPC 服務提供哪些方法</span>
+<span class="cm">// 相當於 REST API 的 Controller</span>
+service DiscountProtoService {
+    rpc GetDiscount    (GetDiscountRequest)    returns (CouponModel);
+    rpc CreateDiscount (CreateDiscountRequest) returns (CouponModel);
+    rpc UpdateDiscount (UpdateDiscountRequest) returns (CouponModel);
+    rpc DeleteDiscount (DeleteDiscountRequest) returns (DeleteDiscountResponse);
+}
+
+<span class="cm">// message：定義資料結構</span>
+<span class="cm">// 相當於 C# 的 class / record，但欄位要標號碼（序列化用）</span>
+message GetDiscountRequest {
+    string productName = 1;  <span class="cm">// 欄位編號從 1 開始，不能改動（影響序列化）</span>
+}
+
+message CouponModel {
+    int32  id          = 1;
+    string productName = 2;
+    string description = 3;
+    int32  amount      = 4;
+}
+
+message CreateDiscountRequest {
+    CouponModel coupon = 1;  <span class="cm">// message 可以包含其他 message</span>
+}
+
+message UpdateDiscountRequest {
+    CouponModel coupon = 1;
+}
+
+message DeleteDiscountRequest {
+    string productName = 1;
+}
+
+message DeleteDiscountResponse {
+    bool success = 1;
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">設定 .csproj 讓 protoc 自動產生程式碼</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>LearnDiscount.csproj</span><span class="lang-tag">XML</span></div>
+          <pre><code>&lt;ItemGroup&gt;
+  &lt;PackageReference Include="Grpc.AspNetCore" Version="2.60.0" /&gt;
+&lt;/ItemGroup&gt;
+
+&lt;ItemGroup&gt;
+  <span class="cm">&lt;!-- GrpcServices="Server" → 產生 Server base class（給這個服務繼承）--&gt;</span>
+  <span class="cm">&lt;!-- GrpcServices="Client" → 產生 Client stub（給呼叫方用）--&gt;</span>
+  <span class="cm">&lt;!-- GrpcServices="Both"   → 兩者都產生 --&gt;</span>
+  &lt;Protobuf Include="Protos\discount.proto" GrpcServices="Server" /&gt;
+&lt;/ItemGroup&gt;</code></pre>
+        </div>
+        <br/>
+        <div class="callout callout-info">
+          <span class="callout-icon">🔍</span>
+          <span>Build 之後，到 <code>obj/Debug/net8.0/</code> 目錄下可以看到自動產生的
+          <code>Discount.cs</code>（message 類別）和 <code>DiscountGrpc.cs</code>（service base class 和 client stub）。
+          這些檔案不需要手動修改。</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">自動產生了什麼</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>自動產生的程式碼（概念說明）</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="cm">// DiscountGrpc.cs（自動產生，不需要手動建立）</span>
+
+<span class="cm">// Server 繼承這個 base class 並覆寫方法</span>
+<span class="kw">public abstract class</span> <span class="ty">DiscountProtoServiceBase</span>
+{
+    <span class="kw">public virtual</span> <span class="ty">Task</span>&lt;<span class="ty">CouponModel</span>&gt; <span class="me">GetDiscount</span>(<span class="ty">GetDiscountRequest</span> request, <span class="ty">ServerCallContext</span> context)
+        => <span class="kw">throw new</span> <span class="ty">RpcException</span>(<span class="kw">new</span> <span class="ty">Status</span>(<span class="ty">StatusCode</span>.Unimplemented, <span class="st">""</span>));
+
+    <span class="cm">// ... 其他方法 ...</span>
+}
+
+<span class="cm">// Client stub（給 Basket.API 這類呼叫方使用）</span>
+<span class="kw">public class</span> <span class="ty">DiscountProtoServiceClient</span>
+{
+    <span class="kw">public virtual</span> <span class="ty">CouponModel</span> <span class="me">GetDiscount</span>(<span class="ty">GetDiscountRequest</span> request, ...) { ... }
+    <span class="kw">public virtual</span> <span class="ty">AsyncUnaryCall</span>&lt;<span class="ty">CouponModel</span>&gt; <span class="me">GetDiscountAsync</span>(<span class="ty">GetDiscountRequest</span> request, ...) { ... }
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>能說明 .proto 裡 service、rpc、message 各自的用途</li>
+          <li>能說明欄位編號（= 1、= 2）的意義和為什麼不能隨意更改</li>
+          <li>能說明 GrpcServices="Server" 和 GrpcServices="Client" 的差別</li>
+          <li>Build 後能在 obj 目錄找到自動產生的 C# 檔案</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 2 ─────────────────── -->
+  <section class="phase phase-2" id="phase2">
+    <div class="phase-header">
+      <div class="phase-badge">2</div>
+      <div>
+        <h2>EF Core + SQLite</h2>
+        <div class="subtitle">用傳統 ORM 管理折扣資料，體會和 Marten 的差異</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 EF Core 的 DbContext、DbSet、Migration 三者的關係</li>
+          <li>理解 SQLite 的特性：檔案型資料庫，不需要安裝伺服器，適合輕量服務</li>
+          <li>理解 OnModelCreating 中的 Seed Data 如何在 Migration 時寫入初始資料</li>
+          <li>體會 EF Core 和 Marten 的開發體驗差異</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">為什麼 Discount 用 SQLite 而不是 PostgreSQL</div>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>Discount 服務只有簡單的折扣資料（商品名稱 + 折扣金額），
+          資料量小、結構固定，不需要完整的資料庫伺服器。
+          SQLite 是單一檔案，啟動快、不需要額外的 Docker container，
+          非常適合這種內部輔助服務。</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">安裝套件</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Terminal</span><span class="lang-tag">shell</span></div>
+          <pre><code>dotnet add package Microsoft.EntityFrameworkCore.Sqlite
+dotnet add package Microsoft.EntityFrameworkCore.Tools</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">定義 Entity 和 DbContext</div>
+        <div class="two-col">
+          <div class="code-block">
+            <div class="code-block-title"><span>Models/Coupon.cs</span><span class="lang-tag">C#</span></div>
+            <pre><code><span class="kw">public class</span> <span class="ty">Coupon</span>
+{
+    <span class="kw">public int</span> Id { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public string</span> ProductName { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public string</span> Description { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public int</span> Amount { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="cm">// EF Core 和 Marten 的差異：
+    // Marten：直接存 C# 物件，不需要 [Key]
+    // EF Core：int Id 慣例自動當主鍵（可省略 [Key]）</span>
+}</code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-block-title"><span>Data/DiscountContext.cs</span><span class="lang-tag">C#</span></div>
+            <pre><code><span class="kw">public class</span> <span class="ty">DiscountContext</span>(<span class="ty">DbContextOptions</span>&lt;<span class="ty">DiscountContext</span>&gt; options)
+    : <span class="ty">DbContext</span>(options)
+{
+    <span class="kw">public</span> <span class="ty">DbSet</span>&lt;<span class="ty">Coupon</span>&gt; Coupons => <span class="me">Set</span>&lt;<span class="ty">Coupon</span>&gt;();
+
+    <span class="kw">protected override void</span> <span class="me">OnModelCreating</span>(<span class="ty">ModelBuilder</span> modelBuilder)
+    {
+        <span class="cm">// Seed Data：Migration 執行時自動插入</span>
+        modelBuilder.<span class="me">Entity</span>&lt;<span class="ty">Coupon</span>&gt;().<span class="me">HasData</span>(
+            <span class="kw">new</span> <span class="ty">Coupon</span> { Id = <span class="nu">1</span>, ProductName = <span class="st">"IPhone X"</span>,   Amount = <span class="nu">150</span>, Description = <span class="st">"IPhone X Discount"</span> },
+            <span class="kw">new</span> <span class="ty">Coupon</span> { Id = <span class="nu">2</span>, ProductName = <span class="st">"Samsung 10"</span>, Amount = <span class="nu">100</span>, Description = <span class="st">"Samsung 10 Discount"</span> }
+        );
+    }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">設定連線字串與自動執行 Migration</div>
+        <div class="two-col">
+          <div class="code-block">
+            <div class="code-block-title"><span>appsettings.json</span><span class="lang-tag">JSON</span></div>
+            <pre><code>{
+  "ConnectionStrings": {
+    "Database": <span class="st">"Data Source=discountdb"</span>
+  }
+}
+
+<span class="cm">// discountdb 是 SQLite 檔案名稱
+// 執行後會在專案目錄產生 discountdb 檔案
+// 不需要安裝任何資料庫伺服器</span></code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-block-title"><span>Data/Extensions.cs</span><span class="lang-tag">C#</span></div>
+            <pre><code><span class="kw">public static class</span> <span class="ty">Extensions</span>
+{
+    <span class="kw">public static</span> <span class="ty">IApplicationBuilder</span> <span class="me">UseMigration</span>(
+        <span class="kw">this</span> <span class="ty">IApplicationBuilder</span> app)
+    {
+        <span class="cm">// 取得 DbContext 並自動執行 Migration</span>
+        <span class="cm">// 確保服務啟動時資料庫一定是最新狀態</span>
+        <span class="kw">using var</span> scope = app.ApplicationServices
+            .<span class="me">CreateScope</span>();
+        <span class="kw">var</span> ctx = scope.ServiceProvider
+            .<span class="me">GetRequiredService</span>&lt;<span class="ty">DiscountContext</span>&gt;();
+        ctx.Database.<span class="me">MigrateAsync</span>();
+        <span class="kw">return</span> app;
+    }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">建立並執行 Migration</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Terminal</span><span class="lang-tag">shell</span></div>
+          <pre><code><span class="cm"># 建立第一個 Migration（分析 DbContext 產生 SQL 腳本）</span>
+dotnet ef migrations add InitialCreate
+
+<span class="cm"># 手動執行（開發時）</span>
+dotnet ef database update
+
+<span class="cm"># 正式環境：在 Program.cs 呼叫 app.UseMigration()，啟動時自動執行</span></code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">EF Core vs Marten 對照</div>
+        <div class="arch-diff">
+          <table>
+            <thead>
+              <tr><th>比較點</th><th>EF Core（Discount 用）</th><th>Marten（Catalog / Basket 用）</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Schema 管理</td><td>手動建 Migration</td><td>自動管理，不需要 Migration</td></tr>
+              <tr><td>儲存格式</td><td>關聯式資料表</td><td>JSON Document（PostgreSQL）</td></tr>
+              <tr><td>主鍵</td><td>int Id（自動遞增）</td><td>Guid 或自然鍵（UserName）</td></tr>
+              <tr><td>查詢方式</td><td>LINQ → SQL</td><td>LINQ → PostgreSQL JSONB 查詢</td></tr>
+              <tr><td>適合場景</td><td>結構固定、關聯複雜</td><td>結構彈性、Document 型資料</td></tr>
+              <tr><td>Seed Data</td><td>OnModelCreating HasData</td><td>實作 IInitialData</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>執行 Migration 後，discountdb 檔案出現在專案目錄</li>
+          <li>用 DB Browser for SQLite 或 VS 的 SQL 工具開啟，確認有兩筆 Seed Data</li>
+          <li>能說明 Migration 和 Marten 自動管理 Schema 的差別</li>
+          <li>能說明為什麼 Discount 適合 SQLite 而 Catalog 用 PostgreSQL</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 3 ─────────────────── -->
+  <section class="phase phase-3" id="phase3">
+    <div class="phase-header">
+      <div class="phase-badge">3</div>
+      <div>
+        <h2>實作 gRPC Service</h2>
+        <div class="subtitle">繼承 proto 產生的 base class，覆寫四個 CRUD 方法</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 gRPC Service 的實作方式：繼承 base class、覆寫方法</li>
+          <li>理解 <code>ServerCallContext</code> 的角色（相當於 REST 的 HttpContext）</li>
+          <li>理解 <code>RpcException</code> 和 <code>StatusCode</code> 的對應關係（類似 HTTP 狀態碼）</li>
+          <li>理解 Mapster 在 Coupon（EF Core entity）和 CouponModel（proto message）之間的轉換</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">實作 DiscountService</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Services/DiscountService.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="cm">// 繼承 proto 自動產生的 base class</span>
+<span class="kw">public class</span> <span class="ty">DiscountService</span>(
+    <span class="ty">DiscountContext</span> dbContext,
+    <span class="ty">ILogger</span>&lt;<span class="ty">DiscountService</span>&gt; logger)
+    : <span class="ty">DiscountProtoService</span>.<span class="ty">DiscountProtoServiceBase</span>
+{
+    <span class="cm">// ServerCallContext 包含 gRPC 呼叫的中繼資料（header、deadline、cancellation token 等）</span>
+    <span class="cm">// 相當於 REST Controller 的 HttpContext，但通常不需要直接存取</span>
+
+    <span class="kw">public override async</span> <span class="ty">Task</span>&lt;<span class="ty">CouponModel</span>&gt; <span class="me">GetDiscount</span>(
+        <span class="ty">GetDiscountRequest</span> request, <span class="ty">ServerCallContext</span> context)
+    {
+        <span class="kw">var</span> coupon = <span class="kw">await</span> dbContext.Coupons
+            .<span class="me">FirstOrDefaultAsync</span>(c => c.ProductName == request.ProductName);
+
+        <span class="cm">// 找不到不拋例外，回傳「無折扣」的預設值</span>
+        <span class="cm">// 這樣 Basket 在呼叫時不需要處理例外情況</span>
+        coupon ??= <span class="kw">new</span> <span class="ty">Coupon</span>
+        {
+            ProductName = <span class="st">"No Discount"</span>,
+            Amount = <span class="nu">0</span>,
+            Description = <span class="st">"No Discount Desc"</span>
+        };
+
+        logger.<span class="me">LogInformation</span>(<span class="st">"Discount is retrieved for ProductName: {ProductName}, Amount: {Amount}"</span>,
+            coupon.ProductName, coupon.Amount);
+
+        <span class="cm">// Coupon（EF Core entity）→ CouponModel（proto message）</span>
+        <span class="kw">return</span> coupon.<span class="me">Adapt</span>&lt;<span class="ty">CouponModel</span>&gt;();
+    }
+
+    <span class="kw">public override async</span> <span class="ty">Task</span>&lt;<span class="ty">CouponModel</span>&gt; <span class="me">CreateDiscount</span>(
+        <span class="ty">CreateDiscountRequest</span> request, <span class="ty">ServerCallContext</span> context)
+    {
+        <span class="cm">// proto message → EF Core entity</span>
+        <span class="kw">var</span> coupon = request.Coupon.<span class="me">Adapt</span>&lt;<span class="ty">Coupon</span>&gt;()
+            ?? <span class="kw">throw new</span> <span class="ty">RpcException</span>(<span class="kw">new</span> <span class="ty">Status</span>(<span class="ty">StatusCode</span>.InvalidArgument, <span class="st">"Invalid request"</span>));
+        <span class="cm">// RpcException + StatusCode.InvalidArgument ≈ HTTP 400 Bad Request</span>
+
+        dbContext.Coupons.<span class="me">Add</span>(coupon);
+        <span class="kw">await</span> dbContext.<span class="me">SaveChangesAsync</span>();
+
+        logger.<span class="me">LogInformation</span>(<span class="st">"Discount is successfully created. ProductName: {ProductName}"</span>,
+            coupon.ProductName);
+
+        <span class="kw">return</span> coupon.<span class="me">Adapt</span>&lt;<span class="ty">CouponModel</span>&gt;();
+    }
+
+    <span class="kw">public override async</span> <span class="ty">Task</span>&lt;<span class="ty">CouponModel</span>&gt; <span class="me">UpdateDiscount</span>(
+        <span class="ty">UpdateDiscountRequest</span> request, <span class="ty">ServerCallContext</span> context)
+    {
+        <span class="kw">var</span> coupon = request.Coupon.<span class="me">Adapt</span>&lt;<span class="ty">Coupon</span>&gt;()
+            ?? <span class="kw">throw new</span> <span class="ty">RpcException</span>(<span class="kw">new</span> <span class="ty">Status</span>(<span class="ty">StatusCode</span>.InvalidArgument, <span class="st">"Invalid request"</span>));
+
+        dbContext.Coupons.<span class="me">Update</span>(coupon);
+        <span class="kw">await</span> dbContext.<span class="me">SaveChangesAsync</span>();
+
+        logger.<span class="me">LogInformation</span>(<span class="st">"Discount is successfully updated. ProductName: {ProductName}"</span>,
+            coupon.ProductName);
+
+        <span class="kw">return</span> coupon.<span class="me">Adapt</span>&lt;<span class="ty">CouponModel</span>&gt;();
+    }
+
+    <span class="kw">public override async</span> <span class="ty">Task</span>&lt;<span class="ty">DeleteDiscountResponse</span>&gt; <span class="me">DeleteDiscount</span>(
+        <span class="ty">DeleteDiscountRequest</span> request, <span class="ty">ServerCallContext</span> context)
+    {
+        <span class="kw">var</span> coupon = <span class="kw">await</span> dbContext.Coupons
+            .<span class="me">FirstOrDefaultAsync</span>(c => c.ProductName == request.ProductName)
+            ?? <span class="kw">throw new</span> <span class="ty">RpcException</span>(<span class="kw">new</span> <span class="ty">Status</span>(<span class="ty">StatusCode</span>.NotFound,
+                <span class="st">$"Discount with ProductName={request.ProductName} not found"</span>));
+        <span class="cm">// RpcException + StatusCode.NotFound ≈ HTTP 404 Not Found</span>
+
+        dbContext.Coupons.<span class="me">Remove</span>(coupon);
+        <span class="kw">await</span> dbContext.<span class="me">SaveChangesAsync</span>();
+
+        logger.<span class="me">LogInformation</span>(<span class="st">"Discount is successfully deleted. ProductName: {ProductName}"</span>,
+            request.ProductName);
+
+        <span class="kw">return new</span> <span class="ty">DeleteDiscountResponse</span> { Success = <span class="kw">true</span> };
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">RpcException StatusCode 對照表</div>
+        <div class="arch-diff">
+          <table>
+            <thead>
+              <tr><th>gRPC StatusCode</th><th>對應 HTTP 狀態碼</th><th>用途</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>OK</code></td><td>200</td><td>成功</td></tr>
+              <tr><td><code>InvalidArgument</code></td><td>400</td><td>請求資料無效</td></tr>
+              <tr><td><code>NotFound</code></td><td>404</td><td>找不到資源</td></tr>
+              <tr><td><code>AlreadyExists</code></td><td>409</td><td>資源已存在</td></tr>
+              <tr><td><code>Unauthenticated</code></td><td>401</td><td>未驗證</td></tr>
+              <tr><td><code>PermissionDenied</code></td><td>403</td><td>無權限</td></tr>
+              <tr><td><code>Internal</code></td><td>500</td><td>服務內部錯誤</td></tr>
+              <tr><td><code>Unimplemented</code></td><td>501</td><td>方法尚未實作（base class 預設）</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">註冊並啟動 gRPC 服務</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Program.cs</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">var</span> builder = <span class="ty">WebApplication</span>.<span class="me">CreateBuilder</span>(args);
+
+<span class="cm">// 啟用 gRPC</span>
+builder.Services.<span class="me">AddGrpc</span>();
+
+<span class="cm">// 注入 EF Core + SQLite</span>
+builder.Services.<span class="me">AddDbContext</span>&lt;<span class="ty">DiscountContext</span>&gt;(opts =>
+    opts.<span class="me">UseSqlite</span>(builder.Configuration.<span class="me">GetConnectionString</span>(<span class="st">"Database"</span>)));
+
+<span class="kw">var</span> app = builder.<span class="me">Build</span>();
+
+<span class="cm">// 啟動時自動執行 Migration + Seed Data</span>
+app.<span class="me">UseMigration</span>();
+
+<span class="cm">// 把 DiscountService 對應到 gRPC endpoint</span>
+<span class="cm">// 相當於 REST 的 app.MapControllers()</span>
+app.<span class="me">MapGrpcService</span>&lt;<span class="ty">DiscountService</span>&gt;();
+
+app.<span class="me">Run</span>();</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">設定 HTTP/2（gRPC 的必要條件）</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>appsettings.json — Kestrel 設定</span><span class="lang-tag">JSON</span></div>
+          <pre><code>{
+  "Kestrel": {
+    "Endpoints": {
+      "Https": {
+        "Url": "https://localhost:7002",
+        "Protocols": "Http2"   <span class="cm">// gRPC 必須用 HTTP/2</span>
+      },
+      "Http": {
+        "Url": "http://localhost:5002",
+        "Protocols": "Http1"   <span class="cm">// 一般 REST 用 HTTP/1.1</span>
+      }
+    }
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="callout callout-warn">
+        <span class="callout-icon">⚠️</span>
+        <span><strong>gRPC 無法直接用瀏覽器或 Postman 測試</strong>（預設）。
+        需要使用 <strong>gRPC UI</strong>、<strong>Postman gRPC 功能</strong>、或 <strong>grpcurl</strong> 工具。
+        最簡單的方式是在 Program.cs 加上 <code>app.MapGrpcReflectionService()</code>（需要額外套件），
+        讓工具可以自動探索服務方法。</span>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>服務啟動後 discountdb 檔案自動建立，包含兩筆 Seed Data</li>
+          <li>用 Postman gRPC 功能呼叫 GetDiscount（productName: "IPhone X"）回傳 amount: 150</li>
+          <li>呼叫 GetDiscount（productName: "NotExist"）回傳 amount: 0（不是錯誤）</li>
+          <li>呼叫 DeleteDiscount（productName: "NotExist"）回傳 NOT_FOUND 錯誤</li>
+          <li>能說明為什麼 GetDiscount 找不到時回傳預設值，而 DeleteDiscount 找不到時拋例外</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 4 ─────────────────── -->
+  <section class="phase phase-4" id="phase4">
+    <div class="phase-header">
+      <div class="phase-badge">4</div>
+      <div>
+        <h2>從 Basket 呼叫這個服務</h2>
+        <div class="subtitle">理解 Client 端的設定，以及兩個服務如何共用同一份 .proto</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 Client 端如何從同一份 .proto 產生呼叫用的 stub</li>
+          <li>理解 <code>AddGrpcClient</code> 和 <code>AddHttpClient</code> 的相似之處</li>
+          <li>理解開發環境中為何需要略過 SSL 憑證驗證</li>
+          <li>理解同步 gRPC 呼叫在 StoreBasket 流程中的位置和影響</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">Client 端：Basket.API 如何設定</div>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>Basket.API 不需要 Discount 服務的原始碼，只需要同一份 <code>discount.proto</code> 檔案。
+          把 .proto 複製到 Basket.API 的 Protos 目錄，設定 <code>GrpcServices="Client"</code>，
+          Build 後就會自動產生呼叫用的 stub，和 Discount 服務的 Server 實作完全對稱。</span>
+        </div>
+        <br/>
+        <div class="code-block">
+          <div class="code-block-title"><span>Basket.API.csproj — Client 端設定</span><span class="lang-tag">XML</span></div>
+          <pre><code>&lt;ItemGroup&gt;
+  <span class="cm">&lt;!-- 同一份 .proto，但 GrpcServices="Client" → 只產生 Client stub --&gt;</span>
+  &lt;Protobuf Include="Protos\discount.proto" GrpcServices="Client" /&gt;
+&lt;/ItemGroup&gt;</code></pre>
+        </div>
+        <br/>
+        <div class="code-block">
+          <div class="code-block-title"><span>Basket.API — Program.cs 註冊 gRPC Client</span><span class="lang-tag">C#</span></div>
+          <pre><code>builder.Services
+    .<span class="me">AddGrpcClient</span>&lt;<span class="ty">DiscountProtoService</span>.<span class="ty">DiscountProtoServiceClient</span>&gt;(options =>
+    {
+        options.Address = <span class="kw">new</span> <span class="ty">Uri</span>(builder.Configuration[<span class="st">"GrpcSettings:DiscountUrl"</span>]!);
+    })
+    .<span class="me">ConfigurePrimaryHttpMessageHandler</span>(() =>
+    {
+        <span class="kw">var</span> handler = <span class="kw">new</span> <span class="ty">HttpClientHandler</span>();
+
+        <span class="cm">// 開發環境：略過 SSL 憑證驗證</span>
+        <span class="cm">// 因為 Discount.Grpc 用的是開發用的自簽憑證</span>
+        <span class="cm">// 正式環境移除這段，使用正式憑證</span>
+        handler.ServerCertificateCustomValidationCallback =
+            <span class="ty">HttpClientHandler</span>.DangerousAcceptAnyServerCertificateValidator;
+
+        <span class="kw">return</span> handler;
+    });</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">在 Handler 中使用 gRPC Client</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Basket — StoreBasketCommandHandler.cs（關鍵部分）</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="kw">public class</span> <span class="ty">StoreBasketCommandHandler</span>(
+    <span class="ty">IBasketRepository</span> repository,
+    <span class="ty">DiscountProtoService</span>.<span class="ty">DiscountProtoServiceClient</span> discountProto)
+    : <span class="ty">ICommandHandler</span>&lt;<span class="ty">StoreBasketCommand</span>, <span class="ty">StoreBasketResult</span>&gt;
+{
+    <span class="kw">private async</span> <span class="ty">Task</span> <span class="me">DeductDiscount</span>(<span class="ty">ShoppingCart</span> cart, <span class="ty">CancellationToken</span> ct)
+    {
+        <span class="kw">foreach</span> (<span class="kw">var</span> item <span class="kw">in</span> cart.Items)
+        {
+            <span class="cm">// 對每件商品同步呼叫 Discount.Grpc</span>
+            <span class="cm">// GetDiscountAsync：非同步版本（效能較好）</span>
+            <span class="cm">// GetDiscount：同步版本（阻塞執行緒）</span>
+            <span class="kw">var</span> coupon = <span class="kw">await</span> discountProto.<span class="me">GetDiscountAsync</span>(
+                <span class="kw">new</span> <span class="ty">GetDiscountRequest</span> { ProductName = item.ProductName },
+                cancellationToken: ct);
+
+            <span class="cm">// coupon.Amount 是 int，item.Price 是 decimal，需要型別轉換</span>
+            item.Price -= coupon.Amount;
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">完整資料流（含 gRPC 呼叫）</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>POST /basket 的執行順序</span><span class="lang-tag">text</span></div>
+          <pre><code>POST /basket（HTTP/JSON）
+    ↓ Carter Endpoint
+StoreBasketCommand
+    ↓ ValidationBehavior
+    ↓ LoggingBehavior
+StoreBasketCommandHandler
+    ↓
+    ├── foreach item in cart.Items
+    │       ↓ gRPC GetDiscountAsync（HTTP/2 + Protobuf）
+    │       Discount.Grpc DiscountService.GetDiscount()
+    │           ↓ EF Core
+    │           SQLite（discountdb）
+    │       ↑ CouponModel（Protobuf 回傳）
+    │       item.Price -= coupon.Amount
+    │
+    └── IBasketRepository.StoreBasket()
+            ↓ CachedBasketRepository
+            ├── PostgreSQL（Marten）
+            └── Redis（更新快取）
+    ↓
+HTTP 201 Created</code></pre>
+        </div>
+      </div>
+
+      <div class="callout callout-warn">
+        <span class="callout-icon">⚠️</span>
+        <span><strong>N+1 呼叫問題：</strong>購物車有幾件商品，就呼叫幾次 gRPC。
+        如果商品很多，這會造成明顯的效能問題。
+        改善方式可以是：批次查詢（如果 proto 支援）、或是快取折扣資料在 Basket 這邊。
+        這個專案為了示範清楚而採用最直覺的寫法。</span>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>同時啟動 Discount.Grpc 和 Basket.API，POST /basket 成功且商品價格有扣除折扣</li>
+          <li>能說明為什麼 Client 端的 .proto 設定是 GrpcServices="Client"</li>
+          <li>能說明 DangerousAcceptAnyServerCertificateValidator 是什麼，以及為什麼需要它</li>
+          <li>能說明 N+1 呼叫問題，並想出一個可能的改善方案</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 5 ─────────────────── -->
+  <section class="phase phase-5" id="phase5">
+    <div class="phase-header">
+      <div class="phase-badge">5</div>
+      <div>
+        <h2>對照 Discount.Grpc</h2>
+        <div class="subtitle">理解這個服務的設計取捨，以及架構上的特殊之處</div>
+      </div>
+    </div>
+
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解為什麼 Discount 沒有用 MediatR 和 CQRS</li>
+          <li>理解這個服務在整個微服務架構中的定位</li>
+          <li>理解 gRPC reflection 對測試和除錯的幫助</li>
+          <li>能閱讀原始專案的每一行程式碼並說明用途</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">為什麼沒有 MediatR 和 CQRS</div>
+        <div class="callout callout-tip">
+          <span class="callout-icon">💡</span>
+          <span>Discount 服務只有四個簡單的 CRUD 操作，業務邏輯幾乎沒有。
+          加入 MediatR + CQRS 反而會增加不必要的複雜度（多出 Command、Query、Handler 等類別）。
+          架構應該配合需求選用，不是所有服務都需要相同的複雜度。
+          這正體現了微服務架構的彈性：每個服務可以根據自身需求選擇最適合的技術棧。</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">閱讀順序建議</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Discount.Grpc 閱讀路徑</span><span class="lang-tag">text</span></div>
+          <pre><code>1. Protos/discount.proto
+   → 了解服務合約：4 個方法、6 個 message 型別
+
+2. Models/Coupon.cs
+   → 最簡單的 EF Core Entity：4 個欄位
+
+3. Data/DiscountContext.cs
+   → DbContext 設定，特別看 OnModelCreating 的 Seed Data
+
+4. Migrations/20240202091837_InitialCreate.cs
+   → EF Core 自動產生的 SQL，理解 Migration 的內容
+
+5. Data/Extensions.cs
+   → UseMigration() 擴充方法，理解自動執行 Migration 的機制
+
+6. Services/DiscountService.cs
+   → 核心實作，對照 GetDiscount 的「不拋例外」和 DeleteDiscount 的「拋例外」
+
+7. Program.cs
+   → 整體設定：gRPC、EF Core、Migration、HTTP/2</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">這個服務在架構中的角色</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>整體架構中 Discount 的位置</span><span class="lang-tag">text</span></div>
+          <pre><code>外部使用者
+    ↓ REST/JSON
+YarpApiGateway
+    ├── Catalog.API    （商品）
+    ├── Basket.API     （購物車）
+    │       ↓ gRPC（內部，不對外）
+    │       Discount.Grpc  ← 這個服務
+    └── Ordering.API   （訂單）
+
+Discount.Grpc 的特點：
+  - 純內部服務，不對外部使用者公開
+  - 不在 API Gateway 的路由裡
+  - 只被 Basket.API 呼叫
+  - 沒有 REST endpoint，只有 gRPC endpoint</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">加上 gRPC Reflection（方便測試）</div>
+        <div class="code-block">
+          <div class="code-block-title"><span>Program.cs — 加入 Reflection 服務</span><span class="lang-tag">C#</span></div>
+          <pre><code><span class="cm">// 安裝套件</span>
+<span class="cm">// dotnet add package Grpc.AspNetCore.Server.Reflection</span>
+
+builder.Services.<span class="me">AddGrpc</span>();
+builder.Services.<span class="me">AddGrpcReflection</span>();  <span class="cm">// 加這行</span>
+
+<span class="kw">if</span> (app.Environment.<span class="me">IsDevelopment</span>())
+{
+    <span class="cm">// 讓 Postman / grpcurl 可以自動探索服務方法</span>
+    <span class="cm">// 不需要手動載入 .proto 檔案</span>
+    app.<span class="me">MapGrpcReflectionService</span>();
+}
+
+app.<span class="me">MapGrpcService</span>&lt;<span class="ty">DiscountService</span>&gt;();</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">三個服務的架構複雜度比較</div>
+        <div class="arch-diff">
+          <table>
+            <thead>
+              <tr><th>服務</th><th>架構複雜度</th><th>原因</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Discount.Grpc</td>
+                <td>⭐ 最簡單</td>
+                <td>純 CRUD，無業務邏輯，直接 DbContext 操作</td>
+              </tr>
+              <tr>
+                <td>Catalog.API</td>
+                <td>⭐⭐ 中等</td>
+                <td>CQRS + Marten，展示 Vertical Slice 架構</td>
+              </tr>
+              <tr>
+                <td>Basket.API</td>
+                <td>⭐⭐⭐ 最複雜</td>
+                <td>CQRS + Redis + gRPC Client + MassTransit，三種通訊模式</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">完成檢查點</div>
+        <ul>
+          <li>能閱讀 Discount.Grpc 每個檔案並說明用途，不需要參考筆記</li>
+          <li>能說明為什麼 GetDiscount 找不到回傳預設值而非拋例外（Basket 的呼叫邏輯決定的）</li>
+          <li>能說明為什麼這個服務不需要 MediatR</li>
+          <li>能說明 gRPC Reflection 的用途</li>
+          <li>能從零建出功能相同的 gRPC 服務</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

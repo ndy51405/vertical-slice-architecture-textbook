@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>學習 YARP API Gateway 架構</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.7;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e, #2d2d5e);
+      border-bottom: 3px solid #4a4aab;
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #c7d2fe;
+      font-size: 1rem;
+    }
+
+    .toc {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .toc h2 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #718096;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+
+    .toc-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .toc-list a {
+      display: inline-block;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      text-decoration: none;
+      background: #fff;
+      border: 1.5px solid #c7d2fe;
+      color: #4a4aab;
+      font-weight: 500;
+      transition: all 0.15s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    .toc-list a:hover {
+      background: #4a4aab;
+      border-color: #4a4aab;
+      color: #fff;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    .phase {
+      margin-bottom: 2.5rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1.5px solid #e2e8f0;
+    }
+
+    .phase-1 .phase-header { background: #eef2ff; }
+    .phase-2 .phase-header { background: #f0fdf4; }
+    .phase-3 .phase-header { background: #fffbeb; }
+    .phase-4 .phase-header { background: #fff5f5; }
+    .phase-5 .phase-header { background: #eef2ff; }
+
+    .phase-badge {
+      flex-shrink: 0;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .phase-1 .phase-badge { background: #4a4aab; color: #fff; }
+    .phase-2 .phase-badge { background: #15803d; color: #fff; }
+    .phase-3 .phase-badge { background: #c2410c; color: #fff; }
+    .phase-4 .phase-badge { background: #9d174d; color: #fff; }
+    .phase-5 .phase-badge { background: #1e3a8a; color: #fff; }
+
+    .phase-header h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a202c;
+    }
+
+    .phase-header .subtitle {
+      font-size: 0.85rem;
+      color: #718096;
+      margin-top: 0.1rem;
+    }
+
+    .phase-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: #a0aec0;
+      margin-bottom: 0.55rem;
+      font-weight: 700;
+    }
+
+    .goal-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .goal-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.95rem;
+      color: #2d3748;
+    }
+
+    .goal-list li::before {
+      content: '→';
+      color: #a0aec0;
+      flex-shrink: 0;
+    }
+
+    .code-block {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .code-block-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background: #2d3748;
+      border-bottom: 1px solid #4a5568;
+      font-size: 0.8rem;
+      color: #a0aec0;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+    }
+
+    .lang-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: #4a5568;
+      color: #a0aec0;
+    }
+
+    pre {
+      padding: 1.1rem 1.2rem;
+      overflow-x: auto;
+      font-size: 0.855rem;
+      line-height: 1.65;
+    }
+
+    code {
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      color: #ba0923;
+    }
+
+    pre code {
+      color: #e2e8f0;
+    }
+
+    .kw  { color: #f6a3f9; }
+    .ty  { color: #93c5fd; }
+    .st  { color: #86efac; }
+    .cm  { color: #6b7280; font-style: italic; }
+    .me  { color: #67e8f9; }
+    .nu  { color: #fca5a5; }
+    .at  { color: #fde68a; }
+    .op  { color: #93c5fd; }
+
+    .callout {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.9rem 1.1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .callout-tip {
+      background: #eef2ff;
+      border: 1.5px solid #c7d2fe;
+      color: #312e81;
+    }
+
+    .callout-warn {
+      background: #fffbeb;
+      border: 1.5px solid #fcd34d;
+      color: #92400e;
+    }
+
+    .callout-info {
+      background: #f0fdf4;
+      border: 1.5px solid #9ae6b4;
+      color: #22543d;
+    }
+
+    .callout-icon { flex-shrink: 0; font-size: 1rem; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    .checkpoint {
+      background: #f0fdf4;
+      border: 1.5px solid #9ae6b4;
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+    }
+
+    .checkpoint .section-label { color: #15803d; }
+
+    .checkpoint ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .checkpoint ul li {
+      font-size: 0.9rem;
+      color: #22543d;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .checkpoint ul li::before {
+      content: '✓';
+      color: #38a169;
+      font-weight: 700;
+    }
+
+    .arch-table {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .arch-table table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .arch-table th {
+      background: #edf2f7;
+      padding: 0.6rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: #4a5568;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .arch-table td {
+      padding: 0.6rem 1rem;
+      border-top: 1px solid #e2e8f0;
+      color: #2d3748;
+      vertical-align: top;
+    }
+
+    .arch-table tr:hover td { background: #f7fafc; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-yarp   { background: #e0e7ff; color: #3730a3; }
+    .badge-nginx  { background: #d1fae5; color: #065f46; }
+    .badge-ocelot { background: #fef3c7; color: #92400e; }
+    .badge-rest   { background: #bee3f8; color: #2c5282; }
+
+    .arch-diagram {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 1.5rem;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.82rem;
+      color: #e2e8f0;
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+
+    .arch-diagram .arch-box { color: #93c5fd; }
+    .arch-diagram .arch-arrow { color: #6b7280; }
+    .arch-diagram .arch-port { color: #fca5a5; }
+    .arch-diagram .arch-label { color: #86efac; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>學習 YARP API Gateway 架構</h1>
+  <p>理解 Reverse Proxy 概念、Route/Cluster 設定、Rate Limiting，以及如何統一管理微服務入口</p>
+</header>
+
+<nav class="toc">
+  <h2>目錄</h2>
+  <div class="toc-list">
+    <a href="#phase1">階段一：YARP 基本概念</a>
+    <a href="#phase2">階段二：多服務路由設定</a>
+    <a href="#phase3">階段三：Rate Limiting</a>
+    <a href="#phase4">階段四：進階功能</a>
+    <a href="#phase5">階段五：對照 YarpApiGateway 專案</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ─────────────────── PHASE 1 ─────────────────── -->
+  <section id="phase1" class="phase phase-1">
+    <div class="phase-header">
+      <div class="phase-badge">1</div>
+      <div>
+        <h2>YARP 基本概念</h2>
+        <div class="subtitle">Reverse Proxy、Route、Cluster 的本質</div>
+      </div>
+    </div>
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 Reverse Proxy 是什麼，以及它在微服務架構中的角色</li>
+          <li>理解為什麼微服務需要 API Gateway，而不是讓客戶端直接呼叫各服務</li>
+          <li>比較 YARP vs Nginx vs Ocelot 三種方案的差異與適用情境</li>
+          <li>理解 Route 和 Cluster 的關係：Route 描述「如何比對請求」，Cluster 描述「轉發到哪裡」</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">為什麼需要 API Gateway？</div>
+        <p style="font-size:0.92rem;color:#2d3748;margin-bottom:0.75rem;">
+          在微服務架構中，可能有十幾個服務各自監聽不同的 Port。如果客戶端（瀏覽器、App）直接呼叫每個服務，會面臨以下問題：
+        </p>
+        <div class="two-col">
+          <div class="callout callout-warn">
+            <span class="callout-icon">⚠</span>
+            <div>
+              <strong>沒有 Gateway 的問題</strong><br/>
+              客戶端需要知道所有服務的位址；跨域 (CORS) 設定複雜；無法統一做認證、限流、日誌；服務位址變動時客戶端需跟著更新。
+            </div>
+          </div>
+          <div class="callout callout-info">
+            <span class="callout-icon">✓</span>
+            <div>
+              <strong>有了 Gateway 的好處</strong><br/>
+              統一入口（單一 Host/Port）；集中認證與授權；統一 Rate Limiting；服務位址對客戶端透明；方便做 A/B 測試、藍綠部署。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">YARP vs Nginx vs Ocelot</div>
+        <div class="arch-table">
+          <table>
+            <thead>
+              <tr>
+                <th>比較項目</th>
+                <th><span class="badge badge-yarp">YARP</span></th>
+                <th><span class="badge badge-nginx">Nginx</span></th>
+                <th><span class="badge badge-ocelot">Ocelot</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>設定方式</td>
+                <td>appsettings.json 或程式碼（C#）</td>
+                <td>nginx.conf（專屬語法）</td>
+                <td>ocelot.json（專屬 JSON）</td>
+              </tr>
+              <tr>
+                <td>C# 整合</td>
+                <td>原生 ASP.NET Core Middleware，可用 C# 擴充</td>
+                <td>無（需用 Lua 或外部模組）</td>
+                <td>可用 C# 擴充，但 API 較舊</td>
+              </tr>
+              <tr>
+                <td>效能</td>
+                <td>高（基於 .NET Kestrel，直接 Pipe）</td>
+                <td>極高（C 語言核心）</td>
+                <td>中（.NET，但轉發效率較低）</td>
+              </tr>
+              <tr>
+                <td>熱更新設定</td>
+                <td>支援（IProxyConfigProvider）</td>
+                <td>需 reload signal</td>
+                <td>需重啟或自訂</td>
+              </tr>
+              <tr>
+                <td>維護狀態</td>
+                <td>Microsoft 官方維護（活躍）</td>
+                <td>F5 維護（非常成熟）</td>
+                <td>社群維護（更新較慢）</td>
+              </tr>
+              <tr>
+                <td>適合情境</td>
+                <td>.NET 微服務需要程式邏輯的 Gateway</td>
+                <td>高流量、靜態資源、傳統架構</td>
+                <td>早期 .NET Core 微服務專案</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">安裝與建立專案</div>
+        <div class="code-block">
+          <div class="code-block-title">
+            <span>Terminal</span>
+            <span class="lang-tag">shell</span>
+          </div>
+          <pre><code><span class="cm"># 建立最小 Web 專案</span>
+dotnet <span class="kw">new</span> web -n LearnYarp
+<span class="kw">cd</span> LearnYarp
+
+<span class="cm"># 安裝 YARP NuGet 套件</span>
+dotnet add package <span class="st">Yarp.ReverseProxy</span></code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Program.cs 最小設定</div>
+        <div class="callout callout-tip" style="margin-bottom:0.75rem;">
+          <span class="callout-icon">i</span>
+          <div>
+            YARP 以標準 ASP.NET Core Middleware 方式運作。只需兩行：<code>AddReverseProxy()</code> 註冊服務，<code>MapReverseProxy()</code> 掛載 Middleware。
+          </div>
+        </div>
+        <div class="code-block">
+          <div class="code-block-title">
+            <span>Program.cs</span>
+            <span class="lang-tag">C#</span>
+          </div>
+          <pre><code><span class="kw">var</span> builder = <span class="ty">WebApplication</span>.<span class="me">CreateBuilder</span>(args);
+
+<span class="cm">// 註冊 YARP 服務，並從 appsettings.json 的 ReverseProxy 段落載入設定</span>
+builder.Services
+    .<span class="me">AddReverseProxy</span>()
+    .<span class="me">LoadFromConfig</span>(builder.Configuration.<span class="me">GetSection</span>(<span class="st">"ReverseProxy"</span>));
+
+<span class="kw">var</span> app = builder.<span class="me">Build</span>();
+
+<span class="cm">// 掛載 YARP Middleware，所有符合 Route 設定的請求都會被轉發</span>
+app.<span class="me">MapReverseProxy</span>();
+
+app.<span class="me">Run</span>();</code></pre>
+        </div>
+        <div class="callout callout-tip" style="margin-top:0.75rem;">
+          <span class="callout-icon">i</span>
+          <div>
+            注意：<code>MapReverseProxy()</code> 必須在 <code>app.Run()</code> 之前呼叫。如果有其他 Middleware（如 Rate Limiter），需注意順序，Rate Limiter 必須在 <code>MapReverseProxy()</code> 之前呼叫 <code>UseRateLimiter()</code>。
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">appsettings.json 最小設定</div>
+        <div class="code-block">
+          <div class="code-block-title">
+            <span>appsettings.json</span>
+            <span class="lang-tag">JSON</span>
+          </div>
+          <pre><code>{
+  <span class="at">"ReverseProxy"</span>: {
+    <span class="at">"Routes"</span>: {
+      <span class="at">"catalog-route"</span>: {                    <span class="cm">// Route 名稱（任意字串）</span>
+        <span class="at">"ClusterId"</span>: <span class="st">"catalog-cluster"</span>,     <span class="cm">// 對應到下方 Clusters 的哪個</span>
+        <span class="at">"Match"</span>: {
+          <span class="at">"Path"</span>: <span class="st">"/catalog-service/{**catch-all}"</span>  <span class="cm">// 比對路徑</span>
+        },
+        <span class="at">"Transforms"</span>: [
+          { <span class="at">"PathRemovePrefix"</span>: <span class="st">"/catalog-service"</span> }  <span class="cm">// 轉發前移除前綴</span>
+        ]
+      }
+    },
+    <span class="at">"Clusters"</span>: {
+      <span class="at">"catalog-cluster"</span>: {              <span class="cm">// Cluster 名稱</span>
+        <span class="at">"Destinations"</span>: {
+          <span class="at">"destination1"</span>: {              <span class="cm">// Destination 名稱（可有多個）</span>
+            <span class="at">"Address"</span>: <span class="st">"http://localhost:6000/"</span>
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">關鍵概念說明</div>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+          <div class="callout callout-tip">
+            <span class="callout-icon">★</span>
+            <div>
+              <strong><code>{**catch-all}</code> 萬用符號</strong><br/>
+              這是 ASP.NET Core Route 語法。<code>**</code> 表示「比對任意路徑片段，包含斜線」。例如 <code>/catalog-service/products/123</code> 和 <code>/catalog-service/categories/food/list</code> 都會被這條 Route 比對到。單個 <code>*</code> 不能跨斜線，必須用 <code>**</code>。
+            </div>
+          </div>
+          <div class="callout callout-tip">
+            <span class="callout-icon">★</span>
+            <div>
+              <strong><code>PathRemovePrefix</code> 轉換</strong><br/>
+              客戶端請求 <code>/catalog-service/products</code>，YARP 移除前綴後，轉發到後端的 <code>/products</code>。這讓後端服務不需要知道自己被掛在哪個路徑前綴下，保持乾淨的 API 設計。
+            </div>
+          </div>
+          <div class="callout callout-info">
+            <span class="callout-icon">i</span>
+            <div>
+              <strong>Cluster 可以有多個 Destination</strong><br/>
+              一個 Cluster 底下可以定義多個 Destination，YARP 會根據 <code>LoadBalancingPolicy</code>（預設 RoundRobin）在多個目標之間分配請求，實現水平擴展與負載平衡。
+            </div>
+          </div>
+          <div class="callout callout-warn">
+            <span class="callout-icon">⚠</span>
+            <div>
+              <strong>Route vs Cluster 的關係</strong><br/>
+              <strong>Route</strong> = 「什麼樣的請求要被處理」（比對規則）。<strong>Cluster</strong> = 「轉發到哪裡」（目標清單）。一個 Route 對應一個 Cluster，但一個 Cluster 可以被多個 Route 共用。
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 2 ─────────────────── -->
+  <section id="phase2" class="phase phase-2">
+    <div class="phase-header">
+      <div class="phase-badge">2</div>
+      <div>
+        <h2>多服務路由設定</h2>
+        <div class="subtitle">設定三個服務、區分本地與 Docker 環境</div>
+      </div>
+    </div>
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解如何設定多個 Route 和 Cluster，對應不同的後端服務</li>
+          <li>理解 <code>appsettings.Local.json</code> 的用途：在本地開發時覆蓋 Docker 設定</li>
+          <li>理解為什麼 Docker 環境用服務名稱（如 <code>catalog.api</code>）而非 <code>localhost</code></li>
+          <li>理解 <code>LoadFromConfig</code> 如何自動合併多個 appsettings 檔案</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">完整三個服務的 appsettings.json（Docker 環境）</div>
+        <div class="callout callout-info" style="margin-bottom:0.75rem;">
+          <span class="callout-icon">i</span>
+          <div>
+            這是 Docker Compose 環境下的設定。服務之間用 Docker 服務名稱互相溝通（<code>catalog.api</code>、<code>basket.api</code>、<code>ordering.api</code>），Port 是容器內的 Port（8080）。
+          </div>
+        </div>
+        <div class="code-block">
+          <div class="code-block-title">
+            <span>appsettings.json（Docker 環境）</span>
+            <span class="lang-tag">JSON</span>
+          </div>
+          <pre><code>{
+  <span class="at">"ReverseProxy"</span>: {
+    <span class="at">"Routes"</span>: {
+      <span class="at">"catalog-route"</span>: {
+        <span class="at">"ClusterId"</span>: <span class="st">"catalog-cluster"</span>,
+        <span class="at">"Match"</span>: { <span class="at">"Path"</span>: <span class="st">"/catalog-service/{**catch-all}"</span> },
+        <span class="at">"Transforms"</span>: [{ <span class="at">"PathRemovePrefix"</span>: <span class="st">"/catalog-service"</span> }]
+      },
+      <span class="at">"basket-route"</span>: {
+        <span class="at">"ClusterId"</span>: <span class="st">"basket-cluster"</span>,
+        <span class="at">"Match"</span>: { <span class="at">"Path"</span>: <span class="st">"/basket-service/{**catch-all}"</span> },
+        <span class="at">"Transforms"</span>: [{ <span class="at">"PathRemovePrefix"</span>: <span class="st">"/basket-service"</span> }]
+      },
+      <span class="at">"ordering-route"</span>: {
+        <span class="at">"ClusterId"</span>: <span class="st">"ordering-cluster"</span>,
+        <span class="at">"Match"</span>: { <span class="at">"Path"</span>: <span class="st">"/ordering-service/{**catch-all}"</span> },
+        <span class="at">"Transforms"</span>: [{ <span class="at">"PathRemovePrefix"</span>: <span class="st">"/ordering-service"</span> }]
+      }
+    },
+    <span class="at">"Clusters"</span>: {
+      <span class="at">"catalog-cluster"</span>: {
+        <span class="at">"Destinations"</span>: {
+          <span class="at">"destination1"</span>: { <span class="at">"Address"</span>: <span class="st">"http://catalog.api:8080/"</span> }
+        }
+      },
+      <span class="at">"basket-cluster"</span>: {
+        <span class="at">"Destinations"</span>: {
+          <span class="at">"destination1"</span>: { <span class="at">"Address"</span>: <span class="st">"http://basket.api:8080/"</span> }
+        }
+      },
+      <span class="at">"ordering-cluster"</span>: {
+        <span class="at">"Destinations"</span>: {
+          <span class="at">"destination1"</span>: { <span class="at">"Address"</span>: <span class="st">"http://ordering.api:8080/"</span> }
+        }
+      }
+    }
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">appsettings.Local.json（本地開發覆蓋）</div>
+        <div class="callout callout-warn" style="margin-bottom:0.75rem;">
+          <span class="callout-icon">⚠</span>
+          <div>
+            <code>appsettings.Local.json</code> 不是 ASP.NET Core 的內建慣例，需要在 <code>Program.cs</code> 手動加入 <code>builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true)</code>，或在 <code>appsettings.json</code> 之後用其他機制載入。
+          </div>
+        </div>
+        <div class="code-block">
+          <div class="code-block-title">
+            <span>appsettings.Local.json（本地開發，覆蓋 Docker 位址）</span>
+            <span class="lang-tag">JSON</span>
+          </div>
+          <pre><code>{
+  <span class="at">"ReverseProxy"</span>: {
+    <span class="at">"Clusters"</span>: {
+      <span class="at">"catalog-cluster"</span>: {
+        <span class="at">"Destinations"</span>: {
+          <span class="at">"destination1"</span>: { <span class="at">"Address"</span>: <span class="st">"http://localhost:6000/"</span> }
+        }
+      },
+      <span class="at">"basket-cluster"</span>: {
+        <span class="at">"Destinations"</span>: {
+          <span class="at">"destination1"</span>: { <span class="at">"Address"</span>: <span class="st">"http://localhost:6001/"</span> }
+        }
+      },
+      <span class="at">"ordering-cluster"</span>: {
+        <span class="at">"Destinations"</span>: {
+          <span class="at">"destination1"</span>: { <span class="at">"Address"</span>: <span class="st">"http://localhost:6003/"</span> }
+        }
+      }
+    }
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Docker 服務名稱 vs localhost 的差異</div>
+        <div class="two-col">
+          <div>
+            <p style="font-size:0.8rem;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">Docker Compose 環境</p>
+            <div class="code-block">
+              <pre><code><span class="cm"># docker-compose.yml 中定義的服務名稱</span>
+services:
+  <span class="at">catalog.api</span>:
+    image: catalog-api
+    ports: [<span class="st">"6000:8080"</span>]
+
+  <span class="at">yarp.gateway</span>:
+    image: yarp-gateway
+    ports: [<span class="st">"6004:8080"</span>]</code></pre>
+            </div>
+            <p style="font-size:0.85rem;color:#2d3748;margin-top:0.5rem;">
+              在 Docker 網路中，容器之間用服務名稱 <code>catalog.api</code> 互相溝通，Port 是容器內部 Port（<code>8080</code>），不是宿主機映射的 Port（<code>6000</code>）。
+            </p>
+          </div>
+          <div>
+            <p style="font-size:0.8rem;font-weight:700;color:#c2410c;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">本地開發環境</p>
+            <div class="code-block">
+              <pre><code><span class="cm"># 本地直接跑各服務，各自監聽 localhost</span>
+<span class="cm"># Catalog.API → localhost:6000</span>
+<span class="cm"># Basket.API  → localhost:6001</span>
+<span class="cm"># Ordering.API → localhost:6003</span>
+<span class="cm"># YarpGateway → localhost:6004</span></code></pre>
+            </div>
+            <p style="font-size:0.85rem;color:#2d3748;margin-top:0.5rem;">
+              本地直接執行時，所有服務都在同一台機器，用 <code>localhost:{port}</code> 存取。沒有 Docker DNS，所以 <code>catalog.api</code> 這個名稱無法解析。
+            </p>
+          </div>
+        </div>
+        <div class="callout callout-tip" style="margin-top:0.75rem;">
+          <span class="callout-icon">i</span>
+          <div>
+            <strong>為什麼 appsettings.json 只覆蓋 Clusters 而不覆蓋 Routes？</strong><br/>
+            Routes 的比對規則（Path Pattern）在兩個環境是一樣的，不需要改。只有 Cluster 中的 Destination Address（目標位址）不同，所以 <code>appsettings.Local.json</code> 只覆寫 Clusters 段落即可。
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 3 ─────────────────── -->
+  <section id="phase3" class="phase phase-3">
+    <div class="phase-header">
+      <div class="phase-badge">3</div>
+      <div>
+        <h2>Rate Limiting</h2>
+        <div class="subtitle">固定視窗演算法、保護特定服務的流量</div>
+      </div>
+    </div>
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>理解 Rate Limiting（速率限制）的用途：防止濫用、保護後端服務資源</li>
+          <li>理解固定視窗（Fixed Window）演算法的運作方式</li>
+          <li>理解為什麼只對 Ordering 服務套用限流，而 Catalog 不需要</li>
+          <li>理解如何在 Route 設定中指定 RateLimiterPolicy</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">固定視窗 vs 滑動視窗</div>
+        <div class="two-col">
+          <div class="callout callout-tip">
+            <span class="callout-icon">★</span>
+            <div>
+              <strong>固定視窗（Fixed Window）</strong><br/>
+              將時間切成等長的「窗口」（例如每 10 秒一格）。每個窗口內最多允許 N 次請求。窗口結束後重置計數。實作簡單，但在窗口邊界可能允許短暫的 2N 個請求（邊界效應）。
+            </div>
+          </div>
+          <div class="callout callout-warn">
+            <span class="callout-icon">★</span>
+            <div>
+              <strong>滑動視窗（Sliding Window）</strong><br/>
+              以「過去 N 秒」為範圍動態計算請求數，沒有邊界效應，流量更平滑。但實作較複雜，需要記錄每個請求的時間戳。.NET 的 <code>AddSlidingWindowLimiter</code> 可以實作此演算法。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Program.cs 完整 Rate Limiting 設定</div>
+        <div class="code-block">
+          <div class="code-block-title">
+            <span>Program.cs</span>
+            <span class="lang-tag">C#</span>
+          </div>
+          <pre><code><span class="kw">var</span> builder = <span class="ty">WebApplication</span>.<span class="me">CreateBuilder</span>(args);
+
+builder.Services
+    .<span class="me">AddReverseProxy</span>()
+    .<span class="me">LoadFromConfig</span>(builder.Configuration.<span class="me">GetSection</span>(<span class="st">"ReverseProxy"</span>));
+
+<span class="cm">// 註冊 Rate Limiter 服務，定義 "fixed" Policy</span>
+builder.Services.<span class="me">AddRateLimiter</span>(rateLimiterOptions =>
+    rateLimiterOptions.<span class="me">AddFixedWindowLimiter</span>(
+        policyName: <span class="st">"fixed"</span>,
+        options =>
+        {
+            <span class="cm">// 時間窗口大小：10 秒</span>
+            options.Window = <span class="ty">TimeSpan</span>.<span class="me">FromSeconds</span>(<span class="nu">10</span>);
+
+            <span class="cm">// 每個窗口最多允許 5 次請求</span>
+            options.PermitLimit = <span class="nu">5</span>;
+
+            <span class="cm">// 超過限制時排隊等待的上限（0 = 直接拒絕）</span>
+            options.QueueLimit = <span class="nu">0</span>;
+        }));
+
+<span class="kw">var</span> app = builder.<span class="me">Build</span>();
+
+<span class="cm">// 必須在 MapReverseProxy 之前呼叫 UseRateLimiter！</span>
+app.<span class="me">UseRateLimiter</span>();
+
+app.<span class="me">MapReverseProxy</span>();
+
+app.<span class="me">Run</span>();</code></pre>
+        </div>
+        <div class="callout callout-warn" style="margin-top:0.75rem;">
+          <span class="callout-icon">⚠</span>
+          <div>
+            <strong>Middleware 順序非常重要</strong><br/>
+            <code>UseRateLimiter()</code> 必須在 <code>MapReverseProxy()</code> 之前呼叫，否則 Rate Limiter Middleware 不會在轉發之前執行，限流設定將無效。
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">appsettings.json 對 ordering-route 套用 Policy</div>
+        <div class="code-block">
+          <div class="code-block-title">
+            <span>appsettings.json（ordering-route 加上 RateLimiterPolicy）</span>
+            <span class="lang-tag">JSON</span>
+          </div>
+          <pre><code>{
+  <span class="at">"ReverseProxy"</span>: {
+    <span class="at">"Routes"</span>: {
+      <span class="at">"catalog-route"</span>: {
+        <span class="at">"ClusterId"</span>: <span class="st">"catalog-cluster"</span>,
+        <span class="at">"Match"</span>: { <span class="at">"Path"</span>: <span class="st">"/catalog-service/{**catch-all}"</span> },
+        <span class="at">"Transforms"</span>: [{ <span class="at">"PathRemovePrefix"</span>: <span class="st">"/catalog-service"</span> }]
+        <span class="cm">// 沒有 RateLimiterPolicy → 不限流</span>
+      },
+      <span class="at">"basket-route"</span>: {
+        <span class="at">"ClusterId"</span>: <span class="st">"basket-cluster"</span>,
+        <span class="at">"Match"</span>: { <span class="at">"Path"</span>: <span class="st">"/basket-service/{**catch-all}"</span> },
+        <span class="at">"Transforms"</span>: [{ <span class="at">"PathRemovePrefix"</span>: <span class="st">"/basket-service"</span> }]
+        <span class="cm">// 沒有 RateLimiterPolicy → 不限流</span>
+      },
+      <span class="at">"ordering-route"</span>: {
+        <span class="at">"ClusterId"</span>: <span class="st">"ordering-cluster"</span>,
+        <span class="at">"Match"</span>: { <span class="at">"Path"</span>: <span class="st">"/ordering-service/{**catch-all}"</span> },
+        <span class="at">"Transforms"</span>: [{ <span class="at">"PathRemovePrefix"</span>: <span class="st">"/ordering-service"</span> }],
+        <span class="at">"RateLimiterPolicy"</span>: <span class="st">"fixed"</span>  <span class="cm">// 套用 "fixed" Policy</span>
+      }
+    }
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">為什麼只對 Ordering 限流？</div>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+          <div class="callout callout-info">
+            <span class="callout-icon">i</span>
+            <div>
+              <strong>Catalog 不需要限流的原因：</strong>商品列表查詢是唯讀操作，通常有快取機制（Redis、CDN）。高頻率的查詢不會造成資料狀態問題，後端通常也有資料庫讀取副本可以水平擴展。
+            </div>
+          </div>
+          <div class="callout callout-warn">
+            <span class="callout-icon">⚠</span>
+            <div>
+              <strong>Ordering 需要限流的原因：</strong>建立訂單是寫入操作，涉及庫存扣除、付款流程。惡意或意外的高頻請求可能造成重複下單、庫存超賣、資料庫鎖定問題。業務上也需要防止惡意搶購腳本。
+            </div>
+          </div>
+          <div class="callout callout-tip">
+            <span class="callout-icon">i</span>
+            <div>
+              <strong>超過限制時的回應：</strong>當請求超過 Rate Limiting 設定（10 秒內 5 次），YARP 會直接回傳 <strong>HTTP 429 Too Many Requests</strong>，並在 Response Header 中加入 <code>Retry-After</code>，告知客戶端何時可以重試。
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 4 ─────────────────── -->
+  <section id="phase4" class="phase phase-4">
+    <div class="phase-header">
+      <div class="phase-badge">4</div>
+      <div>
+        <h2>進階功能</h2>
+        <div class="subtitle">負載平衡、認證、健康檢查、請求轉換（說明為主）</div>
+      </div>
+    </div>
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>知道 YARP 還支援哪些進階能力，以便未來需要時能快速找到對應設定</li>
+          <li>了解負載平衡的多種演算法及其適用情境</li>
+          <li>了解如何在 Gateway 層面做認證與授權（而非在每個服務重複實作）</li>
+          <li>了解健康檢查機制如何讓 YARP 自動排除不健康的 Destination</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">負載平衡（Load Balancing）</div>
+        <div class="callout callout-info" style="margin-bottom:0.75rem;">
+          <span class="callout-icon">i</span>
+          <div>
+            只要在 Cluster 加入 <code>LoadBalancingPolicy</code> 並設定多個 Destination，YARP 就會自動在它們之間分配請求。
+          </div>
+        </div>
+        <div class="code-block">
+          <div class="code-block-title">
+            <span>appsettings.json（RoundRobin 兩個 Destination）</span>
+            <span class="lang-tag">JSON</span>
+          </div>
+          <pre><code>{
+  <span class="at">"ReverseProxy"</span>: {
+    <span class="at">"Clusters"</span>: {
+      <span class="at">"catalog-cluster"</span>: {
+        <span class="at">"LoadBalancingPolicy"</span>: <span class="st">"RoundRobin"</span>,
+        <span class="at">"Destinations"</span>: {
+          <span class="at">"destination1"</span>: { <span class="at">"Address"</span>: <span class="st">"http://catalog.api-1:8080/"</span> },
+          <span class="at">"destination2"</span>: { <span class="at">"Address"</span>: <span class="st">"http://catalog.api-2:8080/"</span> }
+        }
+      }
+    }
+  }
+}</code></pre>
+        </div>
+        <div class="arch-table" style="margin-top:0.75rem;">
+          <table>
+            <thead>
+              <tr>
+                <th>Policy 名稱</th>
+                <th>演算法說明</th>
+                <th>適用情境</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>RoundRobin</code></td>
+                <td>輪流分配，每個 Destination 依序各得一次</td>
+                <td>各服務效能相近，請求處理時間短</td>
+              </tr>
+              <tr>
+                <td><code>LeastRequests</code></td>
+                <td>優先選擇目前進行中請求數最少的 Destination</td>
+                <td>請求處理時間差異大（有的快有的慢）</td>
+              </tr>
+              <tr>
+                <td><code>Random</code></td>
+                <td>隨機選擇</td>
+                <td>簡單場景，不在乎分配均勻性</td>
+              </tr>
+              <tr>
+                <td><code>PowerOfTwoChoices</code></td>
+                <td>隨機選兩個，取請求數較少的那個</td>
+                <td>大規模叢集，比 LeastRequests 效率更高</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">認證與授權（Authentication &amp; Authorization）</div>
+        <div class="code-block">
+          <div class="code-block-title">
+            <span>appsettings.json（Route 加上 AuthorizationPolicy）</span>
+            <span class="lang-tag">JSON</span>
+          </div>
+          <pre><code>{
+  <span class="at">"ReverseProxy"</span>: {
+    <span class="at">"Routes"</span>: {
+      <span class="at">"ordering-route"</span>: {
+        <span class="at">"ClusterId"</span>: <span class="st">"ordering-cluster"</span>,
+        <span class="at">"AuthorizationPolicy"</span>: <span class="st">"default"</span>,  <span class="cm">// 需要已認證的使用者</span>
+        <span class="at">"Match"</span>: { <span class="at">"Path"</span>: <span class="st">"/ordering-service/{**catch-all}"</span> },
+        <span class="at">"Transforms"</span>: [{ <span class="at">"PathRemovePrefix"</span>: <span class="st">"/ordering-service"</span> }]
+      }
+    }
+  }
+}</code></pre>
+        </div>
+        <div class="callout callout-tip" style="margin-top:0.75rem;">
+          <span class="callout-icon">i</span>
+          <div>
+            設定 <code>AuthorizationPolicy</code> 後，未認證的請求會在 Gateway 層被攔截（回傳 401），不會到達後端服務。後端服務可以專注在業務邏輯，不需重複實作認證檢查。
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">健康檢查（Health Checks）</div>
+        <div class="code-block">
+          <div class="code-block-title">
+            <span>appsettings.json（Cluster 加上 HealthCheck）</span>
+            <span class="lang-tag">JSON</span>
+          </div>
+          <pre><code>{
+  <span class="at">"ReverseProxy"</span>: {
+    <span class="at">"Clusters"</span>: {
+      <span class="at">"catalog-cluster"</span>: {
+        <span class="at">"HealthCheck"</span>: {
+          <span class="at">"Active"</span>: {
+            <span class="at">"Enabled"</span>: <span class="kw">true</span>,
+            <span class="at">"Interval"</span>: <span class="st">"00:00:10"</span>,    <span class="cm">// 每 10 秒主動探測</span>
+            <span class="at">"Timeout"</span>: <span class="st">"00:00:05"</span>,    <span class="cm">// 5 秒無回應視為不健康</span>
+            <span class="at">"Policy"</span>: <span class="st">"ConsecutiveFailures"</span>,
+            <span class="at">"Path"</span>: <span class="st">"/health"</span>          <span class="cm">// 後端服務的健康檢查端點</span>
+          }
+        },
+        <span class="at">"Destinations"</span>: {
+          <span class="at">"destination1"</span>: { <span class="at">"Address"</span>: <span class="st">"http://catalog.api:8080/"</span> },
+          <span class="at">"destination2"</span>: { <span class="at">"Address"</span>: <span class="st">"http://catalog.api-2:8080/"</span> }
+        }
+      }
+    }
+  }
+}</code></pre>
+        </div>
+        <div class="callout callout-info" style="margin-top:0.75rem;">
+          <span class="callout-icon">i</span>
+          <div>
+            YARP 定期對每個 Destination 的 <code>/health</code> 路徑發送 GET 請求。若回傳非 2xx 狀態碼或超時，YARP 會自動將該 Destination 標記為不健康，新的請求不再路由到它，直到它恢復健康。
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">請求轉換（Request Transforms）</div>
+        <div class="code-block">
+          <div class="code-block-title">
+            <span>appsettings.json（多種 Transform 範例）</span>
+            <span class="lang-tag">JSON</span>
+          </div>
+          <pre><code>{
+  <span class="at">"ReverseProxy"</span>: {
+    <span class="at">"Routes"</span>: {
+      <span class="at">"catalog-route"</span>: {
+        <span class="at">"ClusterId"</span>: <span class="st">"catalog-cluster"</span>,
+        <span class="at">"Match"</span>: { <span class="at">"Path"</span>: <span class="st">"/catalog-service/{**catch-all}"</span> },
+        <span class="at">"Transforms"</span>: [
+          <span class="cm">// 移除路徑前綴</span>
+          { <span class="at">"PathRemovePrefix"</span>: <span class="st">"/catalog-service"</span> },
+
+          <span class="cm">// 加入自訂 Request Header，後端可讀取</span>
+          { <span class="at">"RequestHeader"</span>: <span class="st">"X-Gateway-Name"</span>, <span class="at">"Set"</span>: <span class="st">"YarpGateway"</span> },
+
+          <span class="cm">// 將 X-Forwarded-For 傳遞給後端</span>
+          { <span class="at">"X-Forwarded"</span>: <span class="st">"Set"</span> },
+
+          <span class="cm">// 修改 QueryString：加入固定參數</span>
+          { <span class="at">"QueryValueParameter"</span>: <span class="st">"source"</span>, <span class="at">"Set"</span>: <span class="st">"gateway"</span> }
+        ]
+      }
+    }
+  }
+}</code></pre>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────── PHASE 5 ─────────────────── -->
+  <section id="phase5" class="phase phase-5">
+    <div class="phase-header">
+      <div class="phase-badge">5</div>
+      <div>
+        <h2>對照 YarpApiGateway 專案</h2>
+        <div class="subtitle">讀懂每一行、理解三個 appsettings 的優先順序</div>
+      </div>
+    </div>
+    <div class="phase-body">
+
+      <div>
+        <div class="section-label">學習目標</div>
+        <ul class="goal-list">
+          <li>能讀懂原始專案中每一行設定的意義</li>
+          <li>理解為什麼這個服務只需要兩個主要檔案（Program.cs + appsettings）</li>
+          <li>理解三個 appsettings 檔案的優先順序與覆蓋邏輯</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">建議閱讀順序</div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+          <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.9rem;background:#eef2ff;border-radius:6px;border:1px solid #c7d2fe;">
+            <span style="flex-shrink:0;width:1.6rem;height:1.6rem;background:#4a4aab;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;">1</span>
+            <div>
+              <code>YarpApiGateway.csproj</code>
+              <span style="font-size:0.83rem;color:#4a5568;margin-left:0.5rem;">確認使用的 SDK 和 NuGet 套件版本</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.9rem;background:#eef2ff;border-radius:6px;border:1px solid #c7d2fe;">
+            <span style="flex-shrink:0;width:1.6rem;height:1.6rem;background:#4a4aab;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;">2</span>
+            <div>
+              <code>appsettings.json</code>
+              <span style="font-size:0.83rem;color:#4a5568;margin-left:0.5rem;">基礎設定（Docker 環境），了解服務名稱與 Port</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.9rem;background:#eef2ff;border-radius:6px;border:1px solid #c7d2fe;">
+            <span style="flex-shrink:0;width:1.6rem;height:1.6rem;background:#4a4aab;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;">3</span>
+            <div>
+              <code>appsettings.Local.json</code>
+              <span style="font-size:0.83rem;color:#4a5568;margin-left:0.5rem;">本地開發覆蓋設定，了解哪些值被替換</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.9rem;background:#eef2ff;border-radius:6px;border:1px solid #c7d2fe;">
+            <span style="flex-shrink:0;width:1.6rem;height:1.6rem;background:#4a4aab;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;">4</span>
+            <div>
+              <code>Program.cs</code>
+              <span style="font-size:0.83rem;color:#4a5568;margin-left:0.5rem;">程式進入點，確認 Middleware 的順序</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">appsettings 優先順序說明</div>
+        <div class="callout callout-info" style="margin-bottom:0.75rem;">
+          <span class="callout-icon">i</span>
+          <div>
+            ASP.NET Core 的設定系統支援多來源疊加覆蓋。後面載入的設定會覆蓋前面相同 Key 的值。
+          </div>
+        </div>
+        <div class="arch-table">
+          <table>
+            <thead>
+              <tr>
+                <th>優先順序</th>
+                <th>設定來源</th>
+                <th>說明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="color:#718096;">最低</td>
+                <td><code>appsettings.json</code></td>
+                <td>基礎預設值，適合 Docker Compose 環境（服務名稱 DNS）</td>
+              </tr>
+              <tr>
+                <td></td>
+                <td><code>appsettings.{Environment}.json</code></td>
+                <td>根據 <code>ASPNETCORE_ENVIRONMENT</code> 環境變數自動載入，例如 <code>appsettings.Production.json</code></td>
+              </tr>
+              <tr>
+                <td style="color:#4a4aab;font-weight:600;">最高</td>
+                <td><code>appsettings.Local.json</code></td>
+                <td>手動加入，覆蓋 Docker 位址為 localhost，不應提交到 Git（加入 .gitignore）</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout-warn" style="margin-top:0.75rem;">
+          <span class="callout-icon">⚠</span>
+          <div>
+            <code>appsettings.Local.json</code> 不是 ASP.NET Core 的預設慣例（不像 <code>appsettings.Development.json</code> 會自動載入）。需要在 <code>Program.cs</code> 中明確呼叫 <code>builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true)</code>，或在 <code>WebApplicationBuilder</code> 的建構過程中設定。
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">整體架構圖</div>
+        <pre class="arch-diagram">
+<span class="arch-label">              外部請求（瀏覽器、App、Postman）</span>
+<span class="arch-box">                          │                        </span>
+<span class="arch-box">                          ▼                        </span>
+<span class="arch-box">┌─────────────────────────────────────────────────┐</span>
+<span class="arch-box">│　　　　　　　　　　YarpApiGateway                  │</span>
+<span class="arch-box">│    HTTP  <span class="arch-port">:6004</span>  /  HTTPS  <span class="arch-port">:6064</span>                 │</span>
+<span class="arch-box">│                                                 │</span>
+<span class="arch-box">│  /catalog-service/**  →  catalog-cluster        │</span>
+<span class="arch-box">│  /basket-service/**   →  basket-cluster         │</span>
+<span class="arch-box">│  /ordering-service/** →  ordering-cluster       │</span>
+<span class="arch-box">│  (+ RateLimiter "fixed")                        │</span>
+<span class="arch-box">└──────────┬──────────────┬────────────────┬──────┘</span>
+<span class="arch-box">           │              │                │       </span>
+<span class="arch-box">           ▼              ▼                ▼       </span>
+<span class="arch-box">   ┌──────────────┐ ┌──────────────┐ ┌──────────────┐</span>
+<span class="arch-box">   │ catalog.api  │ │ basket.api   │ │ ordering.api │</span>
+<span class="arch-box">   │  :<span class="arch-port">8080</span>       │ │  :<span class="arch-port">8080</span>       │ │  :<span class="arch-port">8080</span>       │</span>
+<span class="arch-box">   └──────────────┘ └──────────────┘ └──────────────┘</span>
+<span class="arch-label">（Docker 服務名稱，或 localhost:6000/6001/6003 本地開發）</span>
+        </pre>
+      </div>
+
+      <div>
+        <div class="section-label">和其他服務的比較</div>
+        <div class="arch-table">
+          <table>
+            <thead>
+              <tr>
+                <th>服務</th>
+                <th>Program.cs 行數（約）</th>
+                <th>業務邏輯</th>
+                <th>主要套件</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>YarpApiGateway</strong></td>
+                <td>~20 行</td>
+                <td>無（純路由轉發）</td>
+                <td>Yarp.ReverseProxy</td>
+              </tr>
+              <tr>
+                <td>Catalog.API</td>
+                <td>~30 行</td>
+                <td>商品 CRUD、搜尋</td>
+                <td>Carter, Marten, MediatR</td>
+              </tr>
+              <tr>
+                <td>Basket.API</td>
+                <td>~40 行</td>
+                <td>購物車管理、折扣計算</td>
+                <td>Carter, Marten, Redis, gRPC Client</td>
+              </tr>
+              <tr>
+                <td>Ordering.API</td>
+                <td>~50 行</td>
+                <td>訂單建立、EF Core 遷移</td>
+                <td>Carter, EF Core, MassTransit</td>
+              </tr>
+              <tr>
+                <td>Discount.Grpc</td>
+                <td>~15 行</td>
+                <td>折扣查詢（gRPC）</td>
+                <td>Grpc.AspNetCore, EF Core SQLite</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout-tip" style="margin-top:0.75rem;">
+          <span class="callout-icon">★</span>
+          <div>
+            <strong>為什麼 YarpApiGateway 只有兩個主要檔案？</strong><br/>
+            這個服務本身沒有任何業務邏輯——它只負責「接收請求、查找 Route、轉發到對應 Cluster」。所有的行為都由 YARP 套件處理，開發者只需要提供設定（appsettings.json）。Program.cs 只需要告訴 ASP.NET Core「使用 YARP」，沒有 Controller、Handler、Repository 等元件。
+          </div>
+        </div>
+      </div>
+
+      <div class="checkpoint">
+        <div class="section-label">學習檢查點</div>
+        <ul>
+          <li>能說明 Route 和 Cluster 的差別（Route = 比對規則，Cluster = 目標位址清單）</li>
+          <li>能說明 <code>{**catch-all}</code> 萬用符號的作用，以及為什麼用兩個星號</li>
+          <li>能為第四個服務（例如 Discount.Grpc）新增一組 Route + Cluster 設定</li>
+          <li>能說明 Rate Limiting 超過限制時回傳 HTTP 429 的行為，以及 <code>QueueLimit</code> 的作用</li>
+          <li>能說明 appsettings.json、appsettings.Development.json、appsettings.Local.json 三者的優先順序</li>
+          <li>能說明為什麼 Docker 環境用服務名稱（<code>catalog.api</code>）而本地用 <code>localhost:6000</code></li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

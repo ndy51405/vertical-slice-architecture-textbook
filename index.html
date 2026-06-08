@@ -3,1060 +3,630 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>學習 Catalog API 架構</title>
+  <title>eShop Microservices — 學習導覽</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #0f1117;
-      color: #e2e8f0;
+      background: #f0f4f8;
+      color: #1a202c;
       line-height: 1.7;
     }
 
+    /* ── Header ── */
     header {
-      background: linear-gradient(135deg, #1e3a5f, #0f2942);
-      border-bottom: 1px solid #2d4a6e;
-      padding: 2.5rem 2rem;
+      background: linear-gradient(135deg, #1a202c, #2d3748);
+      border-bottom: 3px solid #4a5568;
+      padding: 2.8rem 2rem;
       text-align: center;
     }
 
     header h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #60a5fa;
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #fff;
       margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
     }
 
     header p {
-      color: #94a3b8;
+      color: #a0aec0;
       font-size: 1rem;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
-    .toc {
-      max-width: 900px;
-      margin: 2rem auto;
-      padding: 0 1.5rem;
-    }
-
-    .toc h2 {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #64748b;
-      margin-bottom: 0.75rem;
-    }
-
-    .toc-list {
+    header .badge-row {
       display: flex;
       flex-wrap: wrap;
+      justify-content: center;
       gap: 0.5rem;
+      margin-top: 1.2rem;
     }
 
-    .toc-list a {
+    header .badge {
       display: inline-block;
-      padding: 0.35rem 0.85rem;
+      padding: 0.25rem 0.75rem;
       border-radius: 999px;
-      font-size: 0.85rem;
-      text-decoration: none;
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #94a3b8;
-      transition: all 0.15s;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(255,255,255,0.1);
+      color: #e2e8f0;
+      border: 1px solid rgba(255,255,255,0.15);
     }
 
-    .toc-list a:hover {
-      background: #1d4ed8;
-      border-color: #1d4ed8;
-      color: #fff;
-    }
-
+    /* ── Main layout ── */
     main {
-      max-width: 900px;
+      max-width: 1060px;
       margin: 0 auto;
-      padding: 0 1.5rem 4rem;
+      padding: 0 1.5rem 5rem;
     }
 
-    .phase {
-      margin-bottom: 3rem;
-      border: 1px solid #1e293b;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .phase-header {
+    /* ── Section heading ── */
+    .section-heading {
+      margin: 2.5rem 0 1.2rem;
       display: flex;
       align-items: center;
-      gap: 1rem;
-      padding: 1.25rem 1.5rem;
-      background: #141920;
-      border-bottom: 1px solid #1e293b;
+      gap: 0.75rem;
     }
 
-    .phase-badge {
-      flex-shrink: 0;
-      width: 2.2rem;
-      height: 2.2rem;
+    .section-heading h2 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #718096;
+      font-weight: 700;
+    }
+
+    .section-heading::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e2e8f0;
+    }
+
+    /* ── Architecture diagram ── */
+    .arch-card {
+      background: #1a202c;
+      border: 1.5px solid #2d3748;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    }
+
+    .arch-card-title {
+      padding: 0.65rem 1.2rem;
+      background: #2d3748;
+      border-bottom: 1px solid #4a5568;
+      font-size: 0.8rem;
+      color: #a0aec0;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .arch-card-title .lang-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: #4a5568;
+      color: #a0aec0;
+    }
+
+    .arch-card pre {
+      padding: 1.4rem 1.6rem;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.84rem;
+      line-height: 1.65;
+      color: #e2e8f0;
+      overflow-x: auto;
+    }
+
+    /* ASCII 顏色 tokens */
+    .arch-card .svc-web    { color: #5eead4; font-weight: 700; }  /* 青綠 */
+    .arch-card .svc-gw     { color: #94a3b8; font-weight: 700; }  /* 石板 */
+    .arch-card .svc-cat    { color: #fbbf24; font-weight: 700; }  /* 鵝黃 */
+    .arch-card .svc-bsk    { color: #60a5fa; font-weight: 700; }  /* 藍 */
+    .arch-card .svc-dis    { color: #c084fc; font-weight: 700; }  /* 紫 */
+    .arch-card .svc-ord    { color: #818cf8; font-weight: 700; }  /* 靛藍 */
+    .arch-card .svc-db     { color: #86efac; }                     /* 綠（資料庫） */
+    .arch-card .svc-mq     { color: #fca5a5; }                     /* 紅（MQ） */
+    .arch-card .arrow      { color: #4a5568; }
+    .arch-card .dim        { color: #4a5568; }
+    .arch-card .proto      { color: #fde68a; font-style: italic; }
+
+    /* ── Service cards grid ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .svc-card {
+      background: #fff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .svc-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    .svc-card-header {
+      padding: 1.1rem 1.3rem 0.9rem;
+      border-bottom: 1.5px solid #e2e8f0;
+    }
+
+    .svc-card-header .svc-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+      opacity: 0.85;
+    }
+
+    .svc-card-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a202c;
+    }
+
+    .svc-card-header .svc-sub {
+      font-size: 0.82rem;
+      color: #718096;
+      margin-top: 0.15rem;
+    }
+
+    .svc-card-body {
+      padding: 1rem 1.3rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .tech-tag {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      color: #4a5568;
+    }
+
+    .phases-info {
+      font-size: 0.82rem;
+      color: #718096;
+    }
+
+    .phases-info strong {
+      color: #2d3748;
+    }
+
+    .svc-card-footer {
+      padding: 0.85rem 1.3rem;
+      border-top: 1.5px solid #e2e8f0;
+    }
+
+    .svc-card-footer a {
+      display: block;
+      text-align: center;
+      padding: 0.55rem 1rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: #fff;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .svc-card-footer a:hover {
+      opacity: 0.88;
+      transform: scale(0.98);
+    }
+
+    /* ── Learning path ── */
+    .path-card {
+      background: #fff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .path-steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+    }
+
+    .path-step {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.4rem;
+      flex: 1;
+      min-width: 180px;
+      position: relative;
+    }
+
+    .path-step::after {
+      content: '→';
+      position: absolute;
+      right: -0.3rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #cbd5e0;
+      font-size: 1.1rem;
+      z-index: 1;
+    }
+
+    .path-step:last-child::after { display: none; }
+
+    .path-num {
+      width: 2rem;
+      height: 2rem;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 700;
-      font-size: 0.9rem;
-    }
-
-    .phase-1 .phase-badge { background: #1e3a5f; color: #60a5fa; }
-    .phase-2 .phase-badge { background: #1a3329; color: #34d399; }
-    .phase-3 .phase-badge { background: #2d1f3d; color: #a78bfa; }
-    .phase-4 .phase-badge { background: #2d2010; color: #fb923c; }
-    .phase-5 .phase-badge { background: #1f2a1a; color: #86efac; }
-
-    .phase-header h2 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #e2e8f0;
-    }
-
-    .phase-header .subtitle {
       font-size: 0.85rem;
-      color: #64748b;
-      margin-top: 0.1rem;
+      flex-shrink: 0;
+      color: #fff;
     }
 
-    .phase-body {
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
+    .path-step-info .name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #1a202c;
     }
 
-    .section-label {
+    .path-step-info .reason {
       font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #475569;
-      margin-bottom: 0.6rem;
-      font-weight: 600;
+      color: #718096;
     }
 
-    .goal-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .goal-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.6rem;
-      font-size: 0.95rem;
-      color: #cbd5e1;
-    }
-
-    .goal-list li::before {
-      content: '→';
-      color: #475569;
-      flex-shrink: 0;
-      margin-top: 0.05rem;
-    }
-
-    .code-block {
-      background: #0d1117;
-      border: 1px solid #1e293b;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .code-block-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.5rem 1rem;
-      background: #161b22;
-      border-bottom: 1px solid #1e293b;
-      font-size: 0.8rem;
-      color: #64748b;
-      font-family: 'Cascadia Code', 'Fira Code', monospace;
-    }
-
-    .lang-tag {
-      font-size: 0.7rem;
-      padding: 0.15rem 0.5rem;
-      border-radius: 4px;
-      background: #1e293b;
-      color: #475569;
-    }
-
-    pre {
-      padding: 1.1rem 1.2rem;
-      overflow-x: auto;
-      font-size: 0.855rem;
-      line-height: 1.65;
-    }
-
-    code {
-      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
-      color: #e2e8f0;
-    }
-
-    /* Syntax highlight tokens */
-    .kw  { color: #c792ea; }  /* keyword */
-    .ty  { color: #82aaff; }  /* type */
-    .st  { color: #c3e88d; }  /* string */
-    .cm  { color: #546e7a; font-style: italic; }  /* comment */
-    .me  { color: #89ddff; }  /* method */
-    .nu  { color: #f78c6c; }  /* number */
-    .at  { color: #ffcb6b; }  /* attribute/annotation */
-    .op  { color: #89ddff; }  /* operator */
-
-    .callout {
-      display: flex;
-      gap: 0.75rem;
-      padding: 0.9rem 1.1rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-    }
-
-    .callout-tip {
-      background: #0f2942;
-      border: 1px solid #1e3a5f;
-      color: #93c5fd;
-    }
-
-    .callout-warn {
-      background: #1c1305;
-      border: 1px solid #431407;
-      color: #fdba74;
-    }
-
-    .callout-icon {
-      flex-shrink: 0;
-      font-size: 1rem;
-    }
-
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
-    @media (max-width: 640px) {
-      .two-col { grid-template-columns: 1fr; }
-    }
-
-    .checkpoint {
-      background: #0f1a0f;
-      border: 1px solid #14532d;
-      border-radius: 8px;
-      padding: 1rem 1.2rem;
-    }
-
-    .checkpoint .section-label { color: #16a34a; }
-
-    .checkpoint ul {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
-
-    .checkpoint ul li {
-      font-size: 0.9rem;
-      color: #86efac;
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .checkpoint ul li::before {
-      content: '✓';
-      color: #16a34a;
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #a0aec0;
+      font-size: 0.82rem;
+      border-top: 1px solid #e2e8f0;
+      margin-top: 2rem;
     }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>學習 Catalog API 架構</h1>
-  <p>從零開始，逐步理解 MediatR · FluentValidation · Marten · Carter 的搭配方式</p>
-</header>
-
-<nav class="toc">
-  <h2>目錄</h2>
-  <div class="toc-list">
-    <a href="#phase1">階段一：MediatR 核心</a>
-    <a href="#phase2">階段二：FluentValidation + Pipeline</a>
-    <a href="#phase3">階段三：Marten + PostgreSQL</a>
-    <a href="#phase4">階段四：Carter</a>
-    <a href="#phase5">階段五：對照 Catalog.API</a>
+  <h1>🛒 eShop Microservices 學習導覽</h1>
+  <p>六個微服務的分階段學習教材，從 Catalog 到 Shopping Web，完整覆蓋現代 .NET 微服務架構</p>
+  <div class="badge-row">
+    <span class="badge">.NET 8</span>
+    <span class="badge">Docker Compose</span>
+    <span class="badge">Vertical Slice</span>
+    <span class="badge">CQRS / MediatR</span>
+    <span class="badge">gRPC</span>
+    <span class="badge">MassTransit + RabbitMQ</span>
+    <span class="badge">YARP Gateway</span>
+    <span class="badge">Clean Architecture</span>
+    <span class="badge">Razor Pages</span>
   </div>
-</nav>
+</header>
 
 <main>
 
-  <!-- ───────────────────────────────── PHASE 1 ───────────────────────────────── -->
-  <section class="phase phase-1" id="phase1">
-    <div class="phase-header">
-      <div class="phase-badge">1</div>
-      <div>
-        <h2>MediatR 核心概念</h2>
-        <div class="subtitle">理解 Request / Handler / Send() 的運作方式</div>
+  <!-- ── 整體架構圖 ── -->
+  <div class="section-heading"><h2>整體架構圖</h2></div>
+
+  <div class="arch-card">
+    <div class="arch-card-title">
+      <span>eshop-microservices — 服務關係圖</span>
+      <span class="lang-tag">ASCII</span>
+    </div>
+    <pre>
+<span class="dim">  瀏覽器 / Postman</span>
+       │  HTTPS
+       ▼
+┌──────────────────────┐
+│  <span class="svc-web">Shopping.Web</span>         │  Razor Pages + Refit HTTP Client
+│  <span class="dim">:6065</span>                │
+└──────────┬───────────┘
+           │  HTTP/HTTPS
+           ▼
+┌──────────────────────┐
+│  <span class="svc-gw">YARP API Gateway</span>     │  反向代理 · Rate Limiting · Path Rewrite
+│  <span class="dim">:6004 / :6064</span>        │
+└──────┬───────┬────────┘
+       │       │
+       │       │  HTTP
+       │       ▼
+       │  ┌─────────────────────────────────────────────┐
+       │  │  <span class="svc-cat">Catalog.API</span>  <span class="dim">:6000/6060</span>                  │
+       │  │  Vertical Slice · Carter · Marten            │
+       │  │         <span class="arrow">↓</span>                                    │
+       │  │  <span class="svc-db">PostgreSQL</span> <span class="dim">:5432</span>                          │
+       │  └─────────────────────────────────────────────┘
+       │
+       │  HTTP
+       ▼
+┌────────────────────────────────────────────────────┐
+│  <span class="svc-bsk">Basket.API</span>  <span class="dim">:6001/6061</span>                           │
+│  Scrutor Decorator · Cache-Aside                   │
+│    <span class="arrow">↓</span> Redis <span class="dim">:6379</span>          <span class="arrow">↓</span> <span class="proto">gRPC</span>              │
+│  <span class="svc-db">Redis</span> Cache              <span class="svc-dis">Discount.Grpc</span> <span class="dim">:6002/6062</span>│
+│                              EF Core + SQLite       │
+│    <span class="arrow">↓</span> Publish                                      │
+│  <span class="svc-mq">RabbitMQ</span> <span class="dim">:5672</span>                                   │
+└────────────────────────────────────────────────────┘
+                      │
+                      │  Subscribe / Consume
+                      ▼
+┌────────────────────────────────────────────────────┐
+│  <span class="svc-ord">Ordering.API</span>  <span class="dim">:6003/6063</span>                         │
+│  Clean Architecture · DDD · EF Core                │
+│    <span class="arrow">↓</span>                                               │
+│  <span class="svc-db">SQL Server (MSSQL)</span> <span class="dim">:1433</span>                         │
+└────────────────────────────────────────────────────┘
+
+<span class="dim">  ┌──────────────────────────────────────────────────────────┐
+  │  基礎設施（docker-compose）                               │
+  │  PostgreSQL · Redis · RabbitMQ · SQL Server              │
+  └──────────────────────────────────────────────────────────┘</span>
+</pre>
+  </div>
+
+  <!-- ── 建議學習路徑 ── -->
+  <div class="section-heading"><h2>建議學習路徑</h2></div>
+
+  <div class="path-card">
+    <div class="path-steps">
+      <div class="path-step">
+        <div class="path-num" style="background:#a88c00;">1</div>
+        <div class="path-step-info">
+          <div class="name" style="color:#92800a;">Catalog API</div>
+          <div class="reason">MediatR · Carter · Marten<br>奠定 Vertical Slice 基礎</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <div class="path-num" style="background:#2b6cb0;">2</div>
+        <div class="path-step-info">
+          <div class="name" style="color:#2b6cb0;">Basket API</div>
+          <div class="reason">Decorator · Redis<br>gRPC Client · MassTransit</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <div class="path-num" style="background:#6b46c1;">3</div>
+        <div class="path-step-info">
+          <div class="name" style="color:#6b46c1;">Discount gRPC</div>
+          <div class="reason">Protocol Buffers · gRPC<br>EF Core + SQLite</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <div class="path-num" style="background:#4a4aab;">4</div>
+        <div class="path-step-info">
+          <div class="name" style="color:#4a4aab;">Ordering API</div>
+          <div class="reason">Clean Architecture · DDD<br>MassTransit Consumer</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <div class="path-num" style="background:#5a6a7a;">5</div>
+        <div class="path-step-info">
+          <div class="name" style="color:#5a6a7a;">YARP Gateway</div>
+          <div class="reason">反向代理 · Route Config<br>Rate Limiting</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <div class="path-num" style="background:#0d9488;">6</div>
+        <div class="path-step-info">
+          <div class="name" style="color:#0d9488;">Shopping Web</div>
+          <div class="reason">Razor Pages · Refit<br>完整前後端串接</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 服務教材卡片 ── -->
+  <div class="section-heading"><h2>服務教材</h2></div>
+
+  <div class="cards-grid">
+
+    <!-- Catalog API -->
+    <div class="svc-card">
+      <div class="svc-card-header" style="border-left: 4px solid #a88c00;">
+        <div class="svc-label" style="color:#a88c00;">Service 1 · Port 6000 / 6060</div>
+        <h3>Catalog API</h3>
+        <div class="svc-sub">商品目錄 — 查詢 / 新增 / 更新 / 刪除</div>
+      </div>
+      <div class="svc-card-body">
+        <div class="tech-tags">
+          <span class="tech-tag">Vertical Slice</span>
+          <span class="tech-tag">MediatR</span>
+          <span class="tech-tag">FluentValidation</span>
+          <span class="tech-tag">Carter</span>
+          <span class="tech-tag">Marten</span>
+          <span class="tech-tag">PostgreSQL</span>
+        </div>
+        <div class="phases-info">
+          <strong>5 個階段</strong>：MediatR Pipeline → FluentValidation → Marten Document Store → Carter 路由 → 對照原專案
+        </div>
+      </div>
+      <div class="svc-card-footer">
+        <a href="learn-catalog-api.html" style="background: linear-gradient(135deg,#a88c00,#7a6500);">開始學習 →</a>
       </div>
     </div>
 
-    <div class="phase-body">
-
-      <div>
-        <div class="section-label">學習目標</div>
-        <ul class="goal-list">
-          <li>理解為什麼需要中介者（Mediator）模式，以及它解決了什麼問題</li>
-          <li>知道 IRequest、IRequestHandler、ISender 三者的關係</li>
-          <li>理解 Command 和 Query 在概念上的差異（寫入 vs 讀取）</li>
-          <li>體會 Endpoint 和 Handler 完全解耦：兩者之間沒有任何直接依賴</li>
-        </ul>
+    <!-- Basket API -->
+    <div class="svc-card">
+      <div class="svc-card-header" style="border-left: 4px solid #2b6cb0;">
+        <div class="svc-label" style="color:#2b6cb0;">Service 2 · Port 6001 / 6061</div>
+        <h3>Basket API</h3>
+        <div class="svc-sub">購物車 — Cache-Aside · gRPC · 事件發布</div>
       </div>
-
-      <div>
-        <div class="section-label">建立專案</div>
-        <div class="code-block">
-          <div class="code-block-title"><span>Terminal</span><span class="lang-tag">shell</span></div>
-          <pre><code>dotnet new webapi -n LearnMediatR --use-minimal-apis -o LearnMediatR
-cd LearnMediatR
-dotnet add package MediatR
-dotnet run</code></pre>
+      <div class="svc-card-body">
+        <div class="tech-tags">
+          <span class="tech-tag">Scrutor Decorator</span>
+          <span class="tech-tag">Redis</span>
+          <span class="tech-tag">gRPC Client</span>
+          <span class="tech-tag">MassTransit</span>
+          <span class="tech-tag">RabbitMQ</span>
+        </div>
+        <div class="phases-info">
+          <strong>6 個階段</strong>：Scrutor Decorator → Redis Cache-Aside → gRPC Client → MassTransit Publisher → 整合串接 → 對照原專案
         </div>
       </div>
-
-      <div>
-        <div class="section-label">定義 Query 和 Command</div>
-        <div class="callout callout-tip">
-          <span class="callout-icon">💡</span>
-          <span>Query 代表讀取資料（不改變狀態），Command 代表寫入資料（改變狀態）。
-          這個區分是 CQRS 的核心概念。</span>
-        </div>
-        <br/>
-        <div class="code-block">
-          <div class="code-block-title"><span>Queries/GetProductsQuery.cs</span><span class="lang-tag">C#</span></div>
-          <pre><code><span class="cm">// Query：代表「我想讀取商品列表」這個意圖</span>
-<span class="cm">// IRequest&lt;T&gt; 告訴 MediatR：執行這個 Request 後會回傳 T</span>
-<span class="kw">public record</span> <span class="ty">GetProductsQuery</span>() : <span class="ty">IRequest</span>&lt;<span class="ty">List</span>&lt;<span class="ty">ProductDto</span>&gt;&gt;;
-
-<span class="kw">public record</span> <span class="ty">ProductDto</span>(<span class="ty">Guid</span> Id, <span class="ty">string</span> Name, <span class="ty">decimal</span> Price);</code></pre>
-        </div>
-        <br/>
-        <div class="code-block">
-          <div class="code-block-title"><span>Commands/CreateProductCommand.cs</span><span class="lang-tag">C#</span></div>
-          <pre><code><span class="cm">// Command：代表「我想建立一個商品」這個意圖</span>
-<span class="kw">public record</span> <span class="ty">CreateProductCommand</span>(<span class="ty">string</span> Name, <span class="ty">decimal</span> Price)
-    : <span class="ty">IRequest</span>&lt;<span class="ty">Guid</span>&gt;;  <span class="cm">// 回傳新商品的 ID</span></code></pre>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-label">實作 Handler</div>
-        <div class="code-block">
-          <div class="code-block-title"><span>Queries/GetProductsHandler.cs</span><span class="lang-tag">C#</span></div>
-          <pre><code><span class="cm">// Handler 負責實際執行邏輯</span>
-<span class="cm">// IRequestHandler&lt;TRequest, TResponse&gt; 告訴 MediatR 這個 Handler 處理哪種 Request</span>
-<span class="kw">public class</span> <span class="ty">GetProductsHandler</span> : <span class="ty">IRequestHandler</span>&lt;<span class="ty">GetProductsQuery</span>, <span class="ty">List</span>&lt;<span class="ty">ProductDto</span>&gt;&gt;
-{
-    <span class="cm">// 先用假資料，還不接資料庫</span>
-    <span class="kw">private static readonly</span> <span class="ty">List</span>&lt;<span class="ty">ProductDto</span>&gt; _fakeProducts =
-    [
-        <span class="kw">new</span>(<span class="ty">Guid</span>.<span class="me">NewGuid</span>(), <span class="st">"iPhone 15"</span>, <span class="nu">35900</span>),
-        <span class="kw">new</span>(<span class="ty">Guid</span>.<span class="me">NewGuid</span>(), <span class="st">"Samsung S24"</span>, <span class="nu">32900</span>),
-    ];
-
-    <span class="kw">public</span> <span class="ty">Task</span>&lt;<span class="ty">List</span>&lt;<span class="ty">ProductDto</span>&gt;&gt; <span class="me">Handle</span>(
-        <span class="ty">GetProductsQuery</span> request,
-        <span class="ty">CancellationToken</span> cancellationToken)
-    {
-        <span class="kw">return</span> <span class="ty">Task</span>.<span class="me">FromResult</span>(_fakeProducts);
-    }
-}</code></pre>
-        </div>
-        <br/>
-        <div class="code-block">
-          <div class="code-block-title"><span>Commands/CreateProductHandler.cs</span><span class="lang-tag">C#</span></div>
-          <pre><code><span class="kw">public class</span> <span class="ty">CreateProductHandler</span> : <span class="ty">IRequestHandler</span>&lt;<span class="ty">CreateProductCommand</span>, <span class="ty">Guid</span>&gt;
-{
-    <span class="kw">public</span> <span class="ty">Task</span>&lt;<span class="ty">Guid</span>&gt; <span class="me">Handle</span>(
-        <span class="ty">CreateProductCommand</span> request,
-        <span class="ty">CancellationToken</span> cancellationToken)
-    {
-        <span class="kw">var</span> newId = <span class="ty">Guid</span>.<span class="me">NewGuid</span>();
-        <span class="ty">Console</span>.<span class="me">WriteLine</span>(<span class="st">$"建立商品：{request.Name}，價格：{request.Price}，ID：{newId}"</span>);
-        <span class="kw">return</span> <span class="ty">Task</span>.<span class="me">FromResult</span>(newId);
-    }
-}</code></pre>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-label">註冊並使用</div>
-        <div class="code-block">
-          <div class="code-block-title"><span>Program.cs</span><span class="lang-tag">C#</span></div>
-          <pre><code><span class="kw">var</span> builder = <span class="ty">WebApplication</span>.<span class="me">CreateBuilder</span>(args);
-
-<span class="cm">// 告訴 MediatR 去掃描這個 Assembly 裡所有的 IRequestHandler</span>
-builder.Services.<span class="me">AddMediatR</span>(cfg =>
-    cfg.<span class="me">RegisterServicesFromAssemblyContaining</span>&lt;<span class="ty">Program</span>&gt;());
-
-<span class="kw">var</span> app = builder.<span class="me">Build</span>();
-
-<span class="cm">// Endpoint 只依賴 ISender，完全不知道 Handler 的存在</span>
-app.<span class="me">MapGet</span>(<span class="st">"/products"</span>, <span class="kw">async</span> (<span class="ty">ISender</span> sender) =>
-{
-    <span class="kw">var</span> result = <span class="kw">await</span> sender.<span class="me">Send</span>(<span class="kw">new</span> <span class="ty">GetProductsQuery</span>());
-    <span class="kw">return</span> <span class="ty">Results</span>.<span class="me">Ok</span>(result);
-});
-
-app.<span class="me">MapPost</span>(<span class="st">"/products"</span>, <span class="kw">async</span> (<span class="ty">CreateProductCommand</span> command, <span class="ty">ISender</span> sender) =>
-{
-    <span class="kw">var</span> id = <span class="kw">await</span> sender.<span class="me">Send</span>(command);
-    <span class="kw">return</span> <span class="ty">Results</span>.<span class="me">Created</span>(<span class="st">$"/products/{id}"</span>, <span class="kw">new</span> { id });
-});
-
-app.<span class="me">Run</span>();</code></pre>
-        </div>
-      </div>
-
-      <div class="callout callout-tip">
-        <span class="callout-icon">💡</span>
-        <span>注意 Endpoint 裡完全看不到 <code>GetProductsHandler</code> 或 <code>CreateProductHandler</code>。
-        MediatR 根據 Request 的型別自動找到對應的 Handler。這就是解耦的意義。</span>
-      </div>
-
-      <div class="checkpoint">
-        <div class="section-label">完成檢查點</div>
-        <ul>
-          <li>GET /products 回傳假資料</li>
-          <li>POST /products 在 Console 印出收到的資料並回傳新 ID</li>
-          <li>能說明 ISender.Send() 和直接呼叫 Handler 的差別</li>
-          <li>能說明為什麼 Query 和 Command 要分開定義</li>
-        </ul>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ───────────────────────────────── PHASE 2 ───────────────────────────────── -->
-  <section class="phase phase-2" id="phase2">
-    <div class="phase-header">
-      <div class="phase-badge">2</div>
-      <div>
-        <h2>FluentValidation + Pipeline Behavior</h2>
-        <div class="subtitle">在 Handler 執行前自動攔截並驗證輸入</div>
+      <div class="svc-card-footer">
+        <a href="learn-basket-api.html" style="background: linear-gradient(135deg,#2b6cb0,#1a4a80);">開始學習 →</a>
       </div>
     </div>
 
-    <div class="phase-body">
-
-      <div>
-        <div class="section-label">學習目標</div>
-        <ul class="goal-list">
-          <li>理解 MediatR Pipeline Behavior 是什麼，以及它的執行順序</li>
-          <li>理解為什麼驗證邏輯不應該寫在 Handler 裡</li>
-          <li>知道如何讓驗證錯誤自動轉成 HTTP 400 回應</li>
-          <li>體會「寫一次，套用到所有 Handler」的好處</li>
-        </ul>
+    <!-- Discount gRPC -->
+    <div class="svc-card">
+      <div class="svc-card-header" style="border-left: 4px solid #6b46c1;">
+        <div class="svc-label" style="color:#6b46c1;">Service 3 · Port 6002 / 6062</div>
+        <h3>Discount gRPC</h3>
+        <div class="svc-sub">折扣服務 — Protocol Buffers · gRPC Server</div>
       </div>
-
-      <div>
-        <div class="section-label">安裝套件</div>
-        <div class="code-block">
-          <div class="code-block-title"><span>Terminal</span><span class="lang-tag">shell</span></div>
-          <pre><code>dotnet add package FluentValidation
-dotnet add package FluentValidation.DependencyInjectionExtensions</code></pre>
+      <div class="svc-card-body">
+        <div class="tech-tags">
+          <span class="tech-tag">gRPC</span>
+          <span class="tech-tag">Protocol Buffers</span>
+          <span class="tech-tag">EF Core</span>
+          <span class="tech-tag">SQLite</span>
+          <span class="tech-tag">Mapster</span>
+        </div>
+        <div class="phases-info">
+          <strong>5 個階段</strong>：gRPC 概念 → .proto 定義 → EF Core SQLite → Service 實作 → Basket 呼叫對照
         </div>
       </div>
-
-      <div>
-        <div class="section-label">定義 Validator</div>
-        <div class="callout callout-tip">
-          <span class="callout-icon">💡</span>
-          <span>每個 Command 或 Query 都可以有自己的 Validator。
-          Validator 和 Handler 放在同一個資料夾，這正是 Vertical Slice 的精神。</span>
-        </div>
-        <br/>
-        <div class="code-block">
-          <div class="code-block-title"><span>Commands/CreateProductValidator.cs</span><span class="lang-tag">C#</span></div>
-          <pre><code><span class="kw">public class</span> <span class="ty">CreateProductCommandValidator</span> : <span class="ty">AbstractValidator</span>&lt;<span class="ty">CreateProductCommand</span>&gt;
-{
-    <span class="kw">public</span> <span class="me">CreateProductCommandValidator</span>()
-    {
-        <span class="me">RuleFor</span>(x => x.Name)
-            .<span class="me">NotEmpty</span>().<span class="me">WithMessage</span>(<span class="st">"商品名稱不能為空"</span>)
-            .<span class="me">MinimumLength</span>(<span class="nu">2</span>).<span class="me">WithMessage</span>(<span class="st">"商品名稱至少 2 個字"</span>)
-            .<span class="me">MaximumLength</span>(<span class="nu">100</span>).<span class="me">WithMessage</span>(<span class="st">"商品名稱最多 100 個字"</span>);
-
-        <span class="me">RuleFor</span>(x => x.Price)
-            .<span class="me">GreaterThan</span>(<span class="nu">0</span>).<span class="me">WithMessage</span>(<span class="st">"價格必須大於 0"</span>);
-    }
-}</code></pre>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-label">實作 Pipeline Behavior</div>
-        <div class="callout callout-tip">
-          <span class="callout-icon">💡</span>
-          <span>Pipeline Behavior 就像是 Handler 的「前後處理器」。
-          執行順序為：Behavior 前段 → Handler → Behavior 後段。
-          可以有多個 Behavior 串接，形成一條 Pipeline。</span>
-        </div>
-        <br/>
-        <div class="code-block">
-          <div class="code-block-title"><span>Behaviors/ValidationBehavior.cs</span><span class="lang-tag">C#</span></div>
-          <pre><code><span class="kw">public class</span> <span class="ty">ValidationBehavior</span>&lt;<span class="ty">TRequest</span>, <span class="ty">TResponse</span>&gt;
-    : <span class="ty">IPipelineBehavior</span>&lt;<span class="ty">TRequest</span>, <span class="ty">TResponse</span>&gt;
-    <span class="kw">where</span> <span class="ty">TRequest</span> : <span class="ty">IRequest</span>&lt;<span class="ty">TResponse</span>&gt;
-{
-    <span class="kw">private readonly</span> <span class="ty">IEnumerable</span>&lt;<span class="ty">IValidator</span>&lt;<span class="ty">TRequest</span>&gt;&gt; _validators;
-
-    <span class="kw">public</span> <span class="me">ValidationBehavior</span>(<span class="ty">IEnumerable</span>&lt;<span class="ty">IValidator</span>&lt;<span class="ty">TRequest</span>&gt;&gt; validators)
-        => _validators = validators;
-
-    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">TResponse</span>&gt; <span class="me">Handle</span>(
-        <span class="ty">TRequest</span> request,
-        <span class="ty">RequestHandlerDelegate</span>&lt;<span class="ty">TResponse</span>&gt; next,  <span class="cm">// next() 呼叫下一個 Behavior 或 Handler</span>
-        <span class="ty">CancellationToken</span> cancellationToken)
-    {
-        <span class="cm">// ① 執行所有 Validator</span>
-        <span class="kw">var</span> context = <span class="kw">new</span> <span class="ty">ValidationContext</span>&lt;<span class="ty">TRequest</span>&gt;(request);
-        <span class="kw">var</span> failures = _validators
-            .<span class="me">Select</span>(v => v.<span class="me">Validate</span>(context))
-            .<span class="me">SelectMany</span>(r => r.Errors)
-            .<span class="me">Where</span>(f => f <span class="op">!=</span> <span class="kw">null</span>)
-            .<span class="me">ToList</span>();
-
-        <span class="cm">// ② 有錯誤就拋出例外，Handler 不會被執行</span>
-        <span class="kw">if</span> (failures.<span class="me">Any</span>())
-            <span class="kw">throw new</span> <span class="ty">ValidationException</span>(failures);
-
-        <span class="cm">// ③ 沒有錯誤，繼續執行 Handler</span>
-        <span class="kw">return await</span> <span class="me">next</span>();
-    }
-}</code></pre>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-label">註冊並處理驗證錯誤</div>
-        <div class="code-block">
-          <div class="code-block-title"><span>Program.cs</span><span class="lang-tag">C#</span></div>
-          <pre><code>builder.Services.<span class="me">AddMediatR</span>(cfg =>
-{
-    cfg.<span class="me">RegisterServicesFromAssemblyContaining</span>&lt;<span class="ty">Program</span>&gt;();
-    <span class="cm">// 把 ValidationBehavior 加入 Pipeline</span>
-    cfg.<span class="me">AddOpenBehavior</span>(<span class="kw">typeof</span>(<span class="ty">ValidationBehavior</span>&lt;,&gt;));
-});
-
-<span class="cm">// 自動掃描並註冊所有 AbstractValidator</span>
-builder.Services.<span class="me">AddValidatorsFromAssemblyContaining</span>&lt;<span class="ty">Program</span>&gt;();
-
-<span class="cm">// 全域例外處理：把 ValidationException 轉成 HTTP 400</span>
-app.<span class="me">UseExceptionHandler</span>(errApp =>
-{
-    errApp.<span class="me">Run</span>(<span class="kw">async</span> ctx =>
-    {
-        <span class="kw">var</span> ex = ctx.Features.<span class="me">Get</span>&lt;<span class="ty">IExceptionHandlerFeature</span>&gt;()?.Error;
-        <span class="kw">if</span> (ex <span class="kw">is</span> <span class="ty">ValidationException</span> ve)
-        {
-            ctx.Response.StatusCode = <span class="nu">400</span>;
-            <span class="kw">await</span> ctx.Response.<span class="me">WriteAsJsonAsync</span>(<span class="kw">new</span>
-            {
-                errors = ve.Errors.<span class="me">Select</span>(e => <span class="kw">new</span> { e.PropertyName, e.ErrorMessage })
-            });
-        }
-    });
-});</code></pre>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-label">驗證測試</div>
-        <div class="two-col">
-          <div class="code-block">
-            <div class="code-block-title"><span>正確的請求</span><span class="lang-tag">JSON</span></div>
-            <pre><code>POST /products
-{
-  "name": "iPhone 15",
-  "price": 35900
-}
-<span class="cm">// → 201 Created</span></code></pre>
-          </div>
-          <div class="code-block">
-            <div class="code-block-title"><span>錯誤的請求</span><span class="lang-tag">JSON</span></div>
-            <pre><code>POST /products
-{
-  "name": "",
-  "price": -100
-}
-<span class="cm">// → 400 Bad Request
-// {
-//   "errors": [
-//     { "propertyName": "Name",
-//       "errorMessage": "..." },
-//     { "propertyName": "Price",
-//       "errorMessage": "..." }
-//   ]
-// }</span></code></pre>
-          </div>
-        </div>
-      </div>
-
-      <div class="checkpoint">
-        <div class="section-label">完成檢查點</div>
-        <ul>
-          <li>送出無效資料時回傳 400，Handler 不會被呼叫</li>
-          <li>新增第二個 Command 不需要修改 ValidationBehavior</li>
-          <li>能說明 next() 在 Pipeline 中的角色</li>
-          <li>能說明為什麼驗證邏輯不寫在 Handler 裡</li>
-        </ul>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ───────────────────────────────── PHASE 3 ───────────────────────────────── -->
-  <section class="phase phase-3" id="phase3">
-    <div class="phase-header">
-      <div class="phase-badge">3</div>
-      <div>
-        <h2>Marten + PostgreSQL</h2>
-        <div class="subtitle">把假資料換成真正的 Document Store</div>
+      <div class="svc-card-footer">
+        <a href="learn-discount-grpc.html" style="background: linear-gradient(135deg,#6b46c1,#4c3494);">開始學習 →</a>
       </div>
     </div>
 
-    <div class="phase-body">
-
-      <div>
-        <div class="section-label">學習目標</div>
-        <ul class="goal-list">
-          <li>理解 Document Store 和傳統關聯式資料庫（EF Core）的差異</li>
-          <li>知道什麼情況下適合用 Document Store</li>
-          <li>理解 Marten 的 Session 概念（IDocumentSession vs IQuerySession）</li>
-          <li>體會不需要 Migration 的開發流程</li>
-        </ul>
+    <!-- Ordering API -->
+    <div class="svc-card">
+      <div class="svc-card-header" style="border-left: 4px solid #4a4aab;">
+        <div class="svc-label" style="color:#4a4aab;">Service 4 · Port 6003 / 6063</div>
+        <h3>Ordering API</h3>
+        <div class="svc-sub">訂單服務 — Clean Architecture · DDD · CQRS</div>
       </div>
-
-      <div>
-        <div class="section-label">啟動 PostgreSQL</div>
-        <div class="code-block">
-          <div class="code-block-title"><span>Terminal</span><span class="lang-tag">shell</span></div>
-          <pre><code><span class="cm"># 用 Docker 快速啟動一個 PostgreSQL，不需要本機安裝</span>
-docker run -d \
-  --name learndb \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=LearnDb \
-  -p 5432:5432 \
-  postgres:16</code></pre>
+      <div class="svc-card-body">
+        <div class="tech-tags">
+          <span class="tech-tag">Clean Architecture</span>
+          <span class="tech-tag">DDD</span>
+          <span class="tech-tag">MediatR</span>
+          <span class="tech-tag">EF Core</span>
+          <span class="tech-tag">MassTransit</span>
+          <span class="tech-tag">MSSQL</span>
+        </div>
+        <div class="phases-info">
+          <strong>7 個階段</strong>：Clean Arch 四層 → Domain 建模 → Domain Events / Interceptors → CQRS → EF Core 進階 → MassTransit Consumer → 對照原專案
         </div>
       </div>
-
-      <div>
-        <div class="section-label">安裝套件並設定連線</div>
-        <div class="code-block">
-          <div class="code-block-title"><span>Terminal</span><span class="lang-tag">shell</span></div>
-          <pre><code>dotnet add package Marten</code></pre>
-        </div>
-        <br/>
-        <div class="code-block">
-          <div class="code-block-title"><span>appsettings.json</span><span class="lang-tag">JSON</span></div>
-          <pre><code>{
-  "ConnectionStrings": {
-    "Database": <span class="st">"Server=localhost;Port=5432;Database=LearnDb;User Id=postgres;Password=postgres"</span>
-  }
-}</code></pre>
-        </div>
-        <br/>
-        <div class="code-block">
-          <div class="code-block-title"><span>Program.cs</span><span class="lang-tag">C#</span></div>
-          <pre><code>builder.Services.<span class="me">AddMarten</span>(opts =>
-{
-    opts.<span class="me">Connection</span>(builder.Configuration.<span class="me">GetConnectionString</span>(<span class="st">"Database"</span>)!);
-}).<span class="me">UseLightweightSessions</span>();
-<span class="cm">// UseLightweightSessions：讀取為主的場景使用，省略 identity map 的開銷</span></code></pre>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-label">定義 Document Model</div>
-        <div class="callout callout-tip">
-          <span class="callout-icon">💡</span>
-          <span>Marten 不需要定義資料表結構。只要是一個 C# class，加上 <code>Id</code> 屬性，
-          Marten 就會自動把它序列化成 JSON 存進 PostgreSQL，Schema 自動建立。</span>
-        </div>
-        <br/>
-        <div class="code-block">
-          <div class="code-block-title"><span>Models/Product.cs</span><span class="lang-tag">C#</span></div>
-          <pre><code><span class="kw">public class</span> <span class="ty">Product</span>
-{
-    <span class="kw">public</span> <span class="ty">Guid</span> Id { <span class="kw">get</span>; <span class="kw">set</span>; }
-    <span class="kw">public</span> <span class="ty">string</span> Name { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">default</span>!;
-    <span class="kw">public</span> <span class="ty">decimal</span> Price { <span class="kw">get</span>; <span class="kw">set</span>; }
-    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">string</span>&gt; Category { <span class="kw">get</span>; <span class="kw">set</span>; } = [];
-
-    <span class="cm">// 注意：不需要 [Key]、不需要 DbContext、不需要 DbSet</span>
-    <span class="cm">// 不需要 Migration，Marten 會自動建立 mt_doc_product 資料表</span>
-}</code></pre>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-label">更新 Handler 使用 Marten</div>
-        <div class="two-col">
-          <div class="code-block">
-            <div class="code-block-title"><span>GetProductsHandler.cs</span><span class="lang-tag">C#</span></div>
-            <pre><code><span class="kw">public class</span> <span class="ty">GetProductsHandler</span>
-    : <span class="ty">IRequestHandler</span>&lt;<span class="ty">GetProductsQuery</span>, <span class="ty">List</span>&lt;<span class="ty">ProductDto</span>&gt;&gt;
-{
-    <span class="kw">private readonly</span> <span class="ty">IQuerySession</span> _session;
-
-    <span class="kw">public</span> <span class="me">GetProductsHandler</span>(<span class="ty">IQuerySession</span> session)
-        => _session = session;
-
-    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">List</span>&lt;<span class="ty">ProductDto</span>&gt;&gt; <span class="me">Handle</span>(
-        <span class="ty">GetProductsQuery</span> request,
-        <span class="ty">CancellationToken</span> ct)
-    {
-        <span class="kw">var</span> products = <span class="kw">await</span> _session
-            .<span class="me">Query</span>&lt;<span class="ty">Product</span>&gt;()
-            .<span class="me">ToListAsync</span>(ct);
-
-        <span class="kw">return</span> products
-            .<span class="me">Select</span>(p => <span class="kw">new</span> <span class="ty">ProductDto</span>(p.Id, p.Name, p.Price))
-            .<span class="me">ToList</span>();
-    }
-}</code></pre>
-          </div>
-          <div class="code-block">
-            <div class="code-block-title"><span>CreateProductHandler.cs</span><span class="lang-tag">C#</span></div>
-            <pre><code><span class="kw">public class</span> <span class="ty">CreateProductHandler</span>
-    : <span class="ty">IRequestHandler</span>&lt;<span class="ty">CreateProductCommand</span>, <span class="ty">Guid</span>&gt;
-{
-    <span class="kw">private readonly</span> <span class="ty">IDocumentSession</span> _session;
-
-    <span class="kw">public</span> <span class="me">CreateProductHandler</span>(<span class="ty">IDocumentSession</span> session)
-        => _session = session;
-
-    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">Guid</span>&gt; <span class="me">Handle</span>(
-        <span class="ty">CreateProductCommand</span> request,
-        <span class="ty">CancellationToken</span> ct)
-    {
-        <span class="kw">var</span> product = <span class="kw">new</span> <span class="ty">Product</span>
-        {
-            Id = <span class="ty">Guid</span>.<span class="me">NewGuid</span>(),
-            Name = request.Name,
-            Price = request.Price
-        };
-
-        <span class="cm">// Store 是在記憶體中標記，SaveChanges 才真正寫入</span>
-        _session.<span class="me">Store</span>(product);
-        <span class="kw">await</span> _session.<span class="me">SaveChangesAsync</span>(ct);
-
-        <span class="kw">return</span> product.Id;
-    }
-}</code></pre>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-label">IQuerySession vs IDocumentSession</div>
-        <div class="two-col">
-          <div class="callout callout-tip">
-            <span class="callout-icon">📖</span>
-            <span><strong>IQuerySession</strong><br/>只讀。比 IDocumentSession 輕量，用於 Query Handler。</span>
-          </div>
-          <div class="callout callout-warn">
-            <span class="callout-icon">✏️</span>
-            <span><strong>IDocumentSession</strong><br/>可讀寫。有 Store / Delete / SaveChanges，用於 Command Handler。</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="checkpoint">
-        <div class="section-label">完成檢查點</div>
-        <ul>
-          <li>POST /products 後資料真正寫入 PostgreSQL</li>
-          <li>GET /products 從資料庫讀取，重啟服務後資料仍在</li>
-          <li>能說明為什麼讀取用 IQuerySession，寫入用 IDocumentSession</li>
-          <li>能說明和 EF Core 相比，少了哪些步驟</li>
-        </ul>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ───────────────────────────────── PHASE 4 ───────────────────────────────── -->
-  <section class="phase phase-4" id="phase4">
-    <div class="phase-header">
-      <div class="phase-badge">4</div>
-      <div>
-        <h2>Carter</h2>
-        <div class="subtitle">把 Program.cs 裡的路由拆成獨立的 Module</div>
+      <div class="svc-card-footer">
+        <a href="learn-ordering-api.html" style="background: linear-gradient(135deg,#4a4aab,#333390);">開始學習 →</a>
       </div>
     </div>
 
-    <div class="phase-body">
-
-      <div>
-        <div class="section-label">學習目標</div>
-        <ul class="goal-list">
-          <li>理解 Carter 解決的問題：避免 Program.cs 因路由越來越多而膨脹</li>
-          <li>知道如何實作 ICarterModule 並讓它自動被發現</li>
-          <li>體會功能完全自包含（路由定義和 Handler 放在同一個資料夾）</li>
-        </ul>
+    <!-- YARP Gateway -->
+    <div class="svc-card">
+      <div class="svc-card-header" style="border-left: 4px solid #5a6a7a;">
+        <div class="svc-label" style="color:#5a6a7a;">Service 5 · Port 6004 / 6064</div>
+        <h3>YARP API Gateway</h3>
+        <div class="svc-sub">API 閘道 — 反向代理 · Rate Limiting</div>
       </div>
-
-      <div>
-        <div class="section-label">安裝套件</div>
-        <div class="code-block">
-          <div class="code-block-title"><span>Terminal</span><span class="lang-tag">shell</span></div>
-          <pre><code>dotnet add package Carter</code></pre>
+      <div class="svc-card-body">
+        <div class="tech-tags">
+          <span class="tech-tag">YARP</span>
+          <span class="tech-tag">Reverse Proxy</span>
+          <span class="tech-tag">Rate Limiting</span>
+          <span class="tech-tag">Path Rewrite</span>
+          <span class="tech-tag">appsettings.json</span>
+        </div>
+        <div class="phases-info">
+          <strong>5 個階段</strong>：YARP 概念 → Route / Cluster 設定 → Rate Limiting → 進階功能 → 對照原專案
         </div>
       </div>
-
-      <div>
-        <div class="section-label">把路由從 Program.cs 移出去</div>
-        <div class="callout callout-tip">
-          <span class="callout-icon">💡</span>
-          <span>目標：<code>Program.cs</code> 裡完全看不到任何路由定義，
-          只有 <code>app.MapCarter()</code> 這一行。</span>
-        </div>
-        <br/>
-        <div class="code-block">
-          <div class="code-block-title"><span>Products/GetProducts/GetProductsEndpoint.cs</span><span class="lang-tag">C#</span></div>
-          <pre><code><span class="kw">public class</span> <span class="ty">GetProductsEndpoint</span> : <span class="ty">ICarterModule</span>
-{
-    <span class="kw">public void</span> <span class="me">AddRoutes</span>(<span class="ty">IEndpointRouteBuilder</span> app)
-    {
-        app.<span class="me">MapGet</span>(<span class="st">"/products"</span>, <span class="kw">async</span> (<span class="ty">ISender</span> sender) =>
-        {
-            <span class="kw">var</span> result = <span class="kw">await</span> sender.<span class="me">Send</span>(<span class="kw">new</span> <span class="ty">GetProductsQuery</span>());
-            <span class="kw">return</span> <span class="ty">Results</span>.<span class="me">Ok</span>(result);
-        });
-    }
-}</code></pre>
-        </div>
-        <br/>
-        <div class="code-block">
-          <div class="code-block-title"><span>Products/CreateProduct/CreateProductEndpoint.cs</span><span class="lang-tag">C#</span></div>
-          <pre><code><span class="kw">public class</span> <span class="ty">CreateProductEndpoint</span> : <span class="ty">ICarterModule</span>
-{
-    <span class="kw">public void</span> <span class="me">AddRoutes</span>(<span class="ty">IEndpointRouteBuilder</span> app)
-    {
-        app.<span class="me">MapPost</span>(<span class="st">"/products"</span>, <span class="kw">async</span> (<span class="ty">CreateProductCommand</span> command, <span class="ty">ISender</span> sender) =>
-        {
-            <span class="kw">var</span> id = <span class="kw">await</span> sender.<span class="me">Send</span>(command);
-            <span class="kw">return</span> <span class="ty">Results</span>.<span class="me">Created</span>(<span class="st">$"/products/{id}"</span>, <span class="kw">new</span> { id });
-        });
-    }
-}</code></pre>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-label">更新 Program.cs</div>
-        <div class="code-block">
-          <div class="code-block-title"><span>Program.cs</span><span class="lang-tag">C#</span></div>
-          <pre><code>builder.Services.<span class="me">AddCarter</span>();  <span class="cm">// 自動掃描所有 ICarterModule</span>
-
-<span class="cm">// ... 其他設定 ...</span>
-
-<span class="cm">// 原本的 app.MapGet(...)、app.MapPost(...) 全部移除</span>
-<span class="cm">// 改成這一行，Carter 自動載入所有 Module</span>
-app.<span class="me">MapCarter</span>();
-
-app.<span class="me">Run</span>();</code></pre>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-label">最終資料夾結構</div>
-        <div class="code-block">
-          <div class="code-block-title"><span>專案結構</span><span class="lang-tag">text</span></div>
-          <pre><code>LearnMediatR/
-├── Products/
-│   ├── GetProducts/
-│   │   ├── GetProductsEndpoint.cs    ← Carter ICarterModule
-│   │   ├── GetProductsQuery.cs       ← IRequest
-│   │   └── GetProductsHandler.cs     ← IRequestHandler
-│   └── CreateProduct/
-│       ├── CreateProductEndpoint.cs  ← Carter ICarterModule
-│       ├── CreateProductCommand.cs   ← IRequest
-│       ├── CreateProductHandler.cs   ← IRequestHandler
-│       └── CreateProductValidator.cs ← AbstractValidator
-├── Models/
-│   └── Product.cs
-├── Behaviors/
-│   └── ValidationBehavior.cs
-└── Program.cs                        ← 只剩設定，沒有路由</code></pre>
-        </div>
-      </div>
-
-      <div class="callout callout-tip">
-        <span class="callout-icon">💡</span>
-        <span>現在每個功能（GetProducts、CreateProduct）的所有相關程式碼都在同一個資料夾裡。
-        新增功能只需要新增一個資料夾，完全不需要修改其他任何現有的檔案。
-        這就是 Vertical Slice Architecture 的核心價值。</span>
-      </div>
-
-      <div class="checkpoint">
-        <div class="section-label">完成檢查點</div>
-        <ul>
-          <li>Program.cs 裡看不到任何 MapGet / MapPost</li>
-          <li>新增一個 GET /products/{id} 功能，只需要新增資料夾，不修改任何現有檔案</li>
-          <li>能說明 Carter 和直接在 Program.cs 寫路由的差別</li>
-          <li>能說明 ICarterModule 是怎麼被自動發現和註冊的</li>
-        </ul>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ───────────────────────────────── PHASE 5 ───────────────────────────────── -->
-  <section class="phase phase-5" id="phase5">
-    <div class="phase-header">
-      <div class="phase-badge">5</div>
-      <div>
-        <h2>對照 Catalog.API</h2>
-        <div class="subtitle">回頭看原始專案，理解每個設計決策</div>
+      <div class="svc-card-footer">
+        <a href="learn-yarp-gateway.html" style="background: linear-gradient(135deg,#5a6a7a,#3d4f5e);">開始學習 →</a>
       </div>
     </div>
 
-    <div class="phase-body">
-
-      <div>
-        <div class="section-label">學習目標</div>
-        <ul class="goal-list">
-          <li>能獨立閱讀 Catalog.API 的任意一個功能的完整程式碼並理解每一行</li>
-          <li>理解 BuildingBlocks 為什麼要獨立成一個專案</li>
-          <li>理解 GlobalUsing.cs 的作用和好處</li>
-          <li>理解 Mapster 在 Endpoint 和 Handler 之間的角色</li>
-          <li>理解 CatalogInitialData 是怎麼在啟動時自動執行的</li>
-        </ul>
+    <!-- Shopping Web -->
+    <div class="svc-card">
+      <div class="svc-card-header" style="border-left: 4px solid #0d9488;">
+        <div class="svc-label" style="color:#0d9488;">Service 6 · Port 6005 / 6065</div>
+        <h3>Shopping Web</h3>
+        <div class="svc-sub">前端應用 — Razor Pages · Refit HTTP Client</div>
       </div>
-
-      <div>
-        <div class="section-label">對照清單</div>
-
-        <div class="code-block">
-          <div class="code-block-title"><span>你寫的 vs Catalog.API</span><span class="lang-tag">對照</span></div>
-          <pre><code><span class="cm">// ① 你的 IRequest — Catalog 用更嚴格的 ICommand / IQuery 包裝</span>
-<span class="cm">// 你的寫法：</span>
-<span class="kw">public record</span> <span class="ty">GetProductsQuery</span>() : <span class="ty">IRequest</span>&lt;<span class="ty">List</span>&lt;<span class="ty">ProductDto</span>&gt;&gt;;
-
-<span class="cm">// Catalog 的寫法（BuildingBlocks/CQRS）：</span>
-<span class="kw">public record</span> <span class="ty">GetProductsQuery</span>(...) : <span class="ty">IQuery</span>&lt;<span class="ty">GetProductsResult</span>&gt;;
-<span class="cm">// IQuery&lt;T&gt; 繼承自 IRequest&lt;T&gt;，加了 [NotNull] 限制，語意更清楚</span>
-
-<span class="cm">// ② 你的 Handler — Catalog 用 IQueryHandler / ICommandHandler</span>
-<span class="cm">// 你的寫法：</span>
-<span class="kw">public class</span> <span class="ty">GetProductsHandler</span> : <span class="ty">IRequestHandler</span>&lt;<span class="ty">GetProductsQuery</span>, <span class="ty">List</span>&lt;<span class="ty">ProductDto</span>&gt;&gt;
-
-<span class="cm">// Catalog 的寫法：</span>
-<span class="kw">public class</span> <span class="ty">GetProductsHandler</span> : <span class="ty">IQueryHandler</span>&lt;<span class="ty">GetProductsQuery</span>, <span class="ty">GetProductsResult</span>&gt;
-<span class="cm">// IQueryHandler 是 IRequestHandler 的別名，只是讓意圖更明顯</span>
-
-<span class="cm">// ③ 你的 Endpoint 直接用 Command — Catalog 用 Mapster 轉換</span>
-<span class="cm">// 你的寫法：</span>
-app.<span class="me">MapPost</span>(<span class="st">"/products"</span>, <span class="kw">async</span> (<span class="ty">CreateProductCommand</span> command, <span class="ty">ISender</span> sender) => ...);
-
-<span class="cm">// Catalog 的寫法：</span>
-app.<span class="me">MapPost</span>(<span class="st">"/products"</span>, <span class="kw">async</span> (<span class="ty">CreateProductRequest</span> request, <span class="ty">ISender</span> sender) =>
-{
-    <span class="kw">var</span> command = request.<span class="me">Adapt</span>&lt;<span class="ty">CreateProductCommand</span>&gt;(); <span class="cm">// Mapster</span>
-    <span class="kw">var</span> result = <span class="kw">await</span> sender.<span class="me">Send</span>(command);
-    <span class="kw">return</span> <span class="ty">Results</span>.<span class="me">Created</span>(...);
-});
-<span class="cm">// 分開 Request DTO 和 Command，讓兩者可以獨立演進</span></code></pre>
+      <div class="svc-card-body">
+        <div class="tech-tags">
+          <span class="tech-tag">Razor Pages</span>
+          <span class="tech-tag">Refit</span>
+          <span class="tech-tag">PageModel</span>
+          <span class="tech-tag">Tag Helpers</span>
+          <span class="tech-tag">Bootstrap</span>
+        </div>
+        <div class="phases-info">
+          <strong>6 個階段</strong>：Razor Pages 基礎 → Refit 宣告式 HTTP → PageModel 整合 → Razor 語法深入 → 硬編碼問題與改善 → 對照原專案
         </div>
       </div>
-
-      <div>
-        <div class="section-label">BuildingBlocks 的設計原因</div>
-        <div class="callout callout-tip">
-          <span class="callout-icon">💡</span>
-          <span>你在階段一到四寫的 <code>ValidationBehavior</code>、自訂例外、CQRS 介面，
-          在 Catalog.API 裡被抽到 <code>BuildingBlocks</code> 專案，
-          原因是這些東西在 Basket.API、Ordering.API 裡一模一樣，
-          共用而不是複製貼上。微服務共用的基礎設施應該獨立成一個套件。</span>
-        </div>
+      <div class="svc-card-footer">
+        <a href="learn-shopping-web.html" style="background: linear-gradient(135deg,#0d9488,#0a7060);">開始學習 →</a>
       </div>
-
-      <div>
-        <div class="section-label">閱讀順序建議</div>
-        <div class="code-block">
-          <div class="code-block-title"><span>Catalog.API 閱讀路徑</span><span class="lang-tag">text</span></div>
-          <pre><code>1. BuildingBlocks/CQRS/           → ICommand、IQuery、ICommandHandler、IQueryHandler
-2. BuildingBlocks/Behaviors/      → ValidationBehavior、LoggingBehavior（和你寫的對照）
-3. BuildingBlocks/Exceptions/     → NotFoundException、CustomExceptionHandler
-4. Catalog.API/Models/Product.cs  → Document Model（和 EF Core Entity 對照）
-5. Catalog.API/Data/              → CatalogInitialData（IInitialData 怎麼被 Marten 呼叫）
-6. Catalog.API/Program.cs         → 所有設定如何組合在一起
-7. 任選一個功能資料夾完整讀完     → 例如 Products/CreateProduct/</code></pre>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-label">進階：加上 LoggingBehavior</div>
-        <div class="code-block">
-          <div class="code-block-title"><span>Behaviors/LoggingBehavior.cs</span><span class="lang-tag">C#</span></div>
-          <pre><code><span class="kw">public class</span> <span class="ty">LoggingBehavior</span>&lt;<span class="ty">TRequest</span>, <span class="ty">TResponse</span>&gt;
-    : <span class="ty">IPipelineBehavior</span>&lt;<span class="ty">TRequest</span>, <span class="ty">TResponse</span>&gt;
-    <span class="kw">where</span> <span class="ty">TRequest</span> : <span class="kw">notnull</span>
-{
-    <span class="kw">private readonly</span> <span class="ty">ILogger</span>&lt;<span class="ty">LoggingBehavior</span>&lt;<span class="ty">TRequest</span>, <span class="ty">TResponse</span>&gt;&gt; _logger;
-
-    <span class="kw">public</span> <span class="me">LoggingBehavior</span>(<span class="ty">ILogger</span>&lt;<span class="ty">LoggingBehavior</span>&lt;<span class="ty">TRequest</span>, <span class="ty">TResponse</span>&gt;&gt; logger)
-        => _logger = logger;
-
-    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">TResponse</span>&gt; <span class="me">Handle</span>(
-        <span class="ty">TRequest</span> request,
-        <span class="ty">RequestHandlerDelegate</span>&lt;<span class="ty">TResponse</span>&gt; next,
-        <span class="ty">CancellationToken</span> cancellationToken)
-    {
-        _logger.<span class="me">LogInformation</span>(<span class="st">"[START] {Request}"</span>, <span class="kw">typeof</span>(<span class="ty">TRequest</span>).Name);
-        <span class="kw">var</span> sw = <span class="ty">Stopwatch</span>.<span class="me">StartNew</span>();
-
-        <span class="kw">var</span> response = <span class="kw">await</span> <span class="me">next</span>();
-
-        sw.<span class="me">Stop</span>();
-        <span class="kw">if</span> (sw.ElapsedMilliseconds > <span class="nu">3000</span>)
-            _logger.<span class="me">LogWarning</span>(<span class="st">"[SLOW] {Request} took {Ms}ms"</span>,
-                <span class="kw">typeof</span>(<span class="ty">TRequest</span>).Name, sw.ElapsedMilliseconds);
-
-        _logger.<span class="me">LogInformation</span>(<span class="st">"[END] {Request} ({Ms}ms)"</span>,
-            <span class="kw">typeof</span>(<span class="ty">TRequest</span>).Name, sw.ElapsedMilliseconds);
-
-        <span class="kw">return</span> response;
-    }
-}
-
-<span class="cm">// Program.cs 加入 Pipeline（順序很重要：Logging → Validation → Handler）</span>
-cfg.<span class="me">AddOpenBehavior</span>(<span class="kw">typeof</span>(<span class="ty">LoggingBehavior</span>&lt;,&gt;));
-cfg.<span class="me">AddOpenBehavior</span>(<span class="kw">typeof</span>(<span class="ty">ValidationBehavior</span>&lt;,&gt;));</code></pre>
-        </div>
-      </div>
-
-      <div class="checkpoint">
-        <div class="section-label">完成檢查點</div>
-        <ul>
-          <li>能閱讀 Catalog.API 任意一個功能的程式碼，說明每個檔案的職責</li>
-          <li>能說明 Mapster 的 Adapt() 在 Endpoint 裡的作用</li>
-          <li>能說明 BuildingBlocks 為什麼要獨立成一個專案</li>
-          <li>能說明 Pipeline 的執行順序，以及為什麼 Logging 要排在 Validation 前面</li>
-          <li>能自己從零開始建出相同架構的新微服務</li>
-        </ul>
-      </div>
-
     </div>
-  </section>
+
+  </div><!-- /cards-grid -->
+
+  <!-- ── 技術棧對照 ── -->
+  <div class="section-heading"><h2>技術棧一覽</h2></div>
+
+  <div class="arch-card">
+    <div class="arch-card-title">
+      <span>各服務使用技術對照</span>
+      <span class="lang-tag">TABLE</span>
+    </div>
+    <pre>
+<span class="dim">┌─────────────────────┬───────────────────┬────────────────┬──────────────────────┬─────────────────────┐
+│ 服務                 │ 路由框架           │ 資料庫          │ 特色技術              │ 訊息/通訊            │
+├─────────────────────┼───────────────────┼────────────────┼──────────────────────┼─────────────────────┤</span>
+│ <span class="svc-cat">Catalog.API</span>         │ Carter            │ <span class="svc-db">PostgreSQL</span>      │ Marten Doc Store    │ —                   │
+│ <span class="svc-bsk">Basket.API</span>          │ Carter            │ <span class="svc-db">Redis</span>           │ Scrutor Decorator   │ <span class="svc-mq">MassTransit Publish</span> │
+│ <span class="svc-dis">Discount.Grpc</span>       │ gRPC Service      │ <span class="svc-db">SQLite</span>          │ Protocol Buffers    │ <span class="proto">gRPC Server</span>         │
+│ <span class="svc-ord">Ordering.API</span>        │ Minimal API       │ <span class="svc-db">SQL Server</span>      │ Clean Arch + DDD    │ <span class="svc-mq">MassTransit Consume</span> │
+│ <span class="svc-gw">YarpGateway</span>         │ YARP              │ —              │ Rate Limiting        │ HTTP Reverse Proxy  │
+│ <span class="svc-web">Shopping.Web</span>        │ Razor Pages       │ —              │ Refit HTTP Client    │ HTTP → Gateway      │
+<span class="dim">└─────────────────────┴───────────────────┴────────────────┴──────────────────────┴─────────────────────┘</span>
+
+<span class="dim">  共用：MediatR · FluentValidation · Mapster · Docker Compose · .NET 8</span>
+</pre>
+  </div>
 
 </main>
+
+<footer>
+  eShop Microservices 學習教材 · 以 <a href="https://github.com/mehmetozkaya/eshop-microservices" style="color:#a0aec0;">mehmetozkaya/eshop-microservices</a> 為基礎整理
+</footer>
+
 </body>
 </html>
